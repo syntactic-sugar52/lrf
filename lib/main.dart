@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/pages/main_page.dart';
+import 'package:lrf/pages/splash_page.dart';
 import 'package:magic_sdk/magic_sdk.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -39,11 +40,16 @@ class MyApp extends StatelessWidget {
           color: Colors.white,
           theme: ThemeData(
             visualDensity: VisualDensity.adaptivePlatformDensity,
-            highlightColor: Colors.indigo,
+            highlightColor: Colors.amber,
             scaffoldBackgroundColor: kAppBackgroundColor,
             backgroundColor: kAppBackgroundColor,
           ),
-          home: const LoginPage(),
+          initialRoute: '/main',
+          routes: {
+            // '/': (_) => const SplashPage(),
+            '/login': (_) => const LoginPage(),
+            '/main': (_) => const MainPage(),
+          },
         ),
         Magic.instance.relayer
       ]),

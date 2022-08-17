@@ -6,7 +6,8 @@ import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final Function? onResultItemTap;
-  const SearchBarWidget({Key? key, required this.onResultItemTap}) : super(key: key);
+  final Widget body;
+  const SearchBarWidget({Key? key, required this.onResultItemTap, required this.body}) : super(key: key);
 
   @override
   State<SearchBarWidget> createState() => _SearchBarWidgetState();
@@ -31,7 +32,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       });
 
       final Map<String, dynamic> response = await autoCompleteSuggestions(search.trim());
-      if (response != '' && query.length > 1) {
+      if (query != '' && query.length > 1) {
         // loop map and check the key pair values of each
         response.forEach(((key, value) {
           //if features exist in response
@@ -57,11 +58,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     // chamges placement of search bar
     final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
     return FloatingSearchBar(
-      elevation: 0,
-      backdropColor: Colors.white,
-      // margins: EdgeInsets.symmetric(
-      //   horizontal: 10,
-      // ).copyWith(top: 45),
+      elevation: 1,
+      backgroundColor: Colors.white54,
       automaticallyImplyBackButton: false,
       controller: searchBarController,
       clearQueryOnClose: true,
@@ -107,24 +105,19 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ],
       builder: (context, transition) => query != ''
           ? AnimatedContainer(
-              duration: Duration(milliseconds: 500),
-              height: double.infinity,
-              margin: EdgeInsets.only(
-                top: 10,
-                // resize height of container dynamically so it wont be in contact with keyboard when keyboard is shown
-                bottom: MediaQuery.of(context).viewInsets.bottom +
-                    10 + // space size
-                    (MediaQuery.of(context).viewInsets.bottom != 0 ? -1 * 60 : 0),
-              ),
+              duration: const Duration(milliseconds: 500),
+              height: 200,
+              margin: EdgeInsets.only(top: 0, bottom: MediaQuery.of(context).viewInsets.bottom),
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                // color: Colors.white.withOpacity(0.9),
+                color: Colors.black38,
                 borderRadius: BorderRadius.circular(12),
               ),
               clipBehavior: Clip.antiAlias,
               child: SearchResultItemsBlock(items: features, onItemTap: widget.onResultItemTap),
             )
-          : SizedBox(),
+          : const SizedBox.shrink(),
+      body: query != '' ? widget.body : Container(),
     );
   }
 

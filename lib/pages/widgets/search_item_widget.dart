@@ -28,8 +28,9 @@ class SearchResultItemsBlock extends StatelessWidget {
             interactive: true,
             child: SingleChildScrollView(
               controller: _controller,
-              physics: ScrollPhysics(),
+              physics: const ScrollPhysics(),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ...items!.map((item) {
                     itemTitle = '';
@@ -84,18 +85,15 @@ class SearchResultItemsBlock extends StatelessWidget {
                         child: ListTile(
                           textColor: Colors.black,
                           isThreeLine: isThreeLines,
-                          leading: Icon(
+                          leading: const Icon(
                             Icons.location_on,
-                            color: Colors.grey.shade600,
+                            color: Colors.pink,
                           ),
                           title: Text(
                             itemTitle,
-                            style: textTheme.subtitle1,
+                            style: const TextStyle(color: Colors.white),
                           ),
-                          subtitle: Text(
-                            itemSubtitle,
-                            style: textTheme.bodyText2?.copyWith(color: Colors.grey.shade600),
-                          ),
+                          subtitle: Text(itemSubtitle, style: const TextStyle(color: Colors.white)),
                         ),
                         onTap: () {
                           // navigate to bounds
@@ -109,10 +107,16 @@ class SearchResultItemsBlock extends StatelessWidget {
                             // [long1, lat1, long2, lat2]
                             // to convert to sw and ne - coordinates need to be changed places (lat1 = ne_lat, lat2 = sw_lat)
                             onItemTap!({
-                              'sw_latitude': double.parse(item['properties']['extent'][3].toString()),
-                              'sw_longitude': double.parse(item['properties']['extent'][0].toString()),
-                              'ne_latitude': double.parse(item['properties']['extent'][1].toString()),
-                              'ne_longitude': double.parse(item['properties']['extent'][2].toString())
+                              'placeName': item['properties']['name'],
+                              'houseNumber': item['properties']['housenumber'],
+                              'street': item['properties']['street'],
+                              'city': item['properties']['city'],
+                              'state': item['properties']['state'],
+                              'country': item['properties']['country']
+                              // 'sw_latitude': double.parse(item['properties']['extent'][3].toString()),
+                              // 'sw_longitude': double.parse(item['properties']['extent'][0].toString()),
+                              // 'ne_latitude': double.parse(item['properties']['extent'][1].toString()),
+                              // 'ne_longitude': double.parse(item['properties']['extent'][2].toString())
                             });
                           }
                           // navigate to coordinates
@@ -120,8 +124,14 @@ class SearchResultItemsBlock extends StatelessWidget {
                               item['geometry']['coordinates'][0] != null &&
                               item['geometry']['coordinates'][1] != null) {
                             onItemTap!({
-                              'latitude': double.parse(item['geometry']['coordinates'][1].toString()),
-                              'longitude': double.parse(item['geometry']['coordinates'][0].toString())
+                              'placeName': item['properties']['name'],
+                              'houseNumber': item['properties']['housenumber'],
+                              'street': item['properties']['street'],
+                              'city': item['properties']['city'],
+                              'state': item['properties']['state'],
+                              'country': item['properties']['country']
+                              // 'latitude': double.parse(item['geometry']['coordinates'][1].toString()),
+                              // 'longitude': double.parse(item['geometry']['coordinates'][0].toString())
                             });
                           } else {
                             // showToast('Error: The coordinates of the location are not defined.');

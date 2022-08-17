@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         body: PageView(
           // disables page scroll
           physics: const ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
@@ -71,7 +71,7 @@ class _MainPageState extends State<MainPage> {
           children: tabs,
         ),
         bottomNavigationBar: SizedBox(
-          height: 100,
+          height: 80,
           child: BottomNavigationBar(
               backgroundColor: kAppBackgroundColor,
               type: BottomNavigationBarType.fixed,
@@ -83,25 +83,25 @@ class _MainPageState extends State<MainPage> {
                 _pageController?.jumpToPage(index);
               },
               showUnselectedLabels: false,
-              selectedFontSize: 15.0,
-              unselectedFontSize: 11.0,
-              unselectedItemColor: Colors.indigo.shade200,
-              selectedItemColor: Colors.indigoAccent,
+              selectedFontSize: 12.0,
+              unselectedFontSize: 5.0,
+              unselectedItemColor: Colors.white54,
+              selectedItemColor: Colors.greenAccent,
               items: const [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.home_filled),
+                  icon: Icon(Icons.home_filled, size: 20),
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_alert),
+                  icon: Icon(Icons.add_alert, size: 20),
                   label: 'Request',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.view_list),
+                  icon: Icon(Icons.view_list, size: 20),
                   label: 'Accepted',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
+                  icon: Icon(Icons.person, size: 20),
                   label: 'Profile',
                 ),
               ]),

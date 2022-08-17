@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/constants/constants.dart';
-import 'package:lrf/pages/main_page.dart';
-import 'package:magic_sdk/magic_sdk.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:lrf/utils/constant.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -13,9 +12,30 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  Magic magic = Magic.instance;
-
+  bool _isLoading = false;
   final textController = TextEditingController();
+  final passwordController = TextEditingController();
+  final GlobalKey _formKey = GlobalKey<FormState>();
+  Future<void> _signIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final response = await supabase.auth.signIn(email: textController.text);
+
+    final error = response.error;
+    if (error != null) {
+      context.showErrorSnackBar(
+        message: error.message,
+      );
+    } else {
+      context.showSnackBar(message: 'Check your email for login link!');
+      textController.clear();
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +71,14 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Text(
-                'Enter Your Phone Number',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, letterSpacing: 1, fontSize: 16),
+                'Enter Your Email Address To Start',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1,
+                  fontSize: 16,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ],
           ),
@@ -65,13 +91,15 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: TextFormField(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   cursorColor: Colors.white10,
-                  keyboardType: TextInputType.phone,
+                  keyboardType: TextInputType.emailAddress,
                   controller: textController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintStyle: const TextStyle(color: Colors.white54),
-                    hintText: '+1234567',
+                    hintText: 'hello@lastresort.com',
                     focusedBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.indigo, width: 2.0),
                       borderRadius: BorderRadius.circular(12.0),
@@ -87,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
+                      return 'Please enter your email address';
                     }
                     return null;
                   },
@@ -104,25 +132,11 @@ class _LoginPageState extends State<LoginPage> {
             height: 50,
             child: ElevatedButton(
               style: ButtonStyle(
-                elevation: MaterialStateProperty.all<double>(4),
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.indigoAccent.shade700),
+                elevation: MaterialStateProperty.all<double>(8),
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.greenAccent),
               ),
-              onPressed: () async {
-                var token = await magic.auth.loginWithSMS(phoneNumber: textController.text);
-                debugPrint('token, $token');
-
-                if (token.isNotEmpty) {
-                  if (mounted) {
-                    Navigator.push(
-                      context,
-                      PageTransition(type: PageTransitionType.bottomToTop, child: const MainPage(), inheritTheme: true, ctx: context),
-                    );
-                  } else {
-                    // add pop up error
-
-                    return;
-                  }
-                }
+              onPressed: () {
+                _signIn();
               },
               child: const Text(
                 'Login',
