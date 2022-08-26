@@ -20,12 +20,18 @@ dependencies:
   magic_sdk: ^1.1.1
   provider: ^6.0.3
   font_awesome_flutter: ^10.1.0
-  supabase_flutter: ^0.3.3
   flutter_dotenv: ^5.0.2
   maps_launcher: ^2.0.1
   http: ^0.13.5
-  page_transition: ^2.0.9
-  material_floating_search_bar: ^0.3.7
+  glass: ^1.0.1+1
+  animations: ^2.0.3
+  expandable: ^5.0.1
+  firebase_auth: ^3.6.4
+  firebase_core: ^1.21.0
+  firebase_dynamic_links: ^4.3.5 
+  cloud_firestore: ^3.4.5
+  animated_theme_switcher: ^2.0.6
+  open_street_map_search_and_pick: ^0.0.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

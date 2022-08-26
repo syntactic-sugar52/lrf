@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/constants/widgets.dart';
 import 'package:lrf/pages/accepted_page.dart';
@@ -73,7 +74,8 @@ class _MainPageState extends State<MainPage> {
         bottomNavigationBar: SizedBox(
           height: 80,
           child: BottomNavigationBar(
-              backgroundColor: kAppBackgroundColor,
+              backgroundColor: Colors.black45,
+              // backgroundColor: kAppBackgroundColor,
               type: BottomNavigationBarType.fixed,
               currentIndex: _currentIndex,
               onTap: (index) {
@@ -86,26 +88,29 @@ class _MainPageState extends State<MainPage> {
               selectedFontSize: 12.0,
               unselectedFontSize: 5.0,
               unselectedItemColor: Colors.white54,
-              selectedItemColor: Colors.greenAccent,
-              items: const [
+              selectedItemColor: Colors.white,
+              items: [
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.home_filled, size: 20),
+                  icon: Icon(
+                    Icons.home_filled,
+                    size: 20,
+                  ).asGlass(),
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_alert, size: 20),
+                  icon: Icon(Icons.add_alert, size: 20).asGlass(),
                   label: 'Request',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.view_list, size: 20),
+                  icon: Icon(Icons.view_list, size: 20).asGlass(),
                   label: 'Accepted',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person, size: 20),
+                  icon: Icon(Icons.person, size: 20).asGlass(),
                   label: 'Profile',
                 ),
               ]),
-        ),
+        ).asGlass(),
       ),
     );
   }

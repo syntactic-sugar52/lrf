@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lrf/pages/login_page.dart';
+import 'package:lrf/pages/request_accepted_page.dart';
 import 'package:lrf/pages/splash_page.dart';
 
 import '../pages/main_page.dart';
@@ -32,8 +33,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case '/main':
       return MaterialPageRoute(builder: (context) => MainPage());
 
-    // case '/map':
-    //   return MaterialPageRoute(builder: (context) => MapPage());
+    case 'requestAccepted':
+      return MaterialPageRoute(builder: (context) => RequestAcceptedPage());
 
     // case '/nearme':
     //   return MaterialPageRoute(builder: (context) => NearmePage());

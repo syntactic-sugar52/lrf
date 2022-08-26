@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lrf/constants/constants.dart';
-import 'package:lrf/pages/widgets/search_bar_widget.dart';
+import 'package:lrf/pages/widgets/request/slider_widget.dart';
+import 'package:open_street_map_search_and_pick/open_street_map_search_and_pick.dart';
 
 class RequestPage extends StatefulWidget {
   const RequestPage({Key? key}) : super(key: key);
@@ -11,6 +10,19 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
+//time picker
+  bool timePicked = false;
+  String newTimePicked = '';
+  int length = 0;
+
+// scrollbar
+  final ScrollController _scrollController = ScrollController();
+
+// text controllers for textfield
+  final TextEditingController _instructionsController = TextEditingController();
+  final TextEditingController _headlineController = TextEditingController();
+  final TextEditingController _locationStartController = TextEditingController();
+  final TextEditingController _locationEndController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,7 +32,13 @@ class _RequestPageState extends State<RequestPage> {
       margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SafeArea(
         child: Scrollbar(
-          child: ListView(shrinkWrap: true, children: [
+          thumbVisibility: true,
+
+          // scrollbarOrientation: ScrollbarOrientation.bottom,
+          controller: _scrollController,
+          interactive: true,
+          // scrollbarOrientation: ScrollbarOrientation.top,
+          child: ListView(shrinkWrap: true, scrollDirection: Axis.vertical, controller: _scrollController, children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -28,37 +46,35 @@ class _RequestPageState extends State<RequestPage> {
                     onPressed: () {},
                     child: const Text(
                       'POST',
-                      style: TextStyle(color: Colors.greenAccent),
-                    ))
+                      style: TextStyle(color: Colors.lightBlueAccent, fontWeight: FontWeight.w800),
+                    )),
               ],
             ),
-            const ListTile(dense: true, leading: Text('Location Start Point : ', style: TextStyle(fontSize: 16, color: Colors.white))),
-            const ListTile(
+            ListTile(dense: true, leading: Text('Headline : ', style: TextStyle(fontSize: 16, color: Colors.white))),
+            ListTile(
               dense: true,
-              leading: Text(
-                'Address',
-                style: TextStyle(color: Colors.white),
-              ),
               title: Padding(
-                padding: EdgeInsets.only(left: 9, right: 5),
+                padding: const EdgeInsets.only(left: 9, right: 5),
                 child: TextField(
                   maxLines: 1,
+                  controller: _headlineController,
                   cursorColor: Colors.grey,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
                     filled: true,
-                    fillColor: Colors.black26,
+                    fillColor: Colors.transparent,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15.0)),
                       borderSide: BorderSide(
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(color: Colors.blueGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
+                      borderSide: BorderSide(color: Colors.blue),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.redAccent),
@@ -73,47 +89,119 @@ class _RequestPageState extends State<RequestPage> {
                 ),
               ),
             ),
-            const ListTile(
-              dense: true,
-              leading: Text(
-                'City        ',
-                style: TextStyle(color: Colors.white),
-              ),
-              title: Padding(
-                padding: EdgeInsets.only(left: 5, right: 5),
-                child: TextField(
-                  maxLines: 1,
-                  cursorColor: Colors.grey,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.black26,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                      borderSide: BorderSide(
-                        width: 1.0,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.redAccent),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.orangeAccent),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const ListTile(dense: true, leading: Text('Location End Point : ', style: TextStyle(fontSize: 16, color: Colors.white))),
+            const ListTile(dense: true, leading: Text('Location Start Point : ', style: TextStyle(fontSize: 16, color: Colors.white70))),
+            // SizedBox(
+            //   height: 70,
+            //   child: Card(
+            //     child: ExpansionTile(
+            //       title: Text(
+            //         'Location Start Point',
+            //         style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+            //       ),
+            //       children: <Widget>[
+            //         SingleChildScrollView(
+            //           child: Container(
+            //             height: 80,
+            //             width: 120,
+            //             child: OpenStreetMapSearchAndPick(
+            //                 center: LatLong(23, 89),
+            //                 buttonColor: Colors.blue,
+            //                 buttonText: 'Set Current Location',
+            //                 onPicked: (pickedData) {
+            //                   print(pickedData.latLong.latitude);
+            //                   print(pickedData.latLong.longitude);
+            //                   print(pickedData.address);
+            //                 }),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+
+            // const ListTile(
+            //   dense: true,
+            //   leading: Text(
+            //     'Address',
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            //   title: Padding(
+            //     padding: EdgeInsets.only(left: 9, right: 5),
+            //     child: TextField(
+            //       autofocus: true,
+            //       maxLines: 1,
+            //       cursorColor: Colors.grey,
+            //       style: TextStyle(color: Colors.white),
+            //       decoration: InputDecoration(
+            //         filled: true,
+            //         fillColor: Colors.transparent,
+            //         border: OutlineInputBorder(
+            //           borderRadius: BorderRadius.all(Radius.circular(15.0)),
+            //           borderSide: BorderSide(
+            //             width: 2.0,
+            //           ),
+            //         ),
+            //         enabledBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.blueGrey),
+            //         ),
+            //         focusedBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.blue),
+            //         ),
+            //         errorBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.redAccent),
+            //         ),
+            //         focusedErrorBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.orangeAccent),
+            //         ),
+            //         disabledBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.white),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // const ListTile(
+            //   dense: true,
+            //   leading: Text(
+            //     'City        ',
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            //   title: Padding(
+            //     padding: EdgeInsets.only(left: 5, right: 5),
+            //     child: TextField(
+            //       maxLines: 1,
+            //       autofocus: true,
+            //       cursorColor: Colors.grey,
+            //       style: TextStyle(color: Colors.white),
+            //       decoration: InputDecoration(
+            //         filled: true,
+            //         fillColor: Colors.transparent,
+            //         border: OutlineInputBorder(
+            //           borderRadius: BorderRadius.all(Radius.circular(15.0)),
+            //           borderSide: BorderSide(
+            //             width: 2.0,
+            //           ),
+            //         ),
+            //         enabledBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.blueGrey),
+            //         ),
+            //         focusedBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.blue),
+            //         ),
+            //         errorBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.redAccent),
+            //         ),
+            //         focusedErrorBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.orangeAccent),
+            //         ),
+            //         disabledBorder: OutlineInputBorder(
+            //           borderSide: BorderSide(color: Colors.white),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            const ListTile(dense: true, leading: Text('Location End Point : ', style: TextStyle(fontSize: 16, color: Colors.white70))),
             const ListTile(
               dense: true,
               leading: Text(
@@ -124,22 +212,23 @@ class _RequestPageState extends State<RequestPage> {
                 padding: EdgeInsets.only(left: 9, right: 5),
                 child: TextField(
                   maxLines: 1,
+                  autofocus: true,
                   cursorColor: Colors.grey,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.black26,
+                    fillColor: Colors.transparent,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
                       borderSide: BorderSide(
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(color: Colors.blueGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
+                      borderSide: BorderSide(color: Colors.blue),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.redAccent),
@@ -163,23 +252,25 @@ class _RequestPageState extends State<RequestPage> {
               title: Padding(
                 padding: EdgeInsets.only(left: 5, right: 5),
                 child: TextField(
+                  textCapitalization: TextCapitalization.words,
+                  autofocus: true,
                   maxLines: 1,
                   cursorColor: Colors.grey,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.black26,
+                    fillColor: Colors.transparent,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
                       borderSide: BorderSide(
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(color: Colors.blueGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
+                      borderSide: BorderSide(color: Colors.blue),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.redAccent),
@@ -195,53 +286,80 @@ class _RequestPageState extends State<RequestPage> {
               ),
             ),
             ListTile(
-                dense: true,
-                leading: const Text('Time to accomplish request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-                title: TextButton(
+              dense: true,
+              leading: const Text('Time to accomplish request : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
+              title: TextButton(
                   onPressed: () async {
-                    // Call when you want to show the time picker
+                    //                       // Call to show the time picker
                     final TimeOfDay? newTime = await showTimePicker(
                       context: context,
                       initialEntryMode: TimePickerEntryMode.input,
-                      initialTime: const TimeOfDay(hour: 7, minute: 15),
+                      initialTime: TimeOfDay.now(),
                     );
+
+                    if (newTime == null) {
+                      // don't change when cancel is pressed
+                      setState(() {
+                        timePicked = false;
+                      });
+                    } else {
+                      setState(() {
+                        timePicked = true;
+                        // when user picks a time , show time picked
+                        newTimePicked = '${newTime.hour}:${newTime.minute} ${newTime.period == DayPeriod.am ? 'am' : 'pm'}';
+                      });
+                    }
                   },
-                  child: const Text(
-                    'Add Time',
-                    style: TextStyle(color: Colors.greenAccent),
-                  ),
-                )),
-            const ListTile(
-              dense: true,
-              leading: Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-            ),
-            ListTile(dense: true, title: SliderFb3(min: 0, max: 500, divisions: 25, onChange: (_) {})),
-            const ListTile(
-              dense: true,
-              leading: Text('Instructions : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: Text(
+                    // change text to show time picked when user picks a time
+                    timePicked ? newTimePicked : 'ADD TIME',
+                    style: TextStyle(color: timePicked ? Colors.lightBlueAccent : Colors.grey.shade300, fontWeight: FontWeight.w700),
+                  )),
             ),
             const ListTile(
+              dense: true,
+              leading: Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
+            ),
+            ListTile(
+                dense: true,
+                title: PhysicalModel(
+                    color: Colors.transparent, elevation: 12.0, child: SliderWidget(min: 0, max: 500, divisions: 25, onChange: (_) {}))),
+            const ListTile(
+              dense: true,
+              leading: Text('Instructions : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
+            ),
+            ListTile(
               dense: true,
               title: TextField(
                 maxLines: 20,
+                maxLength: 40,
+                onChanged: (String value) {
+                  setState(() {
+                    length = value.length;
+                  });
+                },
+                textCapitalization: TextCapitalization.sentences,
                 cursorColor: Colors.grey,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                 ),
-                decoration: InputDecoration(
+                autofocus: true,
+                controller: _instructionsController,
+                decoration: const InputDecoration(
+                  counterText: '',
                   filled: true,
-                  fillColor: Colors.black26,
+                  fillColor: Colors.transparent,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(15.0)),
                     borderSide: BorderSide(
-                      width: 1.0,
+                      width: 2.0,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide: BorderSide(color: Colors.blueGrey),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blueGrey),
+                    borderSide: BorderSide(color: Colors.blue),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.redAccent),
@@ -255,180 +373,17 @@ class _RequestPageState extends State<RequestPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 40),
           ]),
         ),
       ),
     );
   }
-}
-
-class SliderFb3 extends StatefulWidget {
-  final double min;
-  final double max;
-  final double initialValue;
-  final bool showMinMaxText;
-  final int divisions;
-  final Color accentColor;
-  final Function(double) onChange;
-  final LinearGradient gradient;
-  final TextStyle minMaxTextStyle;
-  const SliderFb3(
-      {required this.min,
-      required this.max,
-      required this.divisions,
-      required this.onChange,
-      this.initialValue = 20.0,
-      this.accentColor = Colors.white,
-      this.gradient = const LinearGradient(colors: [
-        Colors.blueGrey,
-        Colors.grey,
-      ]),
-      this.showMinMaxText = true,
-      this.minMaxTextStyle = const TextStyle(fontSize: 14),
-      Key? key})
-      : super(key: key);
 
   @override
-  _SliderFb3State createState() => _SliderFb3State();
-}
-
-class _SliderFb3State extends State<SliderFb3> {
-  late double _currentSliderValue;
-  @override
-  void initState() {
-    super.initState();
-    _currentSliderValue = widget.initialValue;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 52,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), gradient: widget.gradient),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 15.5, right: 15.5),
-        child: Row(
-          children: [
-            Text(
-              '${widget.min.toInt()}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            Expanded(
-              child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: widget.accentColor,
-                  inactiveTrackColor: widget.accentColor.withAlpha(35),
-                  trackShape: const RoundedRectSliderTrackShape(),
-                  trackHeight: 4.0,
-                  thumbShape: CustomSliderThumbCircle(
-                    thumbRadius: 20,
-                    min: widget.min,
-                    max: widget.max,
-                  ),
-                  thumbColor: widget.gradient.colors[0],
-                  overlayColor: widget.gradient.colors[0].withAlpha(32),
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 28.0),
-                  tickMarkShape: const RoundSliderTickMarkShape(),
-                  activeTickMarkColor: widget.gradient.colors[0],
-                  inactiveTickMarkColor: widget.accentColor,
-                  valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-                  valueIndicatorColor: widget.gradient.colors[0],
-                  valueIndicatorTextStyle: const TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                child: Slider(
-                  min: widget.min,
-                  max: widget.max,
-                  value: _currentSliderValue,
-                  divisions: widget.divisions,
-                  onChanged: (value) {
-                    setState(() {
-                      _currentSliderValue = value;
-                    });
-                    widget.onChange(value);
-                  },
-                ),
-              ),
-            ),
-            Text(
-              '${widget.max.toInt()}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Credits to @Ankit Chowdhury
-class CustomSliderThumbCircle extends SliderComponentShape {
-  final double thumbRadius;
-  final double min;
-  final double max;
-
-  const CustomSliderThumbCircle({
-    required this.thumbRadius,
-    this.min = 20.0,
-    this.max = 2000.0,
-  });
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(thumbRadius);
-  }
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset center, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    required bool isDiscrete,
-    required TextPainter labelPainter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required TextDirection textDirection,
-    required double value,
-    required double textScaleFactor,
-    required Size sizeWithOverflow,
-  }) {
-    final Canvas canvas = context.canvas;
-
-    final paint = Paint()
-      ..color = Colors.white //Thumb Background Color
-      ..style = PaintingStyle.fill;
-
-    TextSpan span = TextSpan(
-      style: TextStyle(
-        fontSize: thumbRadius * .8,
-        fontWeight: FontWeight.w700,
-        color: sliderTheme.thumbColor, //Text Color of Value on Thumb
-      ),
-      text: getValue(value),
-    );
-
-    TextPainter tp = TextPainter(text: span, textAlign: TextAlign.center, textDirection: TextDirection.ltr);
-    tp.layout();
-    Offset textCenter = Offset(center.dx - (tp.width / 2), center.dy - (tp.height / 2));
-
-    canvas.drawCircle(center, thumbRadius * .9, paint);
-    tp.paint(canvas, textCenter);
-  }
-
-  String getValue(double value) {
-    return (min + (max - min) * value).round().toString();
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _scrollController.dispose();
   }
 }

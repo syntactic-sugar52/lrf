@@ -2,7 +2,8 @@ import 'dart:convert';
 
 class UserModel {
   String? id;
-  String? phoneNumber;
+  String? email;
+  String? name;
   String? profileImg;
   String? createdAt;
   String? magicToken;
@@ -10,7 +11,8 @@ class UserModel {
 
   UserModel({
     this.id,
-    this.phoneNumber,
+    this.email,
+    this.name,
     this.profileImg,
     this.createdAt,
     this.magicToken,
@@ -18,7 +20,8 @@ class UserModel {
   });
   UserModel copyWith({
     String? id,
-    String? phoneNumber,
+    String? email,
+    String? name,
     String? profileImg,
     String? createdAt,
     String? magicToken,
@@ -26,7 +29,8 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
+      email: email ?? this.email,
+      name: name ?? this.name,
       profileImg: profileImg ?? this.profileImg,
       createdAt: createdAt ?? this.createdAt,
       magicToken: magicToken ?? this.magicToken,
@@ -37,7 +41,8 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'phoneNumber': phoneNumber,
+      'email': email,
+      'name': name,
       'profileImg': profileImg,
       'createdAt': createdAt,
       'magicToken': magicToken,
@@ -48,7 +53,8 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'],
-      phoneNumber: map['phoneNumber'],
+      email: map['email'],
+      name: map['name'],
       profileImg: map['profileImg'],
       createdAt: map['createdAt'],
       magicToken: map['magicToken'],
@@ -59,7 +65,7 @@ class UserModel {
   factory UserModel.fromJson(String source) => UserModel.fromMap(json.decode(source));
   @override
   String toString() {
-    return 'UserModel(id: $id, phoneNumber: $phoneNumber, profileImg: $profileImg, createdAt: $createdAt, magicToken: $magicToken, rating: $rating)';
+    return 'UserModel(id: $id, email: $email, name: $name, profileImg: $profileImg, createdAt: $createdAt, magicToken: $magicToken, rating: $rating)';
   }
 
   @override
@@ -68,7 +74,8 @@ class UserModel {
 
     return other is UserModel &&
         other.id == id &&
-        other.phoneNumber == phoneNumber &&
+        other.email == email &&
+        other.name == name &&
         other.profileImg == profileImg &&
         other.createdAt == createdAt &&
         other.magicToken == magicToken &&
@@ -77,6 +84,6 @@ class UserModel {
 
   @override
   int get hashCode {
-    return id.hashCode ^ phoneNumber.hashCode ^ profileImg.hashCode ^ createdAt.hashCode ^ magicToken.hashCode ^ rating.hashCode;
+    return id.hashCode ^ email.hashCode ^ name.hashCode ^ profileImg.hashCode ^ createdAt.hashCode ^ magicToken.hashCode ^ rating.hashCode;
   }
 }

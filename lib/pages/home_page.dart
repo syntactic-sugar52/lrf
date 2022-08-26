@@ -1,240 +1,327 @@
-import 'dart:math';
-
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:glass/glass.dart';
+import 'package:lrf/pages/request_accepted_page.dart';
+import 'package:lrf/pages/widgets/home/swipe_card.dart';
+import 'dart:math' as math;
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: SwipeCardsFB(cards: cards, onRightSwipe: () {}, onLeftSwipe: () {}, onUpSwipe: () {}));
-  }
-}
-
-//- - - - - - - - - Instructions - - - - - - - - - - - - - - - - - -
-//
-// Pass cards to be swiped into the cards parameter. Any Widget can be provided,
-// although unexpected behavior may occur with widgets that are especially small or large
-//
-// MUST IMPORT MATH for Pi: import 'dart:math';
-//
-// Coming Soon:
-//    - Controller Class for controlling swipecard outside of widget.
-//    - Buttons that swipe left or right
-
-//- - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - -
-
-// -=-=- (Dating App images) -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-//COPY Paste below code to test functionality with demo images
-
-const List<String> urls = [
-  "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8d29tYW4lMjBwb3J0cmFpdHxlbnwwfHwwfHw%3D&w=1000&q=80",
-  "https://images.unsplash.com/photo-1561442748-c50715dc32f6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8MXw5MjU4MjM3fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-  "https://images.unsplash.com/photo-1589156191108-c762ff4b96ab?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8YmxhY2slMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-  "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8d29tYW4lMjBwb3J0cmFpdHxlbnwwfHwwfHw%3D&w=1000&q=80",
-  "https://images.unsplash.com/photo-1561442748-c50715dc32f6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8MXw5MjU4MjM3fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-  "https://images.unsplash.com/photo-1589156191108-c762ff4b96ab?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8YmxhY2slMjB3b21hbiUyMHBvcnRyYWl0fGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60"
-];
-
-List<Widget> cards = urls.map((url) => SwipeImage(url: url)).toList();
-
-// -=-=--=- (Small Cards) =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// List<Widget> cards = [
-//   CardFb1(
-//       text: "Explore",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/illustrations%2Fundraw_Working_late_re_0c3y%201.png?alt=media&token=7b880917-2390-4043-88e5-5d58a9d70555",
-//       subtitle: "+30 books",
-//       onPressed: () {}),
-//   CardFb1(
-//       text: "Implore",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/illustrations%2Fundraw_Working_late_re_0c3y%201.png?alt=media&token=7b880917-2390-4043-88e5-5d58a9d70555",
-//       subtitle: "+30 books",
-//       onPressed: () {}),
-//   CardFb1(
-//       text: "Deplore",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/illustrations%2Fundraw_Working_late_re_0c3y%201.png?alt=media&token=7b880917-2390-4043-88e5-5d58a9d70555",
-//       subtitle: "+30 books",
-//       onPressed: () {}),
-//   CardFb1(
-//       text: "SeaFloor",
-//       imageUrl:
-//           "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/illustrations%2Fundraw_Working_late_re_0c3y%201.png?alt=media&token=7b880917-2390-4043-88e5-5d58a9d70555",
-//       subtitle: "+30 books",
-//       onPressed: () {})
-// ];
-
-class SwipeImage extends StatelessWidget {
-  final String url;
-  const SwipeImage({Key? key, required this.url}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover, alignment: Alignment(0.3, 0))),
-          )),
+    return Center(
+      child: ExpandableTheme(
+        data: const ExpandableThemeData(
+          iconColor: Colors.lightGreenAccent,
+          useInkWell: true,
+        ),
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          children: <Widget>[
+            Card2(),
+            Card2(),
+            Card2(),
+            Card2(),
+            Card2(),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class SwipeCardsFB extends StatefulWidget {
-  final int cardResetDuration;
-  final double maxTiltAngle;
-  final double sideSwipeSensitivity;
-  final double upSwipeSensitivity;
+const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore ";
 
-  final Function onRightSwipe;
-  final Function onLeftSwipe;
-  final Function onUpSwipe;
-  final List<Widget> cards;
-  SwipeCardsFB({
-    Key? key,
-    required this.cards,
-    required this.onRightSwipe,
-    required this.onLeftSwipe,
-    required this.onUpSwipe,
-    this.cardResetDuration = 400, //milliseconds
-    this.maxTiltAngle = 25, //degrees
-    this.sideSwipeSensitivity = 100, //distance the user must swipe left or right for action
-    this.upSwipeSensitivity = 50,
-  }) : super(key: key);
-
-  @override
-  _SwipeCardsFBState createState() => _SwipeCardsFBState();
-}
-
-class _SwipeCardsFBState extends State<SwipeCardsFB> {
-  Offset _dragPosition = Offset.zero;
-  double _angle = 0;
-
-  Offset get dragPosition => _dragPosition;
-
-  bool _isDragging = false;
-  late Size _screenSize;
+class Card2 extends StatelessWidget {
+  const Card2({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    _screenSize = MediaQuery.of(context).size;
-    return Stack(
-        children: cards.map<Widget>((widget) {
-      return widget == cards.last ? buildFrontCard(widget) : buildCard(widget);
-    }).toList());
-  }
+    buildImg(Color color, double height, Widget child) {
+      return SizedBox(
+          height: height,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+            padding: EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.rectangle,
+            ),
+            child: child,
+          )).asGlass();
+    }
 
-  Widget buildCard(Widget card) => Container(
-        child: card,
+    buildCollapsed1() {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(8),
+          child: Row(
+            // crossAxisAlignment: CrossAxisAlignment.,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: const [
+                  CircleAvatar(
+                    backgroundColor: Colors.white70,
+                    radius: 15,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "kd ang",
+                    style: TextStyle(color: Color(0xffCFFFDC)),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.star,
+                    color: Color(0xffCFFFDC),
+                    size: 14,
+                  ),
+                  Text('4.5', style: TextStyle(color: Color(0xffCFFFDC))),
+                ],
+              )
+            ],
+          ),
+        ),
+      ]);
+    }
+
+    buildCollapsed2() {
+      return buildImg(
+          Colors.transparent,
+          150,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  'Paint something for my cats',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xffF7EDDB), fontSize: 17, fontWeight: FontWeight.w600),
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_pin,
+                    color: Color(0xffFF9090),
+                  ),
+                  Text(
+                    'start : Makati',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xffF7EDDB), fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_pin,
+                    color: Color(0xff30E3CA),
+                  ),
+                  Text(
+                    'end   : Quezon City',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xffF7EDDB), fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ],
+          ));
+    }
+
+    buildCollapsed3() {
+      return Container();
+    }
+
+    buildExpanded1() {
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Row(
+                children: const [
+                  FaIcon(
+                    FontAwesomeIcons.moneyBillTransfer,
+                    color: Color(0xffCFFFDC),
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "60 Copper",
+                    style: TextStyle(color: Color(0xffCFFFDC)),
+                    // style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Row(
+                children: const [
+                  FaIcon(
+                    FontAwesomeIcons.clock,
+                    color: Color(0xffCFFFDC),
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "1:10 pm",
+                    style: TextStyle(color: Color(0xffCFFFDC)),
+                    // style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ]);
+    }
+
+    buildExpanded2() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              // Expanded(child: buildImg(Colors.green, 100, Text('something'))),
+              // Expanded(child: buildImg(Colors.orange, 100, Text('somethinf'))),
+            ],
+          ),
+          // Row(
+          //   children: <Widget>[
+          //     Expanded(child: buildImg(Colors.blue, 100)),
+          //     Expanded(child: buildImg(Colors.cyan, 100)),
+          //   ],
+          // ),
+        ],
       );
-  Widget buildFrontCard(Widget card) => GestureDetector(
-        child: LayoutBuilder(builder: (context, constraints) {
-          int duration;
-          if (_isDragging) {
-            //Since User is Dragging card, no animation is necessary, thus duration = 0)
-            duration = 0;
-          } else {
-            duration = widget.cardResetDuration; //User has released card, animation required for card to fly away or reset to origin
-          }
+    }
 
-          //Creates Transform Matrix For Card Tilt and drag animation
-          final center = constraints.smallest.center(Offset.zero);
-          final radians = _toRadians(_angle);
-          final rotatedMatrix = Matrix4.identity()
-            ..translate(center.dx, center.dy) //centers the axis of rotation
-            ..rotateZ(radians)
-            ..translate(-center.dx, -center.dy) //reverts to original axis
-            ..translate(dragPosition.dx, dragPosition.dy);
+    buildExpanded3() {
+      return Padding(
+        padding: EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              // color: Colors.grey,
+              child: Text(
+                loremIpsum,
+                style: TextStyle(color: Color(0xffF1F1F1), fontSize: 18, fontWeight: FontWeight.w500),
+                softWrap: true,
+              ),
+            ),
+            SizedBox(
+              height: 40,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InvertedButtonFb2(
+                    text: 'ACCEPT REQUEST',
+                    onPressed: () {
+                      // todo: add animation page transition
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => RequestAcceptedPage()));
+                    }),
+              ],
+            ),
+            // TextButton(
+            //     onPressed: () {}, child: const Text('Accept', style: TextStyle(color: Color(0xffFFF38C), fontSize: 14, fontWeight: FontWeight.bold))),
+            SizedBox(
+              height: 20,
+            )
+          ],
+        ),
+      ).asGlass();
+    }
 
-          return AnimatedContainer(duration: Duration(milliseconds: duration), transform: rotatedMatrix, child: card);
-        }),
-        onPanUpdate: (details) {
-          setState(() {
-            _dragPosition += details.delta;
-            _angle = widget.maxTiltAngle * _dragPosition.dx / _screenSize.width;
-          });
-        },
-        onPanEnd: (details) async {
-          _isDragging = false;
-
-          if (_isUpSwipe(_dragPosition.dy, widget.upSwipeSensitivity)) {
-            _flyOutUp();
-            widget.onUpSwipe();
-            _toNextCard();
-          } else if (_isRightSwipe(_dragPosition.dx, widget.sideSwipeSensitivity)) {
-            _flyOutRight();
-            widget.onRightSwipe();
-            _toNextCard();
-          } else if (_isLeftSwipe(_dragPosition.dx, widget.sideSwipeSensitivity)) {
-            _flyOutLeft();
-            widget.onLeftSwipe();
-            _toNextCard();
-          } else {
-            _resetPosition();
-          }
-        },
-        onPanStart: (details) {
-          setState(() {
-            _isDragging = true;
-          });
-        },
-      );
-
-  void _toNextCard() async {
-    if (cards.isEmpty) return;
-    await Future.delayed(Duration(milliseconds: 400));
-
-    cards.removeLast();
-    setState(() {
-      _isDragging = true;
-    });
-    _resetPosition();
+    return ExpandableNotifier(
+        child: Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+      child: ScrollOnExpand(
+        child: Card(
+          color: Colors.blueGrey.shade600,
+          // color: Color(0xff191919),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expandable(
+                collapsed: buildCollapsed1(),
+                expanded: buildExpanded1(),
+              ),
+              Expandable(
+                collapsed: buildCollapsed2(),
+                expanded: buildExpanded2(),
+              ),
+              Expandable(
+                collapsed: buildCollapsed3(),
+                expanded: buildExpanded3(),
+              ),
+              Divider(
+                height: 1,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Builder(
+                    builder: (context) {
+                      var controller = ExpandableController.of(context, required: true)!;
+                      return TextButton(
+                        child: Text(
+                          controller.expanded ? "COLLAPSE" : "EXPAND",
+                          style: Theme.of(context).textTheme.button!.copyWith(color: Color(0xff6FEDD6)),
+                        ),
+                        onPressed: () {
+                          controller.toggle();
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
   }
+}
 
-  void _flyOutLeft() {
-    setState(() {
-      _angle = -widget.maxTiltAngle;
-      _dragPosition += Offset(-2 * _screenSize.width, 0);
-    });
-  }
+class InvertedButtonFb2 extends StatelessWidget {
+  final String text;
+  final Function() onPressed;
+  InvertedButtonFb2({required this.text, required this.onPressed});
 
-  void _flyOutRight() {
-    setState(() {
-      _angle = widget.maxTiltAngle;
-      _dragPosition += Offset(2 * _screenSize.width, 0);
-    });
-  }
+  @override
+  Widget build(BuildContext context) {
+    const primaryColor = Color(0xff4338CA);
 
-  void _flyOutUp() {
-    setState(() {
-      _dragPosition += Offset(0, -2 * _screenSize.height);
-    });
-  }
-
-  double _toRadians(double degrees) {
-    return degrees * pi / 180;
-  }
-
-  bool _isRightSwipe(double dx, double sideSwipeSensitivity) {
-    return dx >= sideSwipeSensitivity;
-  }
-
-  bool _isLeftSwipe(double dx, double sideSwipeSensitivity) {
-    return dx <= -sideSwipeSensitivity;
-  }
-
-  bool _isUpSwipe(double dy, double upSwipeSensitivity) {
-    return dy <= -upSwipeSensitivity;
-  }
-
-  void _resetPosition() {
-    setState(() {
-      _dragPosition = Offset.zero;
-      _angle = 0;
-    });
+    return OutlinedButton(
+      style: ButtonStyle(
+          elevation: MaterialStateProperty.all(0),
+          alignment: Alignment.center,
+          side: MaterialStateProperty.all(const BorderSide(width: 1, color: Color(0xff00FFDD))),
+          padding: MaterialStateProperty.all(const EdgeInsets.only(right: 75, left: 75, top: 12.5, bottom: 12.5)),
+          backgroundColor: MaterialStateProperty.all(Colors.transparent),
+          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)))),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        style: const TextStyle(color: Color(0xff00FFDD), fontSize: 16),
+      ),
+    );
   }
 }
