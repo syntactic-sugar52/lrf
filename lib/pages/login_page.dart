@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/data/data_store.dart';
 import 'package:lrf/pages/main_page.dart';
 import 'package:magic_sdk/magic_sdk.dart';
 
@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
-
+  final _nameController = TextEditingController();
   static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final magic = Magic.instance;
@@ -22,26 +22,18 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-
+    // todo : move to splash page
     /// Checks if the user is already loggedIn
     var future = magic.user.isLoggedIn();
+
     future.then((isLoggedIn) {
       if (isLoggedIn) {
         /// Navigate to home page
         if (mounted) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const MainPage()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainPage()));
         }
       }
     });
-  }
-
-  Future createUser({
-    required String name,
-    required String email,
-    required String token,
-  }) async {
-    final docUser = FirebaseFirestore.instance.collection('users');
-    final json = {'name': name, 'email': email, 'token': token, 'createdAt': DateTime.now()};
   }
 
   @override
@@ -55,10 +47,8 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               FaIcon(
-                FontAwesomeIcons.signHanging,
+                FontAwesomeIcons.lastfmSquare,
                 color: Colors.blueAccent,
-                // color: Color(0xff146356),
-                // color: Colors.greenAccent.shade200,
                 size: 30,
               ),
               SizedBox(
@@ -80,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Text(
-                'Enter Your Email Address To Start',
+                'Welcome to Last Resort',
                 style: TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.w500,
@@ -91,25 +81,22 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-          Container(
-            height: MediaQuery.of(context).size.height / 8,
-          ),
           Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 35),
                   child: TextFormField(
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     cursorColor: Colors.white10,
                     keyboardType: TextInputType.emailAddress,
-                    controller: _emailController,
+                    controller: _nameController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintStyle: const TextStyle(color: Colors.white54),
-                      hintText: 'Luna Boob',
+                      hintText: 'Enter Full Name',
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(12.0),
@@ -141,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintStyle: const TextStyle(color: Colors.white54),
-                      hintText: 'hello@lastresort.com',
+                      hintText: 'Enter Email Address',
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(color: Colors.blue, width: 2.0),
                         borderRadius: BorderRadius.circular(12.0),
@@ -176,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
             child: ElevatedButton(
               style: ButtonStyle(
                 elevation: MaterialStateProperty.all<double>(12),
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.blueGrey),
               ),
               onPressed: () async {
                 var token = await magic.auth.loginWithMagicLink(email: _emailController.text, showUI: true);
@@ -184,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 if (token.isNotEmpty) {
                   /// Navigate to home page
-
+                  DataStore().addUser(name: _nameController.text.trim(), email: _emailController.text.trim(), token: token.trim());
                 }
               },
               child: const Text(

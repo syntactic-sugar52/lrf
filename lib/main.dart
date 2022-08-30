@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/pages/main_page.dart';
+import 'package:lrf/pages/pick_location.dart';
 import 'package:lrf/pages/request_accepted_page.dart';
 import 'package:magic_sdk/magic_sdk.dart';
 
@@ -13,7 +15,8 @@ Future main() async {
   Magic.instance = Magic(
     "pk_live_278E6F3C3130FCA1",
   );
-
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -40,7 +43,8 @@ class MyApp extends StatelessWidget {
             // '/': (_) => const SplashPage(),
             '/login': (_) => const LoginPage(),
             '/main': (_) => const MainPage(),
-            '/requestAccepted': (_) => const RequestAcceptedPage()
+            '/requestAccepted': (_) => const RequestAcceptedPage(),
+            '/pickLocation': (_) => const PickLocationPage()
           },
         ),
         Magic.instance.relayer

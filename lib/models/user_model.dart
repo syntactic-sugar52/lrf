@@ -1,12 +1,14 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   String? id;
   String? email;
   String? name;
   String? profileImg;
   String? createdAt;
-  String? magicToken;
+
   String? rating;
 
   UserModel({
@@ -15,7 +17,6 @@ class UserModel {
     this.name,
     this.profileImg,
     this.createdAt,
-    this.magicToken,
     this.rating,
   });
   UserModel copyWith({
@@ -24,7 +25,6 @@ class UserModel {
     String? name,
     String? profileImg,
     String? createdAt,
-    String? magicToken,
     String? rating,
   }) {
     return UserModel(
@@ -33,7 +33,6 @@ class UserModel {
       name: name ?? this.name,
       profileImg: profileImg ?? this.profileImg,
       createdAt: createdAt ?? this.createdAt,
-      magicToken: magicToken ?? this.magicToken,
       rating: rating ?? this.rating,
     );
   }
@@ -45,10 +44,19 @@ class UserModel {
       'name': name,
       'profileImg': profileImg,
       'createdAt': createdAt,
-      'magicToken': magicToken,
       'rating': rating,
     };
   }
+
+  UserModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
+      : id = doc.id,
+        name = doc.data()!["name"],
+        email = doc.data()!["email"];
+  // salary = doc.data()!["salary"],
+  // address = Address.fromMap(doc.data()!["address"]),
+  // employeeTraits = doc.data()?["employeeTraits"] == null
+  // ? null
+  // : doc.data()?["employeeTraits"].cast<String>();
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
@@ -57,16 +65,15 @@ class UserModel {
       name: map['name'],
       profileImg: map['profileImg'],
       createdAt: map['createdAt'],
-      magicToken: map['magicToken'],
       rating: map['rating'],
     );
   }
-  String toJson() => json.encode(toMap());
-  factory UserModel.fromJson(String source) => UserModel.fromMap(json.decode(source));
-  @override
-  String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, profileImg: $profileImg, createdAt: $createdAt, magicToken: $magicToken, rating: $rating)';
-  }
+  // String toJson() => json.encode(toMap());
+  // factory UserModel.fromJson(dynamic source) => UserModel.fromMap(json.decode(source));
+  // @override
+  // String toString() {
+  //   return 'UserModel(id: $id, email: $email, name: $name, profileImg: $profileImg, createdAt: $createdAt, magicToken: $magicToken, rating: $rating)';
+  // }
 
   @override
   bool operator ==(Object other) {
@@ -78,12 +85,11 @@ class UserModel {
         other.name == name &&
         other.profileImg == profileImg &&
         other.createdAt == createdAt &&
-        other.magicToken == magicToken &&
         other.rating == rating;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ email.hashCode ^ name.hashCode ^ profileImg.hashCode ^ createdAt.hashCode ^ magicToken.hashCode ^ rating.hashCode;
+    return id.hashCode ^ email.hashCode ^ name.hashCode ^ profileImg.hashCode ^ createdAt.hashCode ^ rating.hashCode;
   }
 }

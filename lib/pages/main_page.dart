@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glass/glass.dart';
-import 'package:lrf/constants/constants.dart';
 import 'package:lrf/constants/widgets.dart';
 import 'package:lrf/pages/accepted_page.dart';
 import 'package:lrf/pages/home_page.dart';
@@ -91,22 +90,22 @@ class _MainPageState extends State<MainPage> {
               selectedItemColor: Colors.white,
               items: [
                 BottomNavigationBarItem(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.home_filled,
                     size: 20,
                   ).asGlass(),
                   label: 'Home',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_alert, size: 20).asGlass(),
+                  icon: const Icon(Icons.add_alert, size: 20).asGlass(),
                   label: 'Request',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.view_list, size: 20).asGlass(),
+                  icon: const Icon(Icons.view_list, size: 20).asGlass(),
                   label: 'Accepted',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person, size: 20).asGlass(),
+                  icon: const Icon(Icons.person, size: 20).asGlass(),
                   label: 'Profile',
                 ),
               ]),

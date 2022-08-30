@@ -13,12 +13,11 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Request Accepted'),
-      ),
-      body: Center(child: const Text('request accepted page')),
-    );
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('Request Accepted'),
+        ),
+        body: const Text('text'));
   }
 }

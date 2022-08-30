@@ -30,8 +30,10 @@ dependencies:
   firebase_core: ^1.21.0
   firebase_dynamic_links: ^4.3.5 
   cloud_firestore: ^3.4.5
-  animated_theme_switcher: ^2.0.6
-  open_street_map_search_and_pick: ^0.0.9
+
+  geolocator: ^9.0.1
+  open_location_picker: ^0.2.0
+  slide_to_confirm: ^1.1.0 
 dev_dependencies:
   flutter_test:
     sdk: flutter

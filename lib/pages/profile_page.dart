@@ -1,17 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lrf/constants/constants.dart';
+import 'package:lrf/data/data_store.dart';
+import 'package:lrf/models/user_model.dart';
+import 'package:magic_sdk/magic_sdk.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
-  Widget _appBar() {
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  Widget _appBar(UserModel userModel) {
     return Row(
-      children: const <Widget>[
+      children: <Widget>[
         CircleAvatar(
           backgroundColor: Colors.grey,
         ),
         SizedBox(width: 15),
         // TitleText(text: "Hello,"),
-        Text(' Luna Boob,', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
+        Text('${userModel.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
         Expanded(
           child: SizedBox(),
         ),
@@ -29,6 +45,7 @@ class ProfilePage extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(40)),
           child: Container(
             width: MediaQuery.of(context).size.width,
+            // todo: add orientation
             height: MediaQuery.of(context).size.height * .27,
             color: Colors.black12,
             child: Stack(
@@ -46,7 +63,7 @@ class ProfilePage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text(
+                        const Text(
                           '6,354',
                           style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800, color: Colors.white70),
                         ),
@@ -171,8 +188,8 @@ class ProfilePage extends StatelessWidget {
         child: const Icon(Icons.hd, color: Colors.white),
       ),
       contentPadding: const EdgeInsets.symmetric(),
-      title: Text('totle', style: TextStyle(color: Colors.white)),
-      subtitle: Text(time, style: TextStyle(color: Colors.white)),
+      title: const Text('totle', style: const TextStyle(color: Colors.white)),
+      subtitle: Text(time, style: const TextStyle(color: Colors.white)),
       trailing: Container(
           height: 30,
           width: 60,
@@ -188,42 +205,57 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: SingleChildScrollView(
-      child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 35),
-              _appBar(),
-              const SizedBox(
-                height: 20,
+    return FutureBuilder<UserModel?>(
+      // future: readUser(),
+      builder: ((context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Something Went Wrong');
+        } else if (snapshot.hasData) {
+          final UserModel users = snapshot.data!;
+          return SafeArea(
+              child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(height: 35),
+                  _appBar(users),
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  balanceCard(context),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  // TitleText(
+                  //   text: "Operations",
+                  // ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _operationsWidget(),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  // TitleText(
+                  //   text: "Transactions",
+                  // ),
+                  _transectionList(),
+                ],
               ),
-              // TitleText(text: "My wallet"),
-              const SizedBox(
-                height: 20,
-              ),
-              balanceCard(context),
-              SizedBox(
-                height: 50,
-              ),
-              // TitleText(
-              //   text: "Operations",
-              // ),
-              SizedBox(
-                height: 10,
-              ),
-              _operationsWidget(),
-              SizedBox(
-                height: 40,
-              ),
-              // TitleText(
-              //   text: "Transactions",
-              // ),
-              _transectionList(),
-            ],
-          )),
-    ));
+            ),
+          ));
+        } else {
+          return Center(
+            child: CircularProgressIndicator(color: Colors.blue),
+          );
+        }
+      }),
+    );
   }
 }

@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lrf/pages/login_page.dart';
+import 'package:lrf/pages/pick_location.dart';
 import 'package:lrf/pages/request_accepted_page.dart';
 import 'package:lrf/pages/splash_page.dart';
 
@@ -15,8 +16,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   SlideTransition slideNavigation(child, animation, secondaryAnimation) {
     return SlideTransition(
       position: Tween<Offset>(
-        begin: Offset(-1, 0),
-        end: Offset(0, 0),
+        begin: const Offset(-1, 0),
+        end: const Offset(0, 0),
       ).animate(animation),
       child: FadeTransition(
         opacity: animation,
@@ -28,16 +29,21 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   // depending on the route value - redirect to the proper page
   switch (settings.name) {
     case '/':
-      return MaterialPageRoute(builder: (context) => SplashPage());
+      return MaterialPageRoute(builder: (context) => const SplashPage());
 
     case '/main':
-      return MaterialPageRoute(builder: (context) => MainPage());
+      return MaterialPageRoute(builder: (context) => const MainPage());
 
     case 'requestAccepted':
-      return MaterialPageRoute(builder: (context) => RequestAcceptedPage());
+      return MaterialPageRoute(builder: (context) => const RequestAcceptedPage());
 
-    // case '/nearme':
-    //   return MaterialPageRoute(builder: (context) => NearmePage());
+    case '/pickLocation':
+      return PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => PickLocationPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return slideNavigation(child, animation, secondaryAnimation);
+        },
+      );
 
     // case '/other':
     //   return MaterialPageRoute(builder: (context) => OtherPage());
@@ -65,6 +71,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     //   );
 
     default:
-      return MaterialPageRoute(builder: (context) => LoginPage());
+      return MaterialPageRoute(builder: (context) => const LoginPage());
   }
 }
