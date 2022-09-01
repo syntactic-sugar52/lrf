@@ -13,30 +13,15 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  final Stream<DocumentSnapshot> _usersStream =
+      FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).snapshots();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-  }
-
-  Widget _appBar(UserModel userModel) {
-    return Row(
-      children: <Widget>[
-        CircleAvatar(
-          backgroundColor: Colors.grey,
-        ),
-        SizedBox(width: 15),
-        // TitleText(text: "Hello,"),
-        Text('${userModel.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
-        Expanded(
-          child: SizedBox(),
-        ),
-        // Icon(
-        //   Icons.settings,
-        //   color: Colors.green,
-        // )
-      ],
-    );
   }
 
   Widget balanceCard(context) {
@@ -133,6 +118,27 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _appBar(DocumentSnapshot snapshot) {
+    Object? data = snapshot.data();
+    return Row(
+      children: const <Widget>[
+        CircleAvatar(
+          backgroundColor: Colors.grey,
+        ),
+        SizedBox(width: 15),
+        // TitleText(text: "Hello,"),
+        // Text(snapshot['name'], style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
+        Expanded(
+          child: SizedBox(),
+        ),
+        // Icon(
+        //   Icons.settings,
+        //   color: Colors.green,
+        // )
+      ],
+    );
+  }
+
   Widget _operationsWidget() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -188,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: const Icon(Icons.hd, color: Colors.white),
       ),
       contentPadding: const EdgeInsets.symmetric(),
-      title: const Text('totle', style: const TextStyle(color: Colors.white)),
+      title: const Text('totle', style: TextStyle(color: Colors.white)),
       subtitle: Text(time, style: const TextStyle(color: Colors.white)),
       trailing: Container(
           height: 30,
@@ -205,57 +211,57 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<UserModel?>(
-      // future: readUser(),
-      builder: ((context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something Went Wrong');
-        } else if (snapshot.hasData) {
-          final UserModel users = snapshot.data!;
-          return SafeArea(
+    return StreamBuilder<DocumentSnapshot>(
+        stream: _usersStream,
+        builder: ((context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            dynamic data = snapshot.data;
+            // print(data['name']);
+            return SafeArea(
               child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 35),
-                  _appBar(users),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SizedBox(height: 35),
+                      // _appBar(snapshot.data!),
 
-                  const SizedBox(
-                    height: 20,
+                      const SizedBox(
+                        height: 20,
+                      ),
+
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      balanceCard(context),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      // TitleText(
+                      //   text: "Operations",
+                      // ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      _operationsWidget(),
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      // TitleText(
+                      //   text: "Transactions",
+                      // ),
+                      _transectionList(),
+                    ],
                   ),
-                  balanceCard(context),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                  // TitleText(
-                  //   text: "Operations",
-                  // ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _operationsWidget(),
-                  const SizedBox(
-                    height: 40,
-                  ),
-                  // TitleText(
-                  //   text: "Transactions",
-                  // ),
-                  _transectionList(),
-                ],
+                ),
               ),
-            ),
-          ));
-        } else {
-          return Center(
-            child: CircularProgressIndicator(color: Colors.blue),
-          );
-        }
-      }),
-    );
+            );
+          }
+        }));
   }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/constants/constants.dart';
@@ -13,25 +14,32 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _nameController = TextEditingController();
+  final magic = Magic.instance;
+
   static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final magic = Magic.instance;
+  final _auth = FirebaseAuth.instance;
+  final _emailController = TextEditingController();
+  final _nameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     // todo : move to splash page
     /// Checks if the user is already loggedIn
-    var future = magic.user.isLoggedIn();
+    // var future = magic.user.isLoggedIn();
 
-    future.then((isLoggedIn) {
-      if (isLoggedIn) {
-        /// Navigate to home page
-        if (mounted) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainPage()));
-        }
+    // future.then((isLoggedIn) {
+    //   if (isLoggedIn) {
+    //     /// Navigate to home page
+    //     if (mounted) {
+    //       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainPage()));
+    //     }
+    //   }
+    // });
+    FirebaseAuth.instance.authStateChanges().listen((firebaseUser) {
+      if (mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainPage()));
       }
     });
   }
@@ -166,12 +174,15 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.blueGrey),
               ),
               onPressed: () async {
-                var token = await magic.auth.loginWithMagicLink(email: _emailController.text, showUI: true);
-                debugPrint('token, $token');
-
-                if (token.isNotEmpty) {
-                  /// Navigate to home page
-                  DataStore().addUser(name: _nameController.text.trim(), email: _emailController.text.trim(), token: token.trim());
+                // var token = await magic.auth.loginWithMagicLink(email: _emailController.text, showUI: true);
+                // debugPrint('token, $token');
+                var testToken = await magic.user.generateIdToken();
+                if (testToken.isNotEmpty) {
+                  final newUser = await _auth.createUserWithEmailAndPassword(email: _emailController.text.trim(), password: testToken);
+                  if (newUser.user != null) {
+                    /// Navigate to home page
+                    DataStore().addUser(name: _nameController.text.trim(), email: _emailController.text.trim(), token: testToken);
+                  }
                 }
               },
               child: const Text(

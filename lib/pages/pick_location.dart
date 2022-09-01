@@ -9,75 +9,108 @@ class PickLocationPage extends StatefulWidget {
 }
 
 class _PickLocationPageState extends State<PickLocationPage> {
+  String endLocationValue = '';
+  String startLocationValue = '';
+
+  void _onBackPressed() {
+    // Called when the user either presses the back arrow in the AppBar
+    try {
+      if (startLocationValue.isNotEmpty && endLocationValue.isNotEmpty) {
+        Navigator.of(context).pop({'startLocation': startLocationValue, 'endLocation': endLocationValue});
+      } else {
+        // todo: add pop up showing error
+
+      }
+    } catch (e) {
+      Future.error(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: const Text('Select Location'),
-        ),
-        body: Center(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
-              OpenMapPicker(
-                decoration: InputDecoration(
-                    hintText: "Add Start Location",
-                    fillColor: Color(0xff3A3A3A),
-                    filled: true,
-                    labelStyle: TextStyle(color: Colors.white),
-                    prefixIcon: SizedBox.shrink(),
-                    hintStyle: TextStyle(color: Colors.white),
-                    icon: Icon(
-                      Icons.location_pin,
-                      color: Colors.green,
-                    ),
-                    iconColor: Colors.pink),
-                onSaved: (FormattedLocation? newValue) {
-                  /// save new value
-                },
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              OpenMapPicker(
-                textStyle: TextStyle(color: Colors.blueGrey.shade100),
-                decoration: InputDecoration(
-                    hintText: "Add End Location",
-                    fillColor: Color(0xff3A3A3A),
-                    prefixIcon: SizedBox.shrink(),
-                    filled: true,
-                    hintStyle: TextStyle(color: Colors.blueGrey.shade100),
-                    icon: Icon(
-                      Icons.location_pin,
-                      color: Colors.pink,
-                    ),
-                    iconColor: Colors.pink),
-                onSaved: (FormattedLocation? newValue) {
-                  /// save new value
-                },
-              ),
-              // MultiOpenMapPicker(
-              //   decoration: const InputDecoration(hintText: "Add 2 locations", fillColor: Color(0xffF6F6F6), filled: true),
-              //   onSaved: (List<FormattedLocation> newValue) {
-              //     /// save new value
-              //   },
-              // ),
-            ],
+    return WillPopScope(
+      onWillPop: () {
+        _onBackPressed();
+        return Future.value(false);
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: _onBackPressed,
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: const Text('Select Location'),
           ),
-        ));
-    // OpenStreetMapSearchAndPick(
-    //     center: LatLong(9, 1),
-    //     buttonColor: Colors.blue,
-    //     buttonText: 'Set Current Location',
-    //     onPicked: (pickedData) {
-    //       print(pickedData.latLong.latitude);
-    //       print(pickedData.latLong.longitude);
-    //       print(pickedData.address);
-    //     }));
+          body: Center(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: <Widget>[
+                const SizedBox(
+                  height: 20,
+                ),
+                OpenMapPicker(
+                  // todo: add validator
+                  textStyle: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                      hintText: "Add Start Location",
+                      contentPadding: EdgeInsets.symmetric(vertical: 15),
+                      fillColor: Colors.white70,
+                      filled: true,
+                      labelStyle: TextStyle(color: Colors.white),
+                      prefixIcon: SizedBox.shrink(),
+                      hintStyle: TextStyle(color: Colors.black),
+                      icon: Icon(
+                        Icons.location_pin,
+                        color: Colors.green,
+                      ),
+                      iconColor: Colors.pink),
+                  onChanged: (newValue) {
+                    setState(() {
+                      startLocationValue = newValue!.displayName;
+                    });
+                  },
+                  onSaved: (FormattedLocation? newValue) {
+                    setState(() {
+                      startLocationValue = newValue!.displayName;
+                    });
+
+                    /// save new value
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                OpenMapPicker(
+                  textStyle: TextStyle(color: Colors.blueGrey.shade100),
+                  decoration: const InputDecoration(
+                      hintText: "Add End Location",
+                      fillColor: Colors.white70,
+                      contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                      prefixIcon: SizedBox.shrink(),
+                      filled: true,
+                      hintStyle: TextStyle(color: Colors.black),
+                      icon: Icon(
+                        Icons.location_pin,
+                        color: Colors.pink,
+                      ),
+                      iconColor: Colors.pink),
+                  onChanged: (newValue) {
+                    setState(() {
+                      endLocationValue = newValue!.displayName;
+                    });
+                  },
+                  onSaved: (FormattedLocation? newValue) {
+                    /// save new value
+                    setState(() {
+                      endLocationValue = newValue!.displayName;
+                    });
+                  },
+                ),
+              ],
+            ),
+          )),
+    );
   }
 }
