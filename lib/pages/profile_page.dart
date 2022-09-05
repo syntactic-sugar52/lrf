@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lrf/data/data_store.dart';
-import 'package:lrf/models/user_model.dart';
-import 'package:magic_sdk/magic_sdk.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -12,7 +9,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   final Stream<DocumentSnapshot> _usersStream =
@@ -24,98 +21,99 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
   Widget balanceCard(context) {
-    return Container(
-      child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(40)),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            // todo: add orientation
-            height: MediaQuery.of(context).size.height * .27,
-            color: Colors.black12,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Text(
-                      'Total Balance,',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black12),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        const Text(
-                          '6,354',
-                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800, color: Colors.white70),
-                        ),
-                        Text(
-                          ' Copper',
-                          style: TextStyle(fontSize: 35, fontWeight: FontWeight.w500, color: Colors.yellow.withAlpha(200)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                        width: 85,
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                        decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: Colors.white, width: 1)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const <Widget>[
-                            Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            SizedBox(width: 5),
-                            Text("Top up", style: TextStyle(color: Colors.white)),
-                          ],
-                        ))
-                  ],
-                ),
-                Positioned(
-                  left: -170,
-                  top: -170,
-                  child: CircleAvatar(
-                    radius: 130,
-                    backgroundColor: Colors.blue.shade600,
+    return ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          // todo: add orientation
+          height: MediaQuery.of(context).size.height * .27,
+          color: Colors.black12,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Total Balance,',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black12),
                   ),
-                ),
-                const Positioned(
-                  left: -160,
-                  top: -190,
-                  child: CircleAvatar(
-                    radius: 130,
-                    backgroundColor: Colors.transparent,
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Text(
+                        '6,354',
+                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800, color: Colors.white70),
+                      ),
+                      Text(
+                        ' Copper',
+                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.w500, color: Colors.yellow.withAlpha(200)),
+                      ),
+                    ],
                   ),
-                ),
-                Positioned(
-                  right: -170,
-                  bottom: -170,
-                  child: CircleAvatar(
-                    radius: 130,
-                    backgroundColor: Colors.blue.shade600,
+                  const SizedBox(
+                    height: 10,
                   ),
+                  Container(
+                      width: 85,
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      decoration:
+                          BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: Colors.white, width: 1)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const <Widget>[
+                          Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          SizedBox(width: 5),
+                          Text("Top up", style: TextStyle(color: Colors.white)),
+                        ],
+                      ))
+                ],
+              ),
+              Positioned(
+                left: -170,
+                top: -170,
+                child: CircleAvatar(
+                  radius: 130,
+                  backgroundColor: Colors.blue.shade600,
                 ),
-                Positioned(
-                  right: -160,
-                  bottom: -190,
-                  child: CircleAvatar(
-                    radius: 130,
-                    backgroundColor: Colors.blue.shade600,
-                  ),
-                )
-              ],
-            ),
-          )),
-    );
+              ),
+              const Positioned(
+                left: -160,
+                top: -190,
+                child: CircleAvatar(
+                  radius: 130,
+                  backgroundColor: Colors.transparent,
+                ),
+              ),
+              Positioned(
+                right: -170,
+                bottom: -170,
+                child: CircleAvatar(
+                  radius: 130,
+                  backgroundColor: Colors.blue.shade600,
+                ),
+              ),
+              Positioned(
+                right: -160,
+                bottom: -190,
+                child: CircleAvatar(
+                  radius: 130,
+                  backgroundColor: Colors.blue.shade600,
+                ),
+              )
+            ],
+          ),
+        ));
   }
 
   Widget _appBar(DocumentSnapshot snapshot) {
@@ -172,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _transectionList() {
+  Widget _transactionList() {
     return Column(
       children: <Widget>[
         _transection("Flight Ticket", "23 Feb 2020"),
@@ -211,6 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return StreamBuilder<DocumentSnapshot>(
         stream: _usersStream,
         builder: ((context, AsyncSnapshot<DocumentSnapshot> snapshot) {
@@ -219,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: CircularProgressIndicator(),
             );
           } else {
-            dynamic data = snapshot.data;
+            // dynamic data = snapshot.data;
             // print(data['name']);
             return SafeArea(
               child: SingleChildScrollView(
@@ -255,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       // TitleText(
                       //   text: "Transactions",
                       // ),
-                      _transectionList(),
+                      _transactionList(),
                     ],
                   ),
                 ),

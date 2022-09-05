@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'package:magic_sdk/magic_sdk.dart';
 
@@ -9,6 +10,7 @@ class DataStore {
   // reference document
   final usersRef = FirebaseFirestore.instance.collection('users');
   final requestsRef = FirebaseFirestore.instance.collection('request');
+
   Future<void> addUser({
     required String name,
     required String email,
@@ -26,15 +28,18 @@ class DataStore {
     }
   }
 
-  Future<void> addRequest({
-    required String id,
-    required String headline,
-    required String instructions,
-    required String time,
-    required String startLocation,
-    required String endLocation,
-    required String price,
-  }) async {
+  Future addRequest(
+      {required String id,
+      required String headline,
+      required String instructions,
+      required String time,
+      required String startLocation,
+      required String endLocation,
+      required String price,
+      required String startLatitude,
+      required String startLongitude,
+      required String endLatitude,
+      required String endLongitude}) async {
     try {
       await requestsRef.add({
         'id': id,
@@ -45,10 +50,17 @@ class DataStore {
         'time': time,
         'startLocation': startLocation,
         'endLocation': endLocation,
-        'instructions': instructions
+        'instructions': instructions,
+        'startLatitude': startLatitude,
+        'startLongitude': startLongitude,
+        'endLatitude': endLatitude,
+        'endLongitude': endLongitude
       });
     } on Exception catch (e) {
       Future.error(e);
     }
   }
+
+  Position? _currentPosition;
+  Position? get currentPostion => _currentPosition;
 }

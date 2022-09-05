@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lrf/data/data_store.dart';
 import 'package:lrf/pages/general_widgets.dart';
+import 'package:lrf/pages/widgets/request/general_widgets.dart';
 import 'package:lrf/pages/widgets/request/slider_widget.dart';
 
 class RequestPage extends StatefulWidget {
@@ -12,12 +13,15 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
+  String endLat = '';
   String endLocationValue = '';
-  int length = 0;
+  String endLong = '';
   var locationData = {};
   String newTimePicked = '';
   String price = '';
+  String startLat = '';
   String startLocationValue = '';
+  String startLong = '';
 //time picker
   bool timePicked = false;
 
@@ -30,7 +34,6 @@ class _RequestPageState extends State<RequestPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _headlineController.dispose();
     _instructionsController.dispose();
@@ -46,15 +49,59 @@ class _RequestPageState extends State<RequestPage> {
     // todo: make sure copper has value
     try {
       if (_headlineController.text.isNotEmpty && _instructionsController.text.isNotEmpty && newTimePicked != '' && locationData.isNotEmpty) {
+        locationData.forEach((key, value) {
+          if (key.toString().contains('startLat')) {
+            setState(() {
+              startLat = value;
+            });
+          } else if (key.toString().contains('startLong')) {
+            setState(() {
+              startLong = value;
+            });
+          } else if (key.toString().contains('endLat')) {
+            setState(() {
+              endLat = value;
+            });
+          } else if (key.toString().contains('endLong')) {
+            setState(() {
+              endLong = value;
+            });
+          } else if (key.toString().contains('startLocation')) {
+            setState(() {
+              startLocationValue = value;
+            });
+          } else {
+            setState(() {
+              endLocationValue = value;
+            });
+          }
+        });
         await DataStore().addRequest(
-          id: idGenerator(),
-          headline: _headlineController.text.trim(),
-          instructions: _instructionsController.text.trim(),
-          time: newTimePicked.trim(),
-          startLocation: locationData.values.first.toString().trim(),
-          endLocation: locationData.values.last.toString().trim(),
-          price: price,
-        );
+            id: idGenerator(),
+            headline: _headlineController.text.trim(),
+            instructions: _instructionsController.text.trim(),
+            time: newTimePicked.trim(),
+            startLocation: startLocationValue.trim(),
+            endLocation: endLocationValue.trim(),
+            price: price,
+            startLatitude: startLat.trim(),
+            startLongitude: startLong.trim(),
+            endLatitude: endLat.trim(),
+            endLongitude: endLong.trim());
+        setState(() {
+          locationData.clear();
+          price = '';
+          newTimePicked = '';
+        });
+        // if (success) {
+        //   setState(() {
+        //     locationData = {};
+        //     price = '';
+        //     newTimePicked = '';
+        //   });
+        // } else {
+        //   //todo: show error
+        // }
       }
     } on PlatformException catch (e) {
       Future.error(e);
@@ -62,6 +109,14 @@ class _RequestPageState extends State<RequestPage> {
     }
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    locationData.clear();
+  }
+
+//todo  : add images
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -81,7 +136,13 @@ class _RequestPageState extends State<RequestPage> {
                 TextButton(
                     onPressed: () {
                       postRequest().whenComplete(() {
-                        Navigator.pushNamed(context, '/main');
+                        Navigator.pushNamed(context, '/main').whenComplete(() {
+                          setState(() {
+                            locationData.clear();
+                            price = '';
+                            newTimePicked = '';
+                          });
+                        });
                       });
                     },
                     child: const Text(
@@ -92,52 +153,17 @@ class _RequestPageState extends State<RequestPage> {
             ),
             ListTile(
               dense: true,
-              title: const Text('Headline : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  maxLines: 1,
-                  controller: _headlineController,
-                  cursorColor: Colors.grey,
-                  autofocus: true,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                      borderSide: BorderSide(
-                        width: 2.0,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xffCFFFDC),
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.redAccent),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.orangeAccent),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
+              title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+              subtitle:
+                  Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _headlineController, maxLines: 2, maxLength: 120)),
             ),
             ListTile(
               dense: true,
-              title: const Text('Location :', style: TextStyle(fontSize: 16, color: Colors.white70)),
+              title: const Text('Location :', style: TextStyle(fontSize: 16, color: Colors.white)),
               subtitle: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: customButton(
-                  text: 'Select Location',
+                  text: locationData.isNotEmpty ? 'Select Location' : 'Location Saved',
                   onPressed: () {
                     Navigator.pushNamed(context, '/pickLocation').then((value) {
                       setState(() {
@@ -148,39 +174,39 @@ class _RequestPageState extends State<RequestPage> {
                 ),
               ),
             ),
-            ListTile(
-                dense: true,
-                title: const Text('Time to accomplish request : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
-                subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: customButton(
-                    text: // change text to show time picked when user picks a time
-                        timePicked ? newTimePicked : 'Add Time',
-                    onPressed: () async {
-                      final TimeOfDay? newTime = await showTimePicker(
-                        context: context,
-                        initialEntryMode: TimePickerEntryMode.input,
-                        initialTime: TimeOfDay.now(),
-                      );
+            // ListTile(
+            //     dense: true,
+            //     title: const Text('Time to accomplish request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+            //     subtitle: Padding(
+            //       padding: const EdgeInsets.all(8.0),
+            //       child: customButton(
+            //         text: // change text to show time picked when user picks a time
+            //             timePicked ? newTimePicked : 'Add Time',
+            //         onPressed: () async {
+            //           final TimeOfDay? newTime = await showTimePicker(
+            //             context: context,
+            //             initialEntryMode: TimePickerEntryMode.input,
+            //             initialTime: TimeOfDay.now(),
+            //           );
 
-                      if (newTime == null) {
-                        // don't change when cancel is pressed
-                        setState(() {
-                          timePicked = false;
-                        });
-                      } else {
-                        setState(() {
-                          timePicked = true;
-                          // when user picks a time , show time picked
-                          newTimePicked = '${newTime.hour}:${newTime.minute} ${newTime.period == DayPeriod.am ? 'am' : 'pm'}';
-                        });
-                      }
-                    },
-                  ),
-                )),
+            //           if (newTime == null) {
+            //             // don't change when cancel is pressed
+            //             setState(() {
+            //               timePicked = false;
+            //             });
+            //           } else {
+            //             setState(() {
+            //               timePicked = true;
+            //               // when user picks a time , show time picked
+            //               newTimePicked = '${newTime.hour}:${newTime.minute} ${newTime.period == DayPeriod.am ? 'am' : 'pm'}';
+            //             });
+            //           }
+            //         },
+            //       ),
+            //     )),
             ListTile(
                 dense: true,
-                title: const Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
+                title: const Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
                 subtitle: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SliderWidget(
@@ -195,54 +221,9 @@ class _RequestPageState extends State<RequestPage> {
                 )),
             ListTile(
               dense: true,
-              title: const Text('Instructions : ', style: TextStyle(fontSize: 16, color: Colors.white70)),
+              title: Text('Description : ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
               subtitle: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  maxLines: 20,
-                  maxLength: 40,
-                  onChanged: (String value) {
-                    setState(() {
-                      length = value.length;
-                    });
-                  },
-                  textCapitalization: TextCapitalization.sentences,
-                  cursorColor: Colors.grey,
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
-                  autofocus: true,
-                  controller: _instructionsController,
-                  decoration: const InputDecoration(
-                    counterText: '',
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                      borderSide: BorderSide(
-                        width: 2.0,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blueGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xffCFFFDC),
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.redAccent),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.orangeAccent),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
+                  padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _instructionsController, maxLines: 25, maxLength: 820)),
             ),
             const SizedBox(height: 40),
           ]),

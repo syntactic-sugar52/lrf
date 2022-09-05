@@ -1,14 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/widgets.dart';
+import 'package:lrf/data/data_store.dart';
+import 'package:lrf/helper/ui_helper.dart';
 import 'package:lrf/pages/accepted_page.dart';
 import 'package:lrf/pages/home_page.dart';
 import 'package:lrf/pages/profile_page.dart';
 import 'package:lrf/pages/request_page.dart';
+import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -18,69 +22,51 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  LocationPermission? permission;
-  bool? serviceEnabled;
-  // bottom tabs navigation
-  final tabs = [const HomePage(), const RequestPage(), const AcceptedPage(), const ProfilePage()];
-
+  ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
   PageController? _pageController;
 
+  ScrollController _hideBottomNavController = ScrollController();
+
+  bool _isVisible = false;
   @override
   void dispose() {
     _pageController?.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   //todo: add condition if location is denied
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _pageController = PageController(initialPage: 0, keepPage: true);
-    _determinePosition();
+
+    _isVisible = true;
+    _hideBottomNavController = ScrollController();
+    _hideBottomNavController.addListener(
+      () {
+        if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.reverse) {
+          if (_isVisible)
+            setState(() {
+              _isVisible = false;
+            });
+        }
+        if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.forward) {
+          if (!_isVisible)
+            setState(() {
+              _isVisible = true;
+            });
+        }
+      },
+    );
   }
 
   void closeApp() {
     Platform.isIOS ? exit(0) : SystemNavigator.pop();
-  }
+  } // bottom tabs navigation
 
-  /// Determine the current position of the device.
-  ///
-  /// When the location services are not enabled or permissions
-  /// are denied the `Future` will return an error.
-  Future<Position> _determinePosition() async {
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled!) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location services are disabled.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
+  final tabs = [HomePage(), const RequestPage(), AcceptedPage(), const ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
@@ -101,11 +87,11 @@ class _MainPageState extends State<MainPage> {
 
     return WillPopScope(
         onWillPop: _onBackPressed,
-        child: SafeArea(
-            child: Scaffold(
+        child: Scaffold(
           resizeToAvoidBottomInset: true,
           body: PageView(
             // disables page scroll
+
             physics: const ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
             controller: _pageController,
             onPageChanged: (index) {
@@ -115,9 +101,8 @@ class _MainPageState extends State<MainPage> {
             },
             children: tabs,
           ),
-          bottomNavigationBar: SizedBox(
-            // height: 80,
-            child: BottomNavigationBar(
+          bottomNavigationBar: Wrap(children: [
+            BottomNavigationBar(
                 backgroundColor: Colors.black45,
                 // backgroundColor: kAppBackgroundColor,
                 type: BottomNavigationBarType.fixed,
@@ -132,7 +117,7 @@ class _MainPageState extends State<MainPage> {
                 selectedFontSize: 12.0,
                 unselectedFontSize: 5.0,
                 unselectedItemColor: Colors.white54,
-                selectedItemColor: Colors.white,
+                selectedItemColor: Colors.white70,
                 items: [
                   BottomNavigationBarItem(
                     icon: const Icon(
@@ -153,8 +138,8 @@ class _MainPageState extends State<MainPage> {
                     icon: const Icon(Icons.person, size: 20).asGlass(),
                     label: 'Profile',
                   ),
-                ]),
-          ).asGlass(),
-        )));
+                ]).asGlass(),
+          ]),
+        ));
   }
 }
