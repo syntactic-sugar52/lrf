@@ -87,50 +87,53 @@ class _Card2State extends State<Card2> {
     return buildImg(
       Colors.transparent,
       //todo: dynamic height
-      250,
+      MediaQuery.of(context).size.height / 4,
       Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Text(
-              headline,
-              textAlign: TextAlign.start,
-              style: const TextStyle(color: Color(0xffF7EDDB), fontSize: 17, fontWeight: FontWeight.w600),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                headline,
+                // textAlign: TextAlign.start,
+                style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 17, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
-          Row(
-            children: [
-              Icon(
-                Icons.location_pin,
-                color: Color(0xff30E3CA),
-              ),
-              // todo: cut address dynamic
-              Expanded(
-                child: Text(
-                  getDistanceBetweenStartLocation.toString(),
-                  // startLoc.substring(0, 50),
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(color: Color(0xffF7EDDB), fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Icon(
-                Icons.location_pin,
-                color: Color(0xffFF9090),
-              ),
-              Expanded(
-                child: Text(
-                  getDistanceBetweenEndLocation.toString(),
-                  // endLoc.substring(0, 50),
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: Color(0xffF7EDDB), fontSize: 14, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.location_pin,
+          //       color: Color(0xff30E3CA),
+          //     ),
+          //     // todo: cut address dynamic
+          //     Expanded(
+          //       child: Text(
+          //         getDistanceBetweenStartLocation.toString(),
+          //         // startLoc.substring(0, 50),
+          //         textAlign: TextAlign.start,
+          //         style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 14, fontWeight: FontWeight.w600),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // Row(
+          //   children: [
+          //     Icon(
+          //       Icons.location_pin,
+          //       color: Color(0xffFF9090),
+          //     ),
+          //     Expanded(
+          //       child: Text(
+          //         getDistanceBetweenEndLocation.toString(),
+          //         // endLoc.substring(0, 50),
+          //         textAlign: TextAlign.start,
+          //         style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 14, fontWeight: FontWeight.w600),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
@@ -153,7 +156,7 @@ class _Card2State extends State<Card2> {
                 FaIcon(
                   FontAwesomeIcons.moneyBillTransfer,
                   // color: Colors.white,
-                  color: Colors.blueGrey.shade200,
+                  color: Colors.blueGrey.shade300,
                 ),
                 const SizedBox(
                   width: 5,
@@ -170,41 +173,14 @@ class _Card2State extends State<Card2> {
               height: 40,
               child: Card(
                 elevation: 4,
-                color: Colors.blueGrey.shade900,
-                child: Center(
+                color: Colors.blueGrey.shade800,
+                child: const Center(
                     child: Icon(
                   Icons.flag_outlined,
                   color: Colors.white70,
                 )),
-                // child: IconButton(
-                //   onPressed: () {},
-                //   icon: FaIcon(
-                //     FontAwesomeIcons.flag,
-                //     size: 14,
-                //     color: Colors.white70,
-                //   ),
-                // ),
               ),
             ),
-            // const SizedBox(
-            //   height: 5,
-            // ),
-            // Row(
-            //   children: [
-            //     FaIcon(
-            //       FontAwesomeIcons.clock,
-            //       color: Colors.blueGrey.shade200,
-            //     ),
-            //     const SizedBox(
-            //       width: 5,
-            //     ),
-            //     Text(
-            //       time,
-            //       style: TextStyle(color: Colors.blueGrey.shade100),
-            //       // style: Theme.of(context).textTheme.bodyMedium,
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),
@@ -310,8 +286,9 @@ class _Card2State extends State<Card2> {
               scrollOnExpand: true,
               child: Card(
                 elevation: 12,
+                color: Colors.blueGrey.shade900,
                 // color: Colors.black87,
-                color: Color(0xff393E46),
+                // color: Color(0xff393E46),
                 // color: const Color(0xff2D2C2C),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -334,7 +311,7 @@ class _Card2State extends State<Card2> {
                       height: 1,
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Builder(
                           builder: (context) {
@@ -352,6 +329,10 @@ class _Card2State extends State<Card2> {
                             );
                           },
                         ),
+                        const Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: const Text('Last_Resort', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700)),
+                        )
                       ],
                     ),
                   ],

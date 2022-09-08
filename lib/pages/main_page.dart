@@ -127,12 +127,12 @@ class _MainPageState extends State<MainPage> {
                     label: 'Home',
                   ),
                   BottomNavigationBarItem(
-                    icon: const Icon(Icons.add_alert, size: 20).asGlass(),
+                    icon: const Icon(Icons.view_list, size: 20).asGlass(),
                     label: 'Request',
                   ),
                   BottomNavigationBarItem(
-                    icon: const Icon(Icons.view_list, size: 20).asGlass(),
-                    label: 'Accepted',
+                    icon: const Icon(Icons.add_alert, size: 20).asGlass(),
+                    label: 'Notification',
                   ),
                   BottomNavigationBarItem(
                     icon: const Icon(Icons.person, size: 20).asGlass(),

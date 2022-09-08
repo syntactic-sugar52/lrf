@@ -14,6 +14,7 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 2,
@@ -21,19 +22,21 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            ListTile(
-              dense: true,
-              title: Text('Reply to request: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _instructionsController, maxLines: 25, maxLength: 820)),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.8, child: customButton(text: 'SEND', onPressed: () {}))
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 30,
+              ),
+              ListTile(
+                dense: true,
+                title: const Text('Reply to request: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
+                subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _instructionsController, maxLines: 22, maxLength: 800)),
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width * 0.8, child: customButton(text: 'SEND', onPressed: () {}))
+            ],
+          ),
         ),
       ),
     );

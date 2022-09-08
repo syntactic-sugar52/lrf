@@ -49,7 +49,11 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                     children: <Widget>[
                       const Text(
                         '6,354',
-                        style: TextStyle(fontSize: 35, fontWeight: FontWeight.w800, color: Colors.white70),
+                        style: TextStyle(
+                          fontSize: 35,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xfff3f3f3),
+                        ),
                       ),
                       Text(
                         ' Copper',
@@ -84,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                 top: -170,
                 child: CircleAvatar(
                   radius: 130,
-                  backgroundColor: Colors.blue.shade600,
+                  backgroundColor: Color(0xff42855B),
                 ),
               ),
               const Positioned(
@@ -100,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                 bottom: -170,
                 child: CircleAvatar(
                   radius: 130,
-                  backgroundColor: Colors.blue.shade600,
+                  backgroundColor: Color(0xff42855B),
                 ),
               ),
               Positioned(
@@ -108,7 +112,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                 bottom: -190,
                 child: CircleAvatar(
                   radius: 130,
-                  backgroundColor: Colors.blue.shade600,
+                  backgroundColor: Color(0xff42855B),
                 ),
               )
             ],
@@ -142,9 +146,9 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _icon(Icons.add, "Bank"),
-        _icon(Icons.phone, "something"),
-        _icon(Icons.payment, "something"),
-        _icon(Icons.code, "something"),
+        _icon(Icons.contact_mail, "Contact Us"),
+        _icon(Icons.payment, "Cash Out"),
+        _icon(Icons.exit_to_app_outlined, "Log Out"),
       ],
     );
   }
@@ -159,13 +163,18 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
             width: 80,
             margin: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
-                color: Color(0xffEEF2F5),
+                color: Color(0xffF1F1F1),
                 borderRadius: BorderRadius.all(Radius.circular(20)),
-                boxShadow: <BoxShadow>[BoxShadow(color: Color(0xfff3f3f3), offset: Offset(2, 2), blurRadius: 1)]),
+                boxShadow: <BoxShadow>[BoxShadow(color: Color(0xffF1F1F1), offset: Offset(2, 2), blurRadius: 1)]),
             child: Icon(icon),
           ),
         ),
-        Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xff76797e))),
+        Text(text,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xffF1F1F1),
+            )),
       ],
     );
   }
@@ -173,9 +182,9 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
   Widget _transactionList() {
     return Column(
       children: <Widget>[
-        _transection("Flight Ticket", "23 Feb 2020"),
-        _transection("Electricity Bill", "25 Feb 2020"),
-        _transection("Flight Ticket", "03 Mar 2020"),
+        _transection("Sent", "23 Feb 2020"),
+        _transection("Received", "25 Feb 2020"),
+        _transection("Sent", "03 Mar 2020"),
       ],
     );
   }
@@ -189,21 +198,24 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
           color: Colors.black,
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
-        child: const Icon(Icons.hd, color: Colors.white),
+        child: Icon(Icons.remove, color: Colors.red.shade600),
       ),
       contentPadding: const EdgeInsets.symmetric(),
-      title: const Text('totle', style: TextStyle(color: Colors.white)),
+      title: Text(text, style: const TextStyle(color: Color(0xffE8F9FD), fontWeight: FontWeight.w600)),
       subtitle: Text(time, style: const TextStyle(color: Colors.white)),
-      trailing: Container(
-          height: 30,
-          width: 60,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: Colors.green,
-            // color: LightColor.lightGrey,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: const Text('-20 MLR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green))),
+      trailing: Card(
+        color: Colors.transparent,
+        elevation: 8,
+        child: Container(
+            height: 30,
+            width: 80,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            child: const Text('20', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white))),
+      ),
     );
   }
 

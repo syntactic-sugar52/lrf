@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:lrf/helper/ui_helper.dart';
 
 import 'package:lrf/pages/widgets/home/card_widget.dart';
@@ -16,13 +18,37 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   List<String> docId = [];
-  final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
-  bool _locationServiceEnabled = false;
-  LocationPermission? _permissionStatus;
+  Location location = Location();
   LocationPermission? permission;
   bool? serviceEnabled;
+  Position? userPosition;
+
 //todo: change to service enabled instead
   Position? _currentPosition;
+
+  final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
+  LocationData? _locationData;
+  bool _locationServiceEnabled = false;
+  PermissionStatus? _permissionGranted;
+  LocationPermission? _permissionStatus;
+  final ScrollController _scrollController = ScrollController();
+  bool _serviceEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _determinePosition(context);
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  Future<void> getUsers() async {
+    await FirebaseFirestore.instance.collection('request').get().then((snapshot) => snapshot.docs.forEach((element) {
+          docId.add(element.reference.id);
+        }));
+  }
+
 // DataStore? _dataStore;
   Future<void> _determinePosition(BuildContext context) async {
     // _dataStore = Provider.of(context, listen: false);
@@ -58,8 +84,10 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
       showToast('Warning: Location service is disabled. Please enable it to navigate to your location.');
       return Future.error('Location service is disabled');
     }
-    // when permission granted and location service is enabled - get user location and show on map
+
+    // // when permission granted and location service is enabled - get user location and show on map
     _currentPosition = await _geolocator.getCurrentPosition();
+    // _locationData = await location.getLocation();
     if (_currentPosition != null) {
       setState(() {
         userPosition = _currentPosition;
@@ -69,23 +97,6 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
     }
   }
 
-  Position? userPosition;
-  @override
-  void initState() {
-    super.initState();
-    _determinePosition(context);
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-
-  Future<void> getUsers() async {
-    await FirebaseFirestore.instance.collection('request').get().then((snapshot) => snapshot.docs.forEach((element) {
-          docId.add(element.reference.id);
-        }));
-  }
-
-  final ScrollController _scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -102,7 +113,6 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               future: getUsers(),
               builder: (context, snapshot) {
                 return ListView.builder(
-                  // controller: _scrollController,
                   itemBuilder: ((context, index) {
                     return Card2(
                       documentId: docId[index],
@@ -115,7 +125,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               },
             )
           : const Center(
-              child: CircularProgressIndicator(color: Colors.black),
+              child: CircularProgressIndicator(color: Colors.green),
             ),
     ));
   }

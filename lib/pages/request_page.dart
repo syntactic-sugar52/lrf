@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/data/data_store.dart';
 import 'package:lrf/pages/general_widgets.dart';
 import 'package:lrf/pages/widgets/request/general_widgets.dart';
@@ -157,53 +158,23 @@ class _RequestPageState extends State<RequestPage> {
               subtitle:
                   Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _headlineController, maxLines: 2, maxLength: 120)),
             ),
-            ListTile(
-              dense: true,
-              title: const Text('Location :', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: customButton(
-                  text: locationData.isNotEmpty ? 'Select Location' : 'Location Saved',
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/pickLocation').then((value) {
-                      setState(() {
-                        locationData = value as Map<dynamic, dynamic>;
-                      });
-                    });
-                  },
-                ),
-              ),
-            ),
             // ListTile(
-            //     dense: true,
-            //     title: const Text('Time to accomplish request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-            //     subtitle: Padding(
-            //       padding: const EdgeInsets.all(8.0),
-            //       child: customButton(
-            //         text: // change text to show time picked when user picks a time
-            //             timePicked ? newTimePicked : 'Add Time',
-            //         onPressed: () async {
-            //           final TimeOfDay? newTime = await showTimePicker(
-            //             context: context,
-            //             initialEntryMode: TimePickerEntryMode.input,
-            //             initialTime: TimeOfDay.now(),
-            //           );
-
-            //           if (newTime == null) {
-            //             // don't change when cancel is pressed
-            //             setState(() {
-            //               timePicked = false;
-            //             });
-            //           } else {
-            //             setState(() {
-            //               timePicked = true;
-            //               // when user picks a time , show time picked
-            //               newTimePicked = '${newTime.hour}:${newTime.minute} ${newTime.period == DayPeriod.am ? 'am' : 'pm'}';
-            //             });
-            //           }
-            //         },
-            //       ),
-            //     )),
+            //   dense: true,
+            //   title: const Text('Location :', style: TextStyle(fontSize: 16, color: Colors.white)),
+            //   subtitle: Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: customButton(
+            //       text: locationData.isNotEmpty ? 'Select Location' : 'Location Saved',
+            //       onPressed: () {
+            //         Navigator.pushNamed(context, '/pickLocation').then((value) {
+            //           setState(() {
+            //             locationData = value as Map<dynamic, dynamic>;
+            //           });
+            //         });
+            //       },
+            //     ),
+            //   ),
+            // ),
             ListTile(
                 dense: true,
                 title: const Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white)),

@@ -15,7 +15,7 @@ class _SearchInputState extends State<SearchInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 7, right: 7, top: 30, bottom: 5),
+      padding: const EdgeInsets.only(left: 7, right: 7, top: 30, bottom: 5),
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
           offset: const Offset(12, 26),
@@ -25,7 +25,7 @@ class _SearchInputState extends State<SearchInput> {
         ),
       ]),
       child: TextField(
-        cursorColor: Colors.green,
+        cursorColor: Colors.grey,
         controller: widget.textController,
         onChanged: widget.onChanged,
         decoration: InputDecoration(

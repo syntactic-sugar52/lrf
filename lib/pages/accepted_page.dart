@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/pages/widgets/accepted/search_input.dart';
 
 class AcceptedPage extends StatefulWidget {
@@ -44,10 +45,11 @@ class _AcceptedPageState extends State<AcceptedPage> {
 
   final GlobalKey expansionTileKey = GlobalKey();
   List<Data>? newData;
+  bool showRequest = false;
 
   bool _isLoading = false;
   final _searchController = TextEditingController();
-  bool showRequest = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -72,13 +74,13 @@ class _AcceptedPageState extends State<AcceptedPage> {
         newData = List.from(data!);
       });
     }
-    ;
   }
 
   SizedBox sizedBox(double height, double width) => SizedBox(
         height: height,
         width: width,
       );
+
 //todo: add notifications so they can choose which user will they accept
   _buildExpandableContent(Data data) {
     List<Widget> columnContent = [];
@@ -90,10 +92,10 @@ class _AcceptedPageState extends State<AcceptedPage> {
         // leading: CircleAvatar(
         //   radius: 16,
         // ),
-        title: const Text(
+        title: Text(
           'User name',
           style: TextStyle(
-            color: Colors.white70,
+            color: Colors.blueGrey.shade100,
             fontWeight: FontWeight.bold,
             fontSize: 15.0,
           ),
@@ -119,12 +121,14 @@ class _AcceptedPageState extends State<AcceptedPage> {
               child: Container(
                 padding: const EdgeInsets.all(18.0),
                 width: double.infinity,
-                color: Theme.of(context).cardColor,
+                color: Colors.black54,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                        'Lorem ipsum dolor sit amet. Et placeat iste ut nihil error et temporibus totam ut doloribus autem ea quos sint a delectus obcaecati et quos adipisci. Ab sapiente voluptatem qui tempora perferendis et officiis autem! Rem beatae impedit vel quia sunt et adipisci quasi.Hic voluptates nisi nam perferendis corporis ut tenetur voluptatem ex perspiciatis veniam eum placeat recusandae in excepturi delectus ut ullam dolorum. Aut sunt iure aut eaque amet est ratione galisum. Et repellat amet et possimus quia in fugiat suscipit rem explicabo voluptas?Sit minima perspiciatis aut numquam iusto et tenetur dolor aut dolore aliquid eos internos optio commodi dolore est maxime sint? Et quia possimus quo odit similique est quia vitae ex nostrum itaque. Est amet vitae quo libero eligendi libero magni id accusamus quia. Ex ducimus quis ea fugit voluptas et consequuntur sint.'),
+                    Text(
+                      'Lorem ipsum dolor sit amet. Et placeat iste ut nihil error et temporibus totam ut doloribus autem ea quos sint a delectus obcaecati et quos adipisci. Ab sapiente voluptatem qui tempora perferendis et officiis autem! Rem beatae impedit vel quia sunt et adipisci quasi.Hic voluptates nisi nam perferendis corporis ut tenetur voluptatem ex perspiciatis veniam eum placeat recusandae in excepturi delectus ut ullam dolorum. Aut sunt iure aut eaque amet est ratione galisum. Et repellat amet et possimus quia in fugiat suscipit rem explicabo voluptas?Sit minima perspiciatis aut numquam iusto et tenetur dolor aut dolore aliquid eos internos optio commodi dolore est maxime sint? Et quia possimus quo odit similique est quia vitae ex nostrum itaque. Est amet vitae quo libero eligendi libero magni id accusamus quia. Ex ducimus quis ea fugit voluptas et consequuntur sint.',
+                      style: TextStyle(letterSpacing: .5, fontSize: 16, fontWeight: FontWeight.w500, color: Colors.blueGrey.shade200),
+                    ),
                     const SizedBox(
                       height: 20,
                     ),
@@ -208,6 +212,15 @@ class _AcceptedPageState extends State<AcceptedPage> {
             const SizedBox(
               height: 30,
             ),
+            // todo: add chat if accepted
+            // Row(
+            //   children: [
+            //     Icon(
+            //       Icons.telegram,
+            //       color: Colors.white,
+            //     )
+            //   ],
+            // ),
             SearchInput(
               textController: _searchController,
               hintText: 'Search Request',
@@ -270,16 +283,10 @@ class _AcceptedPageState extends State<AcceptedPage> {
                                   iconColor: Colors.white70,
                                   title: Row(
                                     children: [
-                                      // placeholder for img data
-
-                                      // Icon(Icons.abc_outlined),
-                                      // SizedBox(
-                                      //   height: 5,
-                                      // ),
                                       Text(
                                         e.title,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
+                                        style: TextStyle(
+                                          color: Colors.blueGrey.shade100,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15.0,
                                         ),
