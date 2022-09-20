@@ -1,10 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:lrf/data/data_store.dart';
-import 'package:lrf/pages/general_widgets.dart';
+
 import 'package:lrf/pages/widgets/request/general_widgets.dart';
 import 'package:lrf/pages/widgets/request/slider_widget.dart';
+
+import 'package:lrf/services/database.dart';
+import 'package:lrf/utils/utils.dart';
 
 class RequestPage extends StatefulWidget {
   const RequestPage({Key? key}) : super(key: key);
@@ -14,192 +15,129 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
-  String endLat = '';
-  String endLocationValue = '';
-  String endLong = '';
-  var locationData = {};
-  String newTimePicked = '';
   String price = '';
-  String startLat = '';
-  String startLocationValue = '';
-  String startLong = '';
-//time picker
-  bool timePicked = false;
+  // Uint8List? _file;
+  bool isLoading = false;
 
-  final TextEditingController _headlineController = TextEditingController();
 // text controllers for textfield
-  final TextEditingController _instructionsController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
 // scrollbar
   final ScrollController _scrollController = ScrollController();
-
+  final user = FirebaseAuth.instance.currentUser!;
+  String userId = '';
   @override
   void dispose() {
     super.dispose();
-    _headlineController.dispose();
-    _instructionsController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
     _scrollController.dispose();
   }
 
-  String idGenerator() {
-    final now = DateTime.now();
-    return now.microsecondsSinceEpoch.toString();
-  }
-
-  Future<void> postRequest() async {
-    // todo: make sure copper has value
+  void postRequest(String uid, String username, String profImage) async {
+    setState(() {
+      isLoading = true;
+    });
+    // start the loading
     try {
-      if (_headlineController.text.isNotEmpty && _instructionsController.text.isNotEmpty && newTimePicked != '' && locationData.isNotEmpty) {
-        locationData.forEach((key, value) {
-          if (key.toString().contains('startLat')) {
-            setState(() {
-              startLat = value;
-            });
-          } else if (key.toString().contains('startLong')) {
-            setState(() {
-              startLong = value;
-            });
-          } else if (key.toString().contains('endLat')) {
-            setState(() {
-              endLat = value;
-            });
-          } else if (key.toString().contains('endLong')) {
-            setState(() {
-              endLong = value;
-            });
-          } else if (key.toString().contains('startLocation')) {
-            setState(() {
-              startLocationValue = value;
-            });
-          } else {
-            setState(() {
-              endLocationValue = value;
-            });
-          }
-        });
-        await DataStore().addRequest(
-            id: idGenerator(),
-            headline: _headlineController.text.trim(),
-            instructions: _instructionsController.text.trim(),
-            time: newTimePicked.trim(),
-            startLocation: startLocationValue.trim(),
-            endLocation: endLocationValue.trim(),
-            price: price,
-            startLatitude: startLat.trim(),
-            startLongitude: startLong.trim(),
-            endLatitude: endLat.trim(),
-            endLongitude: endLong.trim());
+      // upload to storage and db
+      String res = await Database().uploadPost(_descriptionController.text.trim(), uid, username, profImage, _titleController.text.trim(), price);
+      if (res == "success") {
         setState(() {
-          locationData.clear();
-          price = '';
-          newTimePicked = '';
+          isLoading = false;
         });
-        // if (success) {
-        //   setState(() {
-        //     locationData = {};
-        //     price = '';
-        //     newTimePicked = '';
-        //   });
-        // } else {
-        //   //todo: show error
-        // }
+        if (mounted) {
+          showSnackBar(
+            context,
+            'Posted!',
+          );
+          Navigator.pushNamed(context, '/main');
+        }
+      } else {
+        if (mounted) {
+          showSnackBar(context, res);
+        }
       }
-    } on PlatformException catch (e) {
-      Future.error(e);
-      rethrow;
+    } catch (err) {
+      setState(() {
+        isLoading = false;
+      });
+      showSnackBar(
+        context,
+        err.toString(),
+      );
     }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    locationData.clear();
   }
 
 //todo  : add images
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.all(8),
-      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SafeArea(
-        child: Scrollbar(
-          thumbVisibility: true,
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(8),
+        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SafeArea(
+            child: Scrollbar(
+          thumbVisibility: false,
           controller: _scrollController,
           interactive: true,
-          child: ListView(shrinkWrap: true, scrollDirection: Axis.vertical, controller: _scrollController, children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+          child: ListView(
+              physics: const ClampingScrollPhysics(),
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              controller: _scrollController,
               children: [
-                TextButton(
-                    onPressed: () {
-                      postRequest().whenComplete(() {
-                        Navigator.pushNamed(context, '/main').whenComplete(() {
-                          setState(() {
-                            locationData.clear();
-                            price = '';
-                            newTimePicked = '';
-                          });
-                        });
-                      });
-                    },
-                    child: const Text(
-                      'POST',
-                      style: TextStyle(color: Color(0xffF1F1F1), fontWeight: FontWeight.w800),
+                isLoading
+                    ? const LinearProgressIndicator(
+                        color: Colors.green,
+                      )
+                    : const Padding(padding: EdgeInsets.only(top: 0.0)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () async {
+                          final userDetails = await Database().getUserDetails();
+                          // final user = FirebaseAuth.instance.currentUser!;
+                          postRequest(userDetails['id'], userDetails['displayName'], userDetails['photoUrl']);
+                        },
+                        child: const Text(
+                          'POST',
+                          style: TextStyle(color: Color(0xffF1F1F1), fontWeight: FontWeight.w800),
+                        )),
+                  ],
+                ),
+                ListTile(
+                  dense: true,
+                  title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  subtitle:
+                      Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _titleController, maxLines: 2, maxLength: 120)),
+                ),
+                ListTile(
+                    dense: true,
+                    title: const Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SliderWidget(
+                          min: 0,
+                          max: 500,
+                          divisions: 25,
+                          onChange: (value) {
+                            setState(() {
+                              price = value.toString();
+                            });
+                          }),
                     )),
-              ],
-            ),
-            ListTile(
-              dense: true,
-              title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle:
-                  Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _headlineController, maxLines: 2, maxLength: 120)),
-            ),
-            // ListTile(
-            //   dense: true,
-            //   title: const Text('Location :', style: TextStyle(fontSize: 16, color: Colors.white)),
-            //   subtitle: Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: customButton(
-            //       text: locationData.isNotEmpty ? 'Select Location' : 'Location Saved',
-            //       onPressed: () {
-            //         Navigator.pushNamed(context, '/pickLocation').then((value) {
-            //           setState(() {
-            //             locationData = value as Map<dynamic, dynamic>;
-            //           });
-            //         });
-            //       },
-            //     ),
-            //   ),
-            // ),
-            ListTile(
-                dense: true,
-                title: const Text('Price for the request : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-                subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SliderWidget(
-                      min: 0,
-                      max: 500,
-                      divisions: 25,
-                      onChange: (value) {
-                        setState(() {
-                          price = value.toString();
-                        });
-                      }),
-                )),
-            ListTile(
-              dense: true,
-              title: Text('Description : ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _instructionsController, maxLines: 25, maxLength: 820)),
-            ),
-            const SizedBox(height: 40),
-          ]),
-        ),
-      ),
-    );
+                ListTile(
+                  dense: true,
+                  title: const Text('Description : ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
+                  subtitle: Padding(
+                      padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _descriptionController, maxLines: 25, maxLength: 820)),
+                ),
+                const SizedBox(height: 40),
+              ]),
+        )));
   }
 }

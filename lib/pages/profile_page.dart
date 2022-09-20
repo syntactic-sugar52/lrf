@@ -1,9 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lrf/constants/constants.dart';
+import 'package:lrf/provider/google_sign_in.dart';
+import 'package:lrf/utils/utils.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  // final String uid;
+  const ProfilePage({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -12,17 +19,37 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  final Stream<DocumentSnapshot> _usersStream =
-      FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser?.uid).snapshots();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+  final user = FirebaseAuth.instance.currentUser!;
+  var userData = {};
+  int postLen = 0;
+  bool isLoading = false;
+  int vouch = 0;
 
   @override
   bool get wantKeepAlive => true;
+  getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      var userSnap = await FirebaseFirestore.instance.collection('users').doc().get();
+      // get post lENGTH
+      var postSnap = await FirebaseFirestore.instance.collection('posts').where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid).get();
+      vouch = userSnap.data()!['vouch'].length;
+      postLen = postSnap.docs.length;
+      userData = userSnap.data()!;
+
+      setState(() {});
+    } catch (e) {
+      showSnackBar(
+        context,
+        e.toString(),
+      );
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   Widget balanceCard(context) {
     return ClipRRect(
@@ -83,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                       ))
                 ],
               ),
-              Positioned(
+              const Positioned(
                 left: -170,
                 top: -170,
                 child: CircleAvatar(
@@ -99,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                   backgroundColor: Colors.transparent,
                 ),
               ),
-              Positioned(
+              const Positioned(
                 right: -170,
                 bottom: -170,
                 child: CircleAvatar(
@@ -107,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                   backgroundColor: Color(0xff42855B),
                 ),
               ),
-              Positioned(
+              const Positioned(
                 right: -160,
                 bottom: -190,
                 child: CircleAvatar(
@@ -120,16 +147,15 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
         ));
   }
 
-  Widget _appBar(DocumentSnapshot snapshot) {
-    Object? data = snapshot.data();
+  Widget _appBar() {
     return Row(
       children: const <Widget>[
         CircleAvatar(
           backgroundColor: Colors.grey,
         ),
         SizedBox(width: 15),
-        // TitleText(text: "Hello,"),
-        // Text(snapshot['name'], style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
+        const Text('Hello, '),
+        // Text(, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white70)),
         Expanded(
           child: SizedBox(),
         ),
@@ -148,7 +174,13 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
         _icon(Icons.add, "Bank"),
         _icon(Icons.contact_mail, "Contact Us"),
         _icon(Icons.payment, "Cash Out"),
-        _icon(Icons.exit_to_app_outlined, "Log Out"),
+        InkWell(
+            onTap: () async {
+              final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
+              await provider.googleLogOut();
+              Navigator.pushReplacementNamed(context, '/');
+            },
+            child: _icon(Icons.exit_to_app_outlined, "Log Out")),
       ],
     );
   }
@@ -156,17 +188,17 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
   Widget _icon(IconData icon, String text) {
     return Column(
       children: <Widget>[
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            height: 80,
-            width: 80,
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            decoration: const BoxDecoration(
-                color: Color(0xffF1F1F1),
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-                boxShadow: <BoxShadow>[BoxShadow(color: Color(0xffF1F1F1), offset: Offset(2, 2), blurRadius: 1)]),
-            child: Icon(icon),
+        Container(
+          height: 80,
+          width: 80,
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          decoration: const BoxDecoration(
+              color: Color(0xffF1F1F1),
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+              boxShadow: <BoxShadow>[BoxShadow(color: Color(0xffF1F1F1), offset: Offset(2, 2), blurRadius: 1)]),
+          child: Icon(
+            icon,
+            color: kAppBackgroundColor,
           ),
         ),
         Text(text,
@@ -222,57 +254,60 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StreamBuilder<DocumentSnapshot>(
-        stream: _usersStream,
-        builder: ((context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            // dynamic data = snapshot.data;
-            // print(data['name']);
-            return SafeArea(
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SizedBox(height: 35),
-                      // _appBar(snapshot.data!),
-
-                      const SizedBox(
-                        height: 20,
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const SizedBox(height: 35),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundImage: NetworkImage(user.photoURL!),
                       ),
-
                       const SizedBox(
-                        height: 20,
+                        width: 5,
                       ),
-                      balanceCard(context),
-                      const SizedBox(
-                        height: 50,
+                      Text(
+                        user.displayName!,
+                        style: const TextStyle(color: Colors.white, fontSize: 18),
                       ),
-                      // TitleText(
-                      //   text: "Operations",
-                      // ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      _operationsWidget(),
-                      const SizedBox(
-                        height: 40,
-                      ),
-                      // TitleText(
-                      //   text: "Transactions",
-                      // ),
-                      _transactionList(),
                     ],
                   ),
-                ),
+                  const Text(
+                    'rating',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  )
+                ],
               ),
-            );
-          }
-        }));
+              const SizedBox(
+                height: 20,
+              ),
+              balanceCard(context),
+              const SizedBox(
+                height: 10,
+              ),
+              _operationsWidget(),
+              const SizedBox(
+                height: 40,
+              ),
+              const Text('Transactions: ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  )),
+              _transactionList(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

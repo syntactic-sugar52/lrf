@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "autofocus",
+        "dotenv",
         "firestore",
         "Geolocator",
         "transection"

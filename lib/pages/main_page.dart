@@ -5,13 +5,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:glass/glass.dart';
+import 'package:lrf/constants/constants.dart';
 import 'package:lrf/constants/widgets.dart';
 import 'package:lrf/data/data_store.dart';
 import 'package:lrf/helper/ui_helper.dart';
 import 'package:lrf/pages/accepted_page.dart';
-import 'package:lrf/pages/home_page.dart';
+import 'package:lrf/pages/feed_page.dart';
 import 'package:lrf/pages/profile_page.dart';
 import 'package:lrf/pages/request_page.dart';
+import 'package:lrf/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
@@ -43,23 +45,30 @@ class _MainPageState extends State<MainPage> {
     _pageController = PageController(initialPage: 0, keepPage: true);
 
     _isVisible = true;
-    _hideBottomNavController = ScrollController();
-    _hideBottomNavController.addListener(
-      () {
-        if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.reverse) {
-          if (_isVisible)
-            setState(() {
-              _isVisible = false;
-            });
-        }
-        if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.forward) {
-          if (!_isVisible)
-            setState(() {
-              _isVisible = true;
-            });
-        }
-      },
-    );
+
+    // _hideBottomNavController = ScrollController();
+    // _hideBottomNavController.addListener(
+    //   () {
+    //     if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.reverse) {
+    //       if (_isVisible)
+    //         setState(() {
+    //           _isVisible = false;
+    //         });
+    //     }
+    //     if (_hideBottomNavController.position.userScrollDirection == ScrollDirection.forward) {
+    //       if (!_isVisible)
+    //         setState(() {
+    //           _isVisible = true;
+    //         });
+    //     }
+    //   },
+    // );
+    addData();
+  }
+
+  Future addData() async {
+    UserProvider _userProvider = Provider.of<UserProvider>(context, listen: false);
+    await _userProvider.refreshUser();
   }
 
   void closeApp() {
@@ -91,7 +100,6 @@ class _MainPageState extends State<MainPage> {
           resizeToAvoidBottomInset: true,
           body: PageView(
             // disables page scroll
-
             physics: const ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
             controller: _pageController,
             onPageChanged: (index) {
@@ -103,8 +111,7 @@ class _MainPageState extends State<MainPage> {
           ),
           bottomNavigationBar: Wrap(children: [
             BottomNavigationBar(
-                backgroundColor: Colors.black45,
-                // backgroundColor: kAppBackgroundColor,
+                backgroundColor: mobileBackgroundColor,
                 type: BottomNavigationBarType.fixed,
                 currentIndex: _currentIndex,
                 onTap: (index) {
@@ -117,7 +124,7 @@ class _MainPageState extends State<MainPage> {
                 selectedFontSize: 12.0,
                 unselectedFontSize: 5.0,
                 unselectedItemColor: Colors.white54,
-                selectedItemColor: Colors.white70,
+                selectedItemColor: Colors.white,
                 items: [
                   BottomNavigationBarItem(
                     icon: const Icon(
@@ -128,7 +135,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                   BottomNavigationBarItem(
                     icon: const Icon(Icons.view_list, size: 20).asGlass(),
-                    label: 'Request',
+                    label: 'Post',
                   ),
                   BottomNavigationBarItem(
                     icon: const Icon(Icons.add_alert, size: 20).asGlass(),
