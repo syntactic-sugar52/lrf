@@ -30,7 +30,6 @@ dependencies:
   firebase_core: ^1.10.6
   firebase_dynamic_links: ^4.3.5 
   cloud_firestore: ^3.4.5
-  geolocator: ^9.0.1
   open_location_picker: ^0.2.0
   location: ^4.4.0 
   slide_to_confirm: ^1.1.0 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:lrf/constants/widgets.dart';
 
 void showToast(String text) {
@@ -27,7 +27,7 @@ void showLocationPermissionRequired(BuildContext context) {
     },
     textButton2: 'GO TO SETTINGS',
     onPressedButton2: () async {
-      Geolocator.openLocationSettings();
+      // Geolocator.openLocationSettings();
       Navigator.of(context).pop();
     },
   );

@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+
 import 'package:flutter/services.dart';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:glass/glass.dart';
+import 'package:location/location.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/constants/widgets.dart';
-import 'package:lrf/data/data_store.dart';
-import 'package:lrf/helper/ui_helper.dart';
+
 import 'package:lrf/pages/accepted_page.dart';
 import 'package:lrf/pages/feed_page.dart';
 import 'package:lrf/pages/profile_page.dart';
@@ -69,6 +69,30 @@ class _MainPageState extends State<MainPage> {
   Future addData() async {
     UserProvider _userProvider = Provider.of<UserProvider>(context, listen: false);
     await _userProvider.refreshUser();
+  }
+
+  bool? _serviceEnabled;
+  PermissionStatus? _permissionGranted;
+  LocationData? _locationData;
+  Future getUserLocation() async {
+    Location location = Location();
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled!) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled!) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+    _locationData = await location.getLocation();
   }
 
   void closeApp() {

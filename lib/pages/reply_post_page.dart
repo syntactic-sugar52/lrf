@@ -92,7 +92,7 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
         elevation: 0,
-        title: const Text('Reply to Message Request'),
+        title: const Text('Direct Message'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -104,7 +104,7 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
               ),
               ListTile(
                 dense: true,
-                title: const Text('Message: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
+                title: const Text('Reply: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
                 subtitle:
                     Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _replyController, maxLines: 22, maxLength: 800)),
               ),

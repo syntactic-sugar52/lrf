@@ -171,9 +171,9 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        _icon(Icons.add, "Bank"),
-        _icon(Icons.contact_mail, "Contact Us"),
-        _icon(Icons.payment, "Cash Out"),
+        _icon(Icons.payment, "Bank"),
+        _icon(Icons.history, "History"),
+        _icon(Icons.edit, "Edit"),
         InkWell(
             onTap: () async {
               final provider = Provider.of<GoogleSignInProvider>(context, listen: false);

@@ -8,15 +8,15 @@ class UserModel {
   final String createdAt;
 // final String location;
   final String rating;
-
-  UserModel({
-    required this.uid,
-    required this.email,
-    required this.name,
-    required this.photoURL,
-    required this.createdAt,
-    required this.rating,
-  });
+  final String phoneNumber;
+  UserModel(
+      {required this.uid,
+      required this.email,
+      required this.name,
+      required this.photoURL,
+      required this.createdAt,
+      required this.rating,
+      required this.phoneNumber});
 
   static UserModel fromSnap(DocumentSnapshot snap) {
     var snapshot = snap.data() as Map<String, dynamic>;
@@ -25,10 +25,12 @@ class UserModel {
         name: snapshot["displayName"],
         uid: snapshot["id"],
         email: snapshot["email"],
+        phoneNumber: snapshot["phoneNumber"],
         photoURL: snapshot["photoUrl"],
         createdAt: snapshot["createdAt"],
         rating: snapshot["rating"]);
   }
 
-  Map<String, dynamic> toJson() => {"name": name, "uid": uid, "email": email, "photoUrl": photoURL, "rating": rating, "createdAt": createdAt};
+  Map<String, dynamic> toJson() =>
+      {"name": name, "uid": uid, "email": email, "photoUrl": photoURL, "rating": rating, "createdAt": createdAt, "phoneNumber": phoneNumber};
 }

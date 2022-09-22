@@ -25,11 +25,12 @@ class GoogleSignInProvider extends ChangeNotifier {
           name: user.displayName!,
           photoURL: user.photoUrl!,
           createdAt: DateTime.now().toString(),
+          phoneNumber: '',
           rating: '');
       // adding user in our database
-      // await _firestore.collection("users").doc(userCredential.user!.uid).set(userModel.toJson());
+      await _firestore.collection("users").doc(userCredential.user!.uid).set(userModel.toJson());
       // res = "success";
-      await Database().createUser(user.displayName!, user.email, userCredential.user!.uid, user.photoUrl!);
+      // await Database().createUser(user.displayName!, user.email, userCredential.user!.uid, user.photoUrl!);
     } catch (e) {
       Future.error(e);
     }

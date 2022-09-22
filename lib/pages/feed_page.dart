@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+
 import 'package:location/location.dart';
 import 'package:lrf/helper/ui_helper.dart';
 
@@ -19,9 +19,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   List<String> docId = [];
   Location location = Location();
-  LocationPermission? permission;
-  bool? serviceEnabled;
-  Position? userPosition;
 
 //todo: change to service enabled instead
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lrf/pages/chat_page.dart';
 
 class CommentCard extends StatelessWidget {
   final snap;
@@ -11,56 +12,62 @@ class CommentCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(
-              snap.data()['profilePic'],
-            ),
-            radius: 18,
-          ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  RichText(
-                    text: TextSpan(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat.yMMMd().format(
+                    snap.data()['datePublished'].toDate(),
+                  ),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Divider(
+                  color: Colors.green,
+                ),
+                ListTile(
+                    tileColor: Colors.blueGrey.shade900,
+                    title: Row(
                       children: [
-                        TextSpan(
-                            text: snap.data()['name'],
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            snap.data()['profilePic'],
+                          ),
+                          radius: 14,
+                        ),
+                        const SizedBox(
+                          width: 4,
+                        ),
+                        Text(snap.data()['name'],
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             )),
-                        TextSpan(
-                          text: ' ${snap.data()['text']}',
-                        ),
                       ],
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      DateFormat.yMMMd().format(
-                        snap.data()['datePublished'].toDate(),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    subtitle: Text(
+                      ' ${snap.data()['text']}',
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  )
-                ],
-              ),
+                    trailing: IconButton(
+                        onPressed: () {
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => ChatPage(
+                          //               snap: snap.data(),
+                          //             )));
+                        },
+                        icon: const Icon(
+                          Icons.arrow_circle_right_outlined,
+                          color: Colors.lightGreenAccent,
+                        ))),
+              ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            child: const Icon(
-              Icons.favorite,
-              size: 16,
-            ),
-          )
         ],
       ),
     );

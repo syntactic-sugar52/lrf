@@ -1,8 +1,10 @@
 import 'package:expandable/expandable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/pages/chat_page.dart';
 import 'package:lrf/pages/reply_post_page.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
@@ -18,13 +20,13 @@ class Card2 extends StatefulWidget {
 }
 
 class _Card2State extends State<Card2> {
-  String currentUserId = '';
+  // String currentUserId = '';
   bool dangerTapped = false;
   dynamic userDetails;
 
   @override
   void initState() {
-    getUserData();
+    // getUserData();
 
     super.initState();
   }
@@ -37,7 +39,6 @@ class _Card2State extends State<Card2> {
     return SizedBox(
         height: height,
         width: double.infinity,
-        // width: MediaQuery.of(context).size.width,
         child: Container(
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
@@ -53,7 +54,6 @@ class _Card2State extends State<Card2> {
       Padding(
         padding: const EdgeInsets.all(8),
         child: Row(
-          // crossAxisAlignment: CrossAxisAlignment.,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Row(
@@ -92,7 +92,7 @@ class _Card2State extends State<Card2> {
     return buildImg(
       Colors.transparent,
       //todo: dynamic height
-      MediaQuery.of(context).size.height / 4,
+      MediaQuery.of(context).size.height / 6,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -147,6 +147,7 @@ class _Card2State extends State<Card2> {
     return Container();
   }
 
+  final user = FirebaseAuth.instance.currentUser!;
   buildExpanded1() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Padding(
@@ -174,13 +175,13 @@ class _Card2State extends State<Card2> {
             ),
             // const Text('text'),
             DangerAnimation(
-              isAnimating: widget.snap['danger'].contains(currentUserId),
+              isAnimating: widget.snap['danger'].contains(user.uid),
               smallLike: true,
               child: SizedBox(
                 width: 50,
                 height: 40,
                 child: IconButton(
-                  icon: widget.snap['danger'].contains(currentUserId)
+                  icon: widget.snap['danger'].contains(user.uid)
                       ? const Icon(
                           Icons.warning,
                           color: Colors.red,
@@ -189,7 +190,7 @@ class _Card2State extends State<Card2> {
                           Icons.warning,
                           color: Colors.white70,
                         ),
-                  onPressed: () => Database().flagPost(widget.snap['postId'].toString(), currentUserId, widget.snap['danger']),
+                  onPressed: () => Database().flagPost(widget.snap['postId'].toString(), user.uid, widget.snap['danger']),
                 ),
               ),
             ),
@@ -246,7 +247,6 @@ class _Card2State extends State<Card2> {
           ),
           Text(
             widget.snap['description'].toString(),
-            // instructions,
             style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
             softWrap: true,
           ),
@@ -262,7 +262,7 @@ class _Card2State extends State<Card2> {
                 backgroundColor: kAppBackgroundColor,
                 // backgroundColor: const Color(0xff1B1B1B),
                 textStyle: const TextStyle(color: kWhite),
-                text: 'Slide to Reply',
+                text: 'Slide to Inquire',
                 onConfirmation: () => confirmed(context),
               )
             ],
@@ -275,14 +275,6 @@ class _Card2State extends State<Card2> {
     ).asGlass();
   }
 
-  Future getUserData() async {
-    userDetails = await Database().getUserDetails();
-
-    setState(() {
-      currentUserId = userDetails['id'];
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ExpandableNotifier(
@@ -292,7 +284,7 @@ class _Card2State extends State<Card2> {
         scrollOnCollapse: true,
         scrollOnExpand: true,
         child: Card(
-          elevation: 12,
+          elevation: 8,
           color: Colors.blueGrey.shade900,
           // color: Colors.black87,
           // color: Color(0xff393E46),

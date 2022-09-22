@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
           // scaffoldBackgroundColor: kAppBackgroundColor,
           scaffoldBackgroundColor: mobileBackgroundColor,
         ),
-        initialRoute: '/main',
+        initialRoute: '/login',
         routes: {
           // '/': (_) => const SplashPage(),
           '/login': (_) => const LoginPage(),

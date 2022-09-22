@@ -50,7 +50,6 @@ class Database {
   }
 
   Future<String> uploadPost(String description, String uid, String username, String profImage, String title, String price) async {
-    // asking uid here because we dont want to make extra calls to firebase auth when we can just get from our state management
     String res = "Some error occurred";
     try {
       // String photoUrl = await StorageMethods().uploadImageToStorage('posts', file, true);

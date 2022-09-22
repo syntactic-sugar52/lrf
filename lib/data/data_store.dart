@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:geolocator/geolocator.dart';
 
 import 'package:magic_sdk/magic_sdk.dart';
 
@@ -60,7 +59,4 @@ class DataStore {
       Future.error(e);
     }
   }
-
-  Position? _currentPosition;
-  Position? get currentPostion => _currentPosition;
 }
