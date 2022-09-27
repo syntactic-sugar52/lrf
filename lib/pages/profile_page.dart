@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
-import 'package:lrf/provider/google_sign_in.dart';
+import 'package:lrf/pages/bank_page.dart';
+import 'package:lrf/pages/contact_us_page.dart';
+import 'package:lrf/pages/login_page.dart';
+import 'package:lrf/provider/authentication.dart';
 import 'package:lrf/utils/utils.dart';
 import 'package:provider/provider.dart';
 
@@ -171,14 +174,25 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        _icon(Icons.payment, "Bank"),
+        InkWell(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const BankPage()));
+            },
+            child: _icon(Icons.payment, "Payment")),
+        // todo: list of history requests and requests completed
         _icon(Icons.history, "History"),
-        _icon(Icons.edit, "Edit"),
+        // todo: page where users can write something. goes to excel file
+        InkWell(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ContactUsPage()));
+            },
+            child: _icon(Icons.contact_mail, "Contact Us")),
         InkWell(
             onTap: () async {
-              final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-              await provider.googleLogOut();
-              Navigator.pushReplacementNamed(context, '/');
+              await Authentication.signOut(context: context);
+              if (mounted) {
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => LoginPage()), (route) => false);
+              }
             },
             child: _icon(Icons.exit_to_app_outlined, "Log Out")),
       ],
@@ -214,14 +228,14 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
   Widget _transactionList() {
     return Column(
       children: <Widget>[
-        _transection("Sent", "23 Feb 2020"),
-        _transection("Received", "25 Feb 2020"),
-        _transection("Sent", "03 Mar 2020"),
+        _transaction("Sent", "23 Feb 2020"),
+        _transaction("Received", "25 Feb 2020"),
+        _transaction("Sent", "03 Mar 2020"),
       ],
     );
   }
 
-  Widget _transection(String text, String time) {
+  Widget _transaction(String text, String time) {
     return ListTile(
       leading: Container(
         height: 50,

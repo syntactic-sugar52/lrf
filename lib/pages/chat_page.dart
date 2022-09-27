@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/services/database.dart';
 
 class ChatPage extends StatefulWidget {
-  final String postId;
-  const ChatPage({super.key, required this.postId});
+  final snap;
+  const ChatPage({super.key, required this.snap});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -19,16 +20,6 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.close),
-              onPressed: () {
-                //Implement logout functionality
-                // _auth.signOut();
-                Navigator.pop(context);
-                // messageStream();
-              }),
-        ],
         title: Text('⚡️Chat'),
         backgroundColor: kAppBackgroundColor,
       ),
@@ -38,7 +29,7 @@ class _ChatPageState extends State<ChatPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             MessageStream(
-              postId: widget.postId,
+              snap: widget.snap,
             ),
             Container(
               padding: const EdgeInsets.all(8),
@@ -61,11 +52,8 @@ class _ChatPageState extends State<ChatPage> {
                       messageTextController.clear();
                       //Implement send functionality.
                       //collection - name in the db
-                      FirebaseFirestore.instance
-                          .collection('posts')
-                          .doc()
-                          .collection('replies')
-                          .add({'text': messageText, 'sender': _auth.currentUser!.displayName});
+                      final response = Database().startMessage(
+                          userId: widget.snap['postOwnerId'], peerID: widget.snap['senderUid'], content: messageText.toString().trim(), read: true);
                     },
                     child: const Text(
                       'Send',
@@ -83,57 +71,68 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 class MessageStream extends StatelessWidget {
-  final String postId;
-  MessageStream({super.key, required this.postId});
+  final snap;
+  MessageStream({
+    super.key,
+    required this.snap,
+  });
   final _auth = FirebaseAuth.instance;
+
+  String getConversationID(String userID, String peerID) {
+    return userID.hashCode <= peerID.hashCode ? '${userID}_$peerID' : '${peerID}_$userID';
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
         //display messages from database
-        stream: FirebaseFirestore.instance.collection('posts').doc(postId).collection('replies').snapshots(),
+        // stream: FirebaseFirestore.instance.collectionGroup(getConversationID(snap['postOwnerId'], snap['senderUid'])).snapshots(),
         builder: (context, snapshot) {
-          //if snapshot has no data then return a center widget with a circularprogressindicator or a modal
-          if (!snapshot.hasData) {
-            return const Expanded(
-              child: Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.greenAccent,
-                ),
-              ),
-            );
-          }
-          //reversed- changes the order of the text messages
-          final messages = snapshot.data!.docs.reversed;
-          List<Widget> messageWidgets = [];
-          messageWidgets = messages.map(
-            (message) {
-              Map m = message.data() as Map;
-              final messageText = m['text'];
-              final messageSender = m['name'];
-              final currentUser = _auth.currentUser!.displayName;
-              final messageBubble = MessageBubble(
-                sender: messageSender,
-                text: messageText,
-                isMe: currentUser == messageSender,
-              );
-
-              return messageBubble;
-            },
-          ).toList();
-
-          return Expanded(
-            child: ListView(
-              reverse: true, //sticks to the bottom of yhe page so users can see messages from the bottom
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-              children: messageWidgets,
+      //if snapshot has no data then return a center widget with a circularprogressindicator or a modal
+      if (!snapshot.hasData) {
+        return const Expanded(
+          child: Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.greenAccent,
             ),
+          ),
+        );
+      }
+
+      List<Widget> messageWidgets = [];
+
+      final messages = snapshot.data!.docs;
+      messageWidgets = messages.map(
+        (message) {
+          final messageText = message.get('lastMessage')['content'];
+          final messageSender = message.get('lastMessage')['idTo'];
+          final currentUser = _auth.currentUser!.uid;
+          final messageBubble = MessageBubble(
+            sender: messageSender,
+            text: messageText,
+            isMe: currentUser == messageSender,
           );
-        });
+          return messageBubble;
+        },
+      ).toList();
+
+      return Expanded(
+          child: ListView(
+        reverse: true, //sticks to the bottom of yhe page so users can see messages from the bottom
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+        children: messageWidgets,
+      ));
+    });
   }
 }
 
 class MessageBubble extends StatelessWidget {
-  const MessageBubble({super.key, required this.text, required this.sender, required this.isMe});
+  const MessageBubble({
+    super.key,
+    required this.text,
+    required this.sender,
+    required this.isMe,
+  });
   final String sender;
   final String text;
   final bool isMe;
@@ -158,7 +157,7 @@ class MessageBubble extends StatelessWidget {
                   )
                 : const BorderRadius.only(topLeft: Radius.circular(30.0), bottomLeft: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
             elevation: 5.0,
-            color: isMe ? Colors.white : Colors.greenAccent,
+            color: isMe ? Colors.white : Colors.green,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
               child: Text(

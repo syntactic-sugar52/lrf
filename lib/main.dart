@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/pages/main_page.dart';
-import 'package:lrf/pages/reply_post_page.dart';
+import 'package:lrf/pages/inquiry_page.dart';
+import 'package:lrf/pages/splash_page.dart';
 
-import 'package:lrf/provider/google_sign_in.dart';
+import 'package:lrf/provider/authentication.dart';
 import 'package:lrf/provider/user_provider.dart';
 
 import 'package:lrf/responsive/responsive_layout.dart';
@@ -44,9 +45,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<GoogleSignInProvider>(
-          create: (_) => GoogleSignInProvider(),
-        ),
         ChangeNotifierProvider<UserProvider>(
           create: (_) => UserProvider(),
         ),
@@ -62,13 +60,14 @@ class MyApp extends StatelessWidget {
           // scaffoldBackgroundColor: kAppBackgroundColor,
           scaffoldBackgroundColor: mobileBackgroundColor,
         ),
-        initialRoute: '/login',
-        routes: {
-          // '/': (_) => const SplashPage(),
-          '/login': (_) => const LoginPage(),
-          '/main': (_) => const MainPage(),
-          // '/requestAccepted': (_) => const RequestAcceptedPage()
-        },
+        home: const LoginPage(),
+        // initialRoute: '',
+        // routes: {
+        //   '/': (_) => const SplashPage(),
+        //   '/login': (_) => const LoginPage(),
+        //   '/main': (_) => const MainPage(),
+        //   // '/requestAccepted': (_) => const RequestAcceptedPage()
+        // },
 
         // home: StreamBuilder(
         //     stream: FirebaseAuth.instance.authStateChanges(),

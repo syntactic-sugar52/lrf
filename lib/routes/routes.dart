@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:lrf/pages/contact_us_page.dart';
 import 'package:lrf/pages/login_page.dart';
-import 'package:lrf/pages/reply_post_page.dart';
+import 'package:lrf/pages/inquiry_page.dart';
 import 'package:lrf/pages/splash_page.dart';
 
 import '../pages/main_page.dart';
@@ -28,11 +28,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
   // depending on the route value - redirect to the proper page
   switch (settings.name) {
-    case '/':
-      return MaterialPageRoute(builder: (context) => const SplashPage());
+    // case '/':
+    //   return MaterialPageRoute(builder: (context) => const SplashPage());
 
-    case '/main':
-      return MaterialPageRoute(builder: (context) => const MainPage());
+    // case '/main':
+    //   return MaterialPageRoute(builder: (context) => const MainPage());
 
     // case '/requestAccepted':
     //   return PageRouteBuilder(

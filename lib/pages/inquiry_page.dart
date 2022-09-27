@@ -1,20 +1,22 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/general_widgets.dart';
 import 'package:lrf/pages/widgets/request/general_widgets.dart';
-import 'package:lrf/provider/google_sign_in.dart';
+
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
-import 'package:provider/provider.dart';
 
 class RequestAcceptedPage extends StatefulWidget {
   final String postId;
-  const RequestAcceptedPage({Key? key, required this.postId}) : super(key: key);
+  final String postOwnerId;
+  final String postTitle;
+  final User user;
+  const RequestAcceptedPage({Key? key, required this.postId, required this.user, required this.postOwnerId, required this.postTitle})
+      : super(key: key);
 
   @override
   State<RequestAcceptedPage> createState() => _RequestAcceptedPageState();
@@ -47,15 +49,10 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
           Text("Reply Sent!"),
         ],
       ));
-  void postComment(String uid, String name, String profilePic) async {
+  void postInquiry(String uid, String name, String profilePic) async {
     try {
-      String res = await Database().postReply(
-        widget.postId,
-        _replyController.text.trim(),
-        uid,
-        name,
-        profilePic,
-      );
+      String res = await Database().postInquiry(widget.postId.toString(), _replyController.text.trim(), widget.user.uid, widget.user.displayName!,
+          profilePic, widget.postOwnerId.toString(), widget.postTitle.toString());
 
       if (res != 'success') {
         if (mounted) {
@@ -80,7 +77,6 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
 
   @override
   void dispose() {
-    _replyController.clear();
     _replyController.dispose();
     super.dispose();
   }
@@ -92,7 +88,7 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
         elevation: 0,
-        title: const Text('Direct Message'),
+        title: const Text('Inquire'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -104,17 +100,18 @@ class _RequestAcceptedPageState extends State<RequestAcceptedPage> {
               ),
               ListTile(
                 dense: true,
-                title: const Text('Reply: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
+                title: const Text('Message: ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
                 subtitle:
                     Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _replyController, maxLines: 22, maxLength: 800)),
               ),
               SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: customButton(
+                      color: kGreen,
                       text: 'SEND',
                       onPressed: () async {
-                        final userDetails = await Database().getUserDetails();
-                        postComment(userDetails['id'], userDetails['displayName'], userDetails['photoUrl']);
+                        // final userDetails = await Database().getUserDetails();
+                        postInquiry(widget.user.uid, widget.user.displayName!, widget.user.photoURL!);
                         // todo: add something to say its posted
                       }))
             ],

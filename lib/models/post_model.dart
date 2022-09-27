@@ -4,10 +4,12 @@ class Post {
   final String description;
   final String uid;
   final String username;
-  final danger;
+
+  final List upVote;
+  final List downVote;
   final String postId;
   final DateTime datePublished;
-  final String postUrl;
+  // final String postUrl;
   final String profImage;
   final String title;
   final String price;
@@ -15,10 +17,11 @@ class Post {
       {required this.description,
       required this.uid,
       required this.username,
-      required this.danger,
+      required this.upVote,
+      required this.downVote,
       required this.postId,
       required this.datePublished,
-      required this.postUrl,
+      // required this.postUrl,
       required this.profImage,
       required this.price,
       required this.title});
@@ -29,12 +32,13 @@ class Post {
     return Post(
         description: snapshot["description"],
         uid: snapshot["uid"],
-        danger: snapshot["danger"],
+        upVote: snapshot["upvote"],
+        downVote: snapshot["downvote"],
         postId: snapshot["postId"],
         price: snapshot['price'],
         datePublished: snapshot["datePublished"],
         username: snapshot["username"],
-        postUrl: snapshot['postUrl'],
+        // postUrl: snapshot['postUrl'],
         title: snapshot['title'],
         profImage: snapshot['profImage']);
   }
@@ -42,12 +46,13 @@ class Post {
   Map<String, dynamic> toJson() => {
         "description": description,
         "uid": uid,
-        "danger": danger,
+        "upVote": upVote,
+        "downVote": downVote,
         "title": title,
         "username": username,
         "postId": postId,
         "datePublished": datePublished,
-        'postUrl': postUrl,
+        // 'postUrl': postUrl,
         'profImage': profImage,
         'price': price
       };

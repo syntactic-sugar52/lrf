@@ -2,8 +2,10 @@
     "cSpell.words": [
         "autofocus",
         "dotenv",
+        "downvote",
         "firestore",
         "Geolocator",
-        "transection"
+        "transection",
+        "upvote"
     ]
 }

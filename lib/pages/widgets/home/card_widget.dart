@@ -5,16 +5,16 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/chat_page.dart';
-import 'package:lrf/pages/reply_post_page.dart';
+import 'package:lrf/pages/inquiry_page.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:slide_to_confirm/slide_to_confirm.dart';
 
 class Card2 extends StatefulWidget {
-  const Card2({Key? key, required this.snap}) : super(key: key);
+  const Card2({Key? key, required this.snap, required this.user}) : super(key: key);
 
   final snap;
-
+  final User user;
   @override
   State<Card2> createState() => _Card2State();
 }
@@ -24,13 +24,8 @@ class _Card2State extends State<Card2> {
   bool dangerTapped = false;
   dynamic userDetails;
 
-  @override
-  void initState() {
-    // getUserData();
-
-    super.initState();
-  }
-
+  // @override
+  // bool get wantKeepAlive => true;
   buildImg(
     Color color,
     double height,
@@ -173,26 +168,9 @@ class _Card2State extends State<Card2> {
                 ),
               ],
             ),
-            // const Text('text'),
-            DangerAnimation(
-              isAnimating: widget.snap['danger'].contains(user.uid),
-              smallLike: true,
-              child: SizedBox(
-                width: 50,
-                height: 40,
-                child: IconButton(
-                  icon: widget.snap['danger'].contains(user.uid)
-                      ? const Icon(
-                          Icons.warning,
-                          color: Colors.red,
-                        )
-                      : const Icon(
-                          Icons.warning,
-                          color: Colors.white70,
-                        ),
-                  onPressed: () => Database().flagPost(widget.snap['postId'].toString(), user.uid, widget.snap['danger']),
-                ),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Text('Last_Resort', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700)),
             ),
           ],
         ),
@@ -232,7 +210,15 @@ class _Card2State extends State<Card2> {
 
   void confirmed(BuildContext context) {
     if (mounted) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => RequestAcceptedPage(postId: widget.snap['postId'].toString())));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => RequestAcceptedPage(
+                    postId: widget.snap['postId'].toString(),
+                    user: widget.user,
+                    postOwnerId: widget.snap['userId'].toString(),
+                    postTitle: widget.snap['title'].toString(),
+                  )));
     }
   }
 
@@ -260,7 +246,6 @@ class _Card2State extends State<Card2> {
                 height: 55,
                 foregroundColor: const Color(0xff42855B),
                 backgroundColor: kAppBackgroundColor,
-                // backgroundColor: const Color(0xff1B1B1B),
                 textStyle: const TextStyle(color: kWhite),
                 text: 'Slide to Inquire',
                 onConfirmation: () => confirmed(context),
@@ -277,18 +262,17 @@ class _Card2State extends State<Card2> {
 
   @override
   Widget build(BuildContext context) {
+    // super.build;
     return ExpandableNotifier(
         child: Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+      padding: EdgeInsets.zero,
+      // padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: ScrollOnExpand(
         scrollOnCollapse: true,
         scrollOnExpand: true,
         child: Card(
           elevation: 8,
           color: Colors.blueGrey.shade900,
-          // color: Colors.black87,
-          // color: Color(0xff393E46),
-          // color: const Color(0xff2D2C2C),
           clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,9 +295,67 @@ class _Card2State extends State<Card2> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
-                    child: Text('Last_Resort', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700)),
+                  Card(
+                    elevation: 2,
+                    child: IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 15,
+                          ),
+                          Text(widget.snap['upVote'].length.toString()),
+                          DangerAnimation(
+                            isAnimating: widget.snap['upVote'].contains(widget.user.uid),
+                            smallLike: true,
+                            child: SizedBox(
+                              width: 50,
+                              height: 40,
+                              child: IconButton(
+                                icon: widget.snap['upVote'].contains(widget.user.uid)
+                                    ? const Icon(
+                                        Icons.arrow_circle_up_outlined,
+                                        color: Colors.green,
+                                      )
+                                    : const Icon(
+                                        Icons.arrow_circle_up_outlined,
+                                        color: Colors.white70,
+                                      ),
+                                onPressed: () => Database().upvotePost(widget.snap['postId'].toString(), user.uid, widget.snap['upVote']),
+                              ),
+                            ),
+                          ),
+                          const VerticalDivider(
+                            thickness: 1,
+                            // width: 20,
+                            color: Colors.black,
+                          ),
+                          Container(
+                            width: 15,
+                          ),
+                          Text(widget.snap['downVote'].length.toString()),
+                          DangerAnimation(
+                            isAnimating: widget.snap['downVote'].contains(widget.user.uid),
+                            smallLike: true,
+                            child: SizedBox(
+                              width: 50,
+                              height: 40,
+                              child: IconButton(
+                                icon: widget.snap['downVote'].contains(widget.user.uid)
+                                    ? const Icon(
+                                        Icons.arrow_circle_down_rounded,
+                                        color: Colors.pink,
+                                      )
+                                    : const Icon(
+                                        Icons.arrow_circle_down_rounded,
+                                        color: Colors.white70,
+                                      ),
+                                onPressed: () => Database().downVotePost(widget.snap['postId'].toString(), user.uid, widget.snap['downVote']),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   Builder(
                     builder: (context) {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-Widget customButton({required String text, required Function onPressed}) {
+Widget customButton({required String text, required Function onPressed, required Color color}) {
   return ElevatedButton(
     onPressed: () => onPressed(),
     style: ElevatedButton.styleFrom(
         elevation: 12,
-        primary: const Color(0xff42855B),
+        primary: color,
         // Color(0xff3A3A3A),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),

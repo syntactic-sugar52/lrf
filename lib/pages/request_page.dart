@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lrf/pages/main_page.dart';
 
 import 'package:lrf/pages/widgets/request/general_widgets.dart';
 import 'package:lrf/pages/widgets/request/slider_widget.dart';
@@ -29,10 +30,11 @@ class _RequestPageState extends State<RequestPage> {
   String userId = '';
   @override
   void dispose() {
-    super.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
+
     _scrollController.dispose();
+    super.dispose();
   }
 
   void postRequest(String uid, String username, String profImage) async {
@@ -42,31 +44,37 @@ class _RequestPageState extends State<RequestPage> {
     // start the loading
     try {
       // upload to storage and db
-      String res = await Database().uploadPost(_descriptionController.text.trim(), uid, username, profImage, _titleController.text.trim(), price);
+      String res = await Database().createPostRequest(
+          title: _titleController.text.trim(),
+          description: _descriptionController.text.trim(),
+          userId: uid,
+          price: price.trim(),
+          username: username,
+          photoURL: profImage);
       if (res == "success") {
         setState(() {
           isLoading = false;
         });
         if (mounted) {
-          showSnackBar(
-            context,
-            'Posted!',
-          );
-          Navigator.pushNamed(context, '/main');
+          // showSnackBar(
+          //   context,
+          //   'Posted!',
+          // );
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage(user: user)));
         }
       } else {
         if (mounted) {
-          showSnackBar(context, res);
+          // showSnackBar(context, res);
         }
       }
     } catch (err) {
       setState(() {
         isLoading = false;
       });
-      showSnackBar(
-        context,
-        err.toString(),
-      );
+      // showSnackBar(
+      //   context,
+      //   err.toString(),
+      // );
     }
   }
 
@@ -113,7 +121,7 @@ class _RequestPageState extends State<RequestPage> {
                   dense: true,
                   title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
                   subtitle:
-                      Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _titleController, maxLines: 2, maxLength: 120)),
+                      Padding(padding: const EdgeInsets.all(8.0), child: textFieldRequest(controller: _titleController, maxLines: 2, maxLength: 50)),
                 ),
                 ListTile(
                     dense: true,
