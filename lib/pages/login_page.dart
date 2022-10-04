@@ -1,21 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
-import 'package:lrf/pages/feed_page.dart';
+
 import 'package:lrf/pages/widgets/google_signin_button.dart';
-import 'package:lrf/pages/widgets/login/google_button.dart';
+
 import 'package:lrf/provider/authentication.dart';
 
-import 'package:provider/provider.dart';
-
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

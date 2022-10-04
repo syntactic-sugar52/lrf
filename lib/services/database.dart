@@ -7,14 +7,21 @@ class Database {
   final usersRef = FirebaseFirestore.instance.collection('users');
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  Stream<User?> get authChanges => _auth.authStateChanges();
+  User get user => _auth.currentUser!;
 
   // get user details
   Future getUserDetails() async {
-    User currentUser = _auth.currentUser!;
-    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(currentUser.uid).get();
+    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(user.uid).get();
     // returns map string dynamic
     return documentSnapshot.data();
     // return UserModel.fromSnap(documentSnapshot);
+  }
+
+  Future<Map> getUserDataFromFirestore(String uid) async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    Map docData = doc.data() as Map;
+    return docData;
   }
 
   Future createUser(String displayName, String email, String id, String photoURL) async {
@@ -24,67 +31,45 @@ class Database {
     await docUser.set(user);
   }
 
+  Future<String> updateUserCollection({required String address, required String lat, required String lng, required String uid}) async {
+    final docRequest = FirebaseFirestore.instance.collection('users').doc(uid);
+    String res = "Some error occurred";
+    try {
+      final user = {
+        'address': address,
+        'lat': lat,
+        'lng': lng,
+      };
+// create document and write data to firebase
+      await docRequest.update(
+        user,
+      );
+      res = "success";
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
   String getConversationID(String userID, String peerID) {
     return userID.hashCode <= peerID.hashCode ? '${userID}_$peerID' : '${peerID}_$userID';
   }
 
-  // Future inquiryIsAccepted( String uid, String name, String profilePic, String postOwnerId,){
-  //       final String id = getConversationID(postOwnerId, uid);
-  //  final docRequest =   _firestore.collection('inquiry').doc(postOwnerId).collection('inquiryItems').doc();
-  // //  docRequest.update();
+  Future getMessageList(String uid) async {
+    QuerySnapshot documentSnapshot = await _firestore.collection('messageList').doc(uid).collection('list').get();
 
-  // }
-
-  Future<String> createMessage({required String userId, required String peerID, required String inquiryId, required String postId}) async {
-    final String convoId = getConversationID(userId, peerID);
-    final docRequest = FirebaseFirestore.instance.collection('message').doc(convoId);
-    String res = "Some error occurred";
-    try {
-      final message = {
-        'inquiryId': inquiryId,
-        'postId': postId,
-        'users': [userId, peerID],
-        'datePublished': DateTime.now(),
-      };
-// create document and write data to firebase
-      await docRequest.set(message);
-      res = "success";
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
-  Future<String> startMessage({required String userId, required String peerID, required String content, required bool read}) async {
-    final String convoId = getConversationID(userId, peerID);
-    final docRequest = FirebaseFirestore.instance.collection('message').doc(convoId).collection(convoId).doc();
-    String res = "Some error occurred";
-    try {
-      final message = {
-        'lastMessage': {
-          'content': content,
-          'idFrom': userId,
-          'idTo': peerID,
-          'read': read,
-          'datePublished': DateTime.now(),
-        },
-        'users': [userId, peerID],
-      };
-// create document and write data to firebase
-      await docRequest.set(message);
-      res = "success";
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
+    return documentSnapshot.docs;
   }
 
   Future<String> createPostRequest(
       {required String title,
       required String description,
       required String userId,
-      required String price,
+      required String contactNumber,
+      required String contactEmail,
       required String username,
+      required String currentAddress,
+      required String subAdminArea,
       required String photoURL}) async {
     final postId = const Uuid().v4();
     final docRequest = FirebaseFirestore.instance.collection('posts').doc(postId);
@@ -94,16 +79,54 @@ class Database {
         'postId': postId,
         'userId': userId,
         'username': username,
+        'contactNumber': contactNumber,
+        'contactEmail': contactEmail,
         'title': title,
         'upVote': [],
         'downVote': [],
         'description': description,
         'datePublished': DateTime.now(),
-        'price': price,
         'profImage': photoURL,
+        'subAdminArea': subAdminArea,
+        'currentAddress': currentAddress
       };
 // create document and write data to firebase
       await docRequest.set(posts);
+      res = "success";
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> deletePostRequest({required String postId}) async {
+    final docRequest = FirebaseFirestore.instance.collection('posts').doc(postId);
+    String res = "Some error occurred";
+    try {
+      await docRequest.delete();
+      res = "success";
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> updateContactedCollection(
+      {required String userPostedId, required String postOwnerId, required bool isEmail, required bool isSms, required String postId}) async {
+    final id = const Uuid().v4();
+
+    final docRequest = FirebaseFirestore.instance.collection('contacted').doc(id);
+    String res = "Some error occurred";
+    try {
+      final posts = {
+        'postId': postId,
+        'isEmail': isEmail,
+        'isSms': isSms,
+        'users': [userPostedId, postOwnerId],
+        'datePublished': DateTime.now(),
+      };
+// create document and write data to firebase
+      await docRequest.set(posts, SetOptions(merge: true));
       res = "success";
     } catch (err) {
       res = err.toString();
@@ -131,7 +154,7 @@ class Database {
     String res = "Some error occurred";
     try {
       if (upvote.contains(uid)) {
-        // if the likes list contains the user uid, we need to remove it
+        // if the  list contains the user uid, we need to remove it
         _firestore.collection('posts').doc(postId).update({
           'upVote': FieldValue.arrayRemove([uid])
         });
@@ -152,7 +175,7 @@ class Database {
     String res = "Some error occurred";
     try {
       if (downvote.contains(uid)) {
-        // if the likes list contains the user uid, we need to remove it
+        // if the  list contains the user uid, we need to remove it
         _firestore.collection('posts').doc(postId).update({
           'downVote': FieldValue.arrayRemove([uid])
         });
@@ -169,49 +192,25 @@ class Database {
     return res;
   }
 
-  // Post reply
-  Future<String> postInquiry(String postId, String text, String uid, String name, String profilePic, String postOwnerId, String title) async {
-    String res = "Some error occurred";
-    try {
-      final inquiryId = const Uuid().v4();
-      final String id = getConversationID(postOwnerId, uid);
-      if (text.isNotEmpty) {
-        _firestore.collection('inquiry').doc(postOwnerId).collection('inquiryItems').doc(inquiryId).set({
-          'profilePic': profilePic,
-          'sender': name,
-          'senderUid': uid,
-          'postOwnerId': postOwnerId,
-          'postId': postId,
-          'inquiryId': inquiryId,
-          'text': text,
-          'datePublished': DateTime.now(),
-          'title': title,
-          'isAccepted': false
-        });
-        res = 'success';
-      } else {
-        res = "Please enter text";
-      }
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
   // Post comment
-  Future<String> postComment(String postId, String text, String uid, String name, String profilePic) async {
+  Future<String> postMessage(
+    String postId,
+    String text,
+    String idFrom,
+    String idTo,
+    String content,
+  ) async {
     String res = "Some error occurred";
     try {
       if (text.isNotEmpty) {
         // if the likes list contains the user uid, we need to remove it
         String commentId = const Uuid().v4();
-        _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
-          'profilePic': profilePic,
-          'name': name,
-          'uid': uid,
-          'text': text,
-          'commentId': commentId,
-          'datePublished': DateTime.now(),
+        _firestore.collection('posts').doc(postId).collection('message').doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
+          'content': content,
+          'idFrom': idFrom,
+          'idTo': idTo,
+          'id': DateTime.now().millisecondsSinceEpoch.toString(),
+          'createdAt': DateTime.now().millisecondsSinceEpoch.toString()
         });
         res = 'success';
       } else {

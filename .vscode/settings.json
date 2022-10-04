@@ -5,6 +5,7 @@
         "downvote",
         "firestore",
         "Geolocator",
+        "prefs",
         "transection",
         "upvote"
     ]

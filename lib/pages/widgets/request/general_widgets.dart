@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
-TextField textFieldRequest({required TextEditingController controller, required int maxLines, required int maxLength}) {
+TextField textFieldRequest(
+    {required TextEditingController controller,
+    required maxLines,
+    required maxLength,
+    required TextCapitalization textCapitalization,
+    required TextInputType textInputType}) {
   return TextField(
     maxLines: maxLines,
     maxLength: maxLength,
-    textCapitalization: TextCapitalization.sentences,
+    keyboardType: textInputType,
+    textCapitalization: textCapitalization,
     cursorColor: Colors.grey,
     style: const TextStyle(
       color: Colors.white,

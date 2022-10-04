@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/constants/constants.dart';
-import 'package:lrf/pages/general_widgets.dart';
-import 'package:lrf/pages/widgets/request/general_widgets.dart';
+import 'package:lrf/utils/utils.dart';
 
-class ContactUsPage extends StatefulWidget {
-  ContactUsPage({Key? key}) : super(key: key);
+class ContactUsPage extends StatelessWidget {
+  const ContactUsPage({Key? key}) : super(key: key);
 
-  @override
-  State<ContactUsPage> createState() => _ContactUsPageState();
-}
-
-class _ContactUsPageState extends State<ContactUsPage> {
-  final TextEditingController _textEditingController = TextEditingController();
-
-  final items = ['Fix', 'Complaint', 'Bug', 'Feature', 'Others'];
-
-  String selectedValue = 'Feature';
-
-  // todo: drop down choices (bug, feature, i dont like this, i like this, others)
+  // todo: add url launcher
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,59 +22,54 @@ class _ContactUsPageState extends State<ContactUsPage> {
           child: Column(
             children: [
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 12, top: 10, bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey.shade800,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                    // dropdown below..
-                    child: DropdownButton<String>(
-                      value: selectedValue,
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedValue = newValue!;
-                        });
-                      },
-
-                      items: items
-                          .map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ))
-                          .toList(),
-
-                      // add extra sugar..
-                      icon: const Icon(Icons.arrow_drop_down),
-                      iconSize: 42,
-                      underline: const SizedBox(),
-                    ),
-                  ),
-                ],
+              const Text(
+                'Join Our Growing Community',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(
-                height: 20,
+                height: 30,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: textFieldRequest(controller: _textEditingController, maxLines: 20, maxLength: 180),
+              const Divider(
+                color: Colors.grey,
               ),
-              const SizedBox(
-                height: 20,
+              ListTile(
+                leading: const FaIcon(FontAwesomeIcons.discord),
+                title: const Text(
+                  'https://discord.gg/ESBqwvkN',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+                trailing: IconButton(
+                    onPressed: () {
+                      Clipboard.setData(const ClipboardData(text: 'https://discord.gg/ESBqwvkN')).then((_) {
+                        showSnackBar(context, "Copied to clipboard");
+                      });
+                    },
+                    icon: const Icon(Icons.copy)),
               ),
-              SizedBox(width: double.infinity, child: customButton(text: 'Send', onPressed: () {}, color: Colors.green.shade900))
+              const Divider(
+                color: Colors.grey,
+              ),
+              ListTile(
+                leading: const Icon(Icons.mail),
+                title: const Text(
+                  'hello@lastresrt.com',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+                trailing: IconButton(
+                    onPressed: () {
+                      Clipboard.setData(const ClipboardData(text: 'hello@lastresrt.com')).then((_) {
+                        showSnackBar(context, "Copied to clipboard");
+                      });
+                    },
+                    icon: const Icon(Icons.copy)),
+              ),
+              const Divider(
+                color: Colors.grey,
+              ),
             ],
           ),
         ),

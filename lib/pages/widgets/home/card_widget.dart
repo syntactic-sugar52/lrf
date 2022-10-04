@@ -1,20 +1,25 @@
+import 'dart:io';
+
 import 'package:expandable/expandable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:glass/glass.dart';
-import 'package:lrf/constants/constants.dart';
-import 'package:lrf/pages/chat_page.dart';
-import 'package:lrf/pages/inquiry_page.dart';
+
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
-import 'package:slide_to_confirm/slide_to_confirm.dart';
+import 'package:lrf/utils/utils.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 class Card2 extends StatefulWidget {
-  const Card2({Key? key, required this.snap, required this.user}) : super(key: key);
+  const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea}) : super(key: key);
 
   final snap;
   final User user;
+
+  final String subAdministrativeArea;
   @override
   State<Card2> createState() => _Card2State();
 }
@@ -22,10 +27,17 @@ class Card2 extends StatefulWidget {
 class _Card2State extends State<Card2> {
   // String currentUserId = '';
   bool dangerTapped = false;
+
+  late Database db;
   dynamic userDetails;
 
-  // @override
-  // bool get wantKeepAlive => true;
+  @override
+  void initState() {
+    // TODO: implement initState
+    db = Database();
+    super.initState();
+  }
+
   buildImg(
     Color color,
     double height,
@@ -68,13 +80,14 @@ class _Card2State extends State<Card2> {
               ],
             ),
             Row(
-              children: const <Widget>[
-                Icon(
-                  Icons.star,
-                  color: Color(0xffCFFFDC),
-                  size: 14,
+              children: <Widget>[
+                Text(
+                  DateFormat.yMMMd().format(
+                    widget.snap['datePublished'].toDate(),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  // style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                // Text(rating, style: const TextStyle(color: Colors.white)),
               ],
             )
           ],
@@ -100,39 +113,6 @@ class _Card2State extends State<Card2> {
               ),
             ),
           ),
-          // Row(
-          //   children: [
-          //     Icon(
-          //       Icons.location_pin,
-          //       color: Color(0xff30E3CA),
-          //     ),
-          //     // todo: cut address dynamic
-          //     Expanded(
-          //       child: Text(
-          //         getDistanceBetweenStartLocation.toString(),
-          //         // startLoc.substring(0, 50),
-          //         textAlign: TextAlign.start,
-          //         style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 14, fontWeight: FontWeight.w600),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // Row(
-          //   children: [
-          //     Icon(
-          //       Icons.location_pin,
-          //       color: Color(0xffFF9090),
-          //     ),
-          //     Expanded(
-          //       child: Text(
-          //         getDistanceBetweenEndLocation.toString(),
-          //         // endLoc.substring(0, 50),
-          //         textAlign: TextAlign.start,
-          //         style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 14, fontWeight: FontWeight.w600),
-          //       ),
-          //     ),
-          //   ],
-          // ),
         ],
       ),
     );
@@ -142,7 +122,6 @@ class _Card2State extends State<Card2> {
     return Container();
   }
 
-  final user = FirebaseAuth.instance.currentUser!;
   buildExpanded1() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Padding(
@@ -152,26 +131,35 @@ class _Card2State extends State<Card2> {
           children: <Widget>[
             Row(
               children: [
-                FaIcon(
-                  FontAwesomeIcons.moneyBillTransfer,
-                  // color: Colors.white,
-                  color: Colors.blueGrey.shade300,
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                Text(
-                  widget.snap['price'].toString(),
-                  // "$price Copper",
-                  style: const TextStyle(color: Colors.white),
-                  // style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Icon(Icons.location_pin, color: Colors.green.shade600),
+                Text(widget.subAdministrativeArea),
               ],
             ),
-            const Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: Text('Last_Resort', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700)),
-            ),
+            widget.snap['userId'].toString() == widget.user.uid.toString()
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: TextButton(
+                        onPressed: () async {
+                          try {
+                            String res = await db.deletePostRequest(postId: widget.snap['postId']);
+
+                            if (res == 'success') {
+                              print('delete success');
+                            } else {
+                              if (mounted) {
+                                showSnackBar(context, 'Delete Unsuccessful. Try Agin.');
+                              }
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              showSnackBar(context, 'Something went wrong.');
+                            }
+                            Future.error(e);
+                          }
+                        },
+                        child: const Text('Delete', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700))),
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
       ),
@@ -183,43 +171,38 @@ class _Card2State extends State<Card2> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Row(
-          children: const <Widget>[
-            // Expanded(
-            //     child: buildImg(
-            //   Colors.green,
-            //   100,
-            //   Text('something'),
-            // )),
-            // Expanded(
-            //     child: buildImg(
-            //   Colors.orange,
-            //   100,
-            //   Text('somethinf'),
-            // )),
-          ],
+          children: const <Widget>[],
         ),
-        // Row(
-        //   children: <Widget>[
-        //     Expanded(child: buildImg(Colors.blue, 100)),
-        //     Expanded(child: buildImg(Colors.cyan, 100)),
-        //   ],
-        // ),
       ],
     );
   }
 
-  void confirmed(BuildContext context) {
-    if (mounted) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => RequestAcceptedPage(
-                    postId: widget.snap['postId'].toString(),
-                    user: widget.user,
-                    postOwnerId: widget.snap['userId'].toString(),
-                    postTitle: widget.snap['title'].toString(),
-                  )));
+  _textMe(String number) async {
+    // final separator = Platform.isIOS ? '&' : '?';
+    //   _launchURL('sms:$number${separator}body=${Uri.encodeFull(content)}&subject=${Uri.encodeFull(subject)}');
+    final smsUri = Uri(
+      scheme: 'sms',
+      path: number,
+    );
+
+    try {
+      if (await canLaunchUrl(
+        smsUri,
+      )) {
+        await launchUrl(smsUri);
+      }
+    } catch (e) {
+      showSnackBar(context, 'Some error occured');
     }
+  }
+
+  void _sendEmail(String email) {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {'subject': 'Last Resrt Inquiry', 'body': ''},
+    );
+    launchUrl(emailLaunchUri);
   }
 
   buildExpanded3() {
@@ -229,7 +212,7 @@ class _Card2State extends State<Card2> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const SizedBox(
-            height: 10,
+            height: 20,
           ),
           Text(
             widget.snap['description'].toString(),
@@ -237,23 +220,117 @@ class _Card2State extends State<Card2> {
             softWrap: true,
           ),
           const SizedBox(
-            height: 40,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ConfirmationSlider(
-                height: 55,
-                foregroundColor: const Color(0xff42855B),
-                backgroundColor: kAppBackgroundColor,
-                textStyle: const TextStyle(color: kWhite),
-                text: 'Slide to Inquire',
-                onConfirmation: () => confirmed(context),
-              )
-            ],
-          ),
-          const SizedBox(
             height: 20,
+          ),
+          //todo: fix url launcher
+          Card(
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                const Text('Contact number: '),
+                TextButton(
+                    onPressed: () async {
+                      try {
+                        if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                          String res = await db.updateContactedCollection(
+                              userPostedId: db.user.uid.toString(),
+                              postOwnerId: widget.snap['userId'].toString(),
+                              isEmail: false,
+                              isSms: true,
+                              postId: widget.snap['postId'].toString());
+                          if (res == 'success') {
+                            setState(() {
+                              _textMe("sms:${widget.snap['contactNumber'].toString()}");
+                            });
+                          } else {
+                            if (mounted) {
+                              showSnackBar(context, res);
+                            }
+                          }
+                        } else {
+                          if (mounted) {
+                            showSnackBar(context, 'Try a different card');
+                          }
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          showSnackBar(context, e.toString());
+                        }
+                        print(e);
+                        Future.error(e);
+                      }
+                    },
+                    child: Text(
+                      widget.snap['contactNumber'].toString(),
+                      style: TextStyle(
+                        color: Colors.green.shade400,
+                        fontSize: 14,
+                        letterSpacing: .5,
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.underline,
+                      ),
+                    )),
+              ],
+            ),
+          ),
+
+          Card(
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                const Text('Contact Email: '),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                        String res = await db.updateContactedCollection(
+                            userPostedId: db.user.uid.toString(),
+                            postOwnerId: widget.snap['userId'].toString(),
+                            isEmail: true,
+                            isSms: false,
+                            postId: widget.snap['postId'].toString());
+                        if (res == 'success') {
+                          setState(() {
+                            _sendEmail(
+                              widget.snap['contactEmail'].toString(),
+                            );
+                          });
+                        } else {
+                          if (mounted) {
+                            showSnackBar(context, res);
+                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          showSnackBar(context, 'Try a different card');
+                        }
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        showSnackBar(context, e.toString());
+                      }
+                      print(e);
+                      Future.error(e);
+                    }
+                  },
+                  child: Text(
+                    widget.snap['contactEmail'].toString(),
+                    style: TextStyle(
+                      color: Colors.green.shade400,
+                      fontSize: 14,
+                      letterSpacing: .5,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                    ),
+                    softWrap: true,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -266,7 +343,6 @@ class _Card2State extends State<Card2> {
     return ExpandableNotifier(
         child: Padding(
       padding: EdgeInsets.zero,
-      // padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: ScrollOnExpand(
         scrollOnCollapse: true,
         scrollOnExpand: true,
@@ -320,7 +396,7 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_up_outlined,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => Database().upvotePost(widget.snap['postId'].toString(), user.uid, widget.snap['upVote']),
+                                onPressed: () => Database().upvotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['upVote']),
                               ),
                             ),
                           ),
@@ -349,7 +425,7 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_down_rounded,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => Database().downVotePost(widget.snap['postId'].toString(), user.uid, widget.snap['downVote']),
+                                onPressed: () => Database().downVotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['downVote']),
                               ),
                             ),
                           ),

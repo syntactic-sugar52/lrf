@@ -6,10 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:lrf/pages/contact_us_page.dart';
 import 'package:lrf/pages/login_page.dart';
-import 'package:lrf/pages/inquiry_page.dart';
-import 'package:lrf/pages/splash_page.dart';
-
-import '../pages/main_page.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   // sliding navigation - screen moves left, then right
@@ -42,13 +38,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     //     },
     //   );
 
-    case '/contactUs':
-      return PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => ContactUsPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return slideNavigation(child, animation, secondaryAnimation);
-        },
-      );
+    // case '/contactUs':
+    //   return PageRouteBuilder(
+    //     pageBuilder: (context, animation, secondaryAnimation) => ContactUsPage(),
+    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //       return slideNavigation(child, animation, secondaryAnimation);
+    //     },
+    //   );
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

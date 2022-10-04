@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:lrf/models/user_model.dart';
 import 'package:lrf/services/database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
-  Map<String, dynamic>? _userModel;
-  Map<String, dynamic> get getUser => _userModel!;
-  final Database _database = Database();
+  String? _currentUserName;
+  String get getCurrentUserName => _currentUserName!;
+  String? _currentUserUid;
+  String get getCurrentUserUid => _currentUserUid!;
+  getCurrentUserNameFromLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    //Return String
+    String? stringValueName = prefs.getString('currentUserName');
+    String? stringValueUid = prefs.getString('currentUserUid');
 
-  Future<void> refreshUser() async {
-    Map<String, dynamic> user = await _database.getUserDetails();
+    _currentUserName = stringValueName ?? '';
+    _currentUserUid = stringValueUid ?? '';
 
-    _userModel = user;
-    // print(_userModel);
     notifyListeners();
   }
 }

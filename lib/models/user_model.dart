@@ -1,36 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
-  final String uid;
-  final String email;
-  final String name;
-  final String photoURL;
-  final String createdAt;
-// final String location;
-  final String rating;
-  final String phoneNumber;
-  UserModel(
-      {required this.uid,
-      required this.email,
-      required this.name,
-      required this.photoURL,
-      required this.createdAt,
-      required this.rating,
-      required this.phoneNumber});
+  String? name, email, uid, address, photoURL, createdAt;
+  UserModel({
+    this.uid,
+    this.email,
+    this.name,
+    this.photoURL,
+    this.createdAt,
+  });
 
   static UserModel fromSnap(DocumentSnapshot snap) {
     var snapshot = snap.data() as Map<String, dynamic>;
 
     return UserModel(
-        name: snapshot["displayName"],
-        uid: snapshot["id"],
-        email: snapshot["email"],
-        phoneNumber: snapshot["phoneNumber"],
-        photoURL: snapshot["photoUrl"],
-        createdAt: snapshot["createdAt"],
-        rating: snapshot["rating"]);
+      name: snapshot["displayName"],
+      uid: snapshot["id"],
+      email: snapshot["email"],
+      photoURL: snapshot["photoUrl"],
+      createdAt: snapshot["createdAt"],
+    );
   }
 
-  Map<String, dynamic> toJson() =>
-      {"name": name, "uid": uid, "email": email, "photoUrl": photoURL, "rating": rating, "createdAt": createdAt, "phoneNumber": phoneNumber};
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "uid": uid,
+        "email": email,
+        "photoUrl": photoURL,
+        "createdAt": createdAt,
+      };
+
+  // Location related
+  double? latitude, longitude;
+  Map get location => {'latitude': latitude, 'longitude': longitude};
 }

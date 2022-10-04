@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lrf/models/user_model.dart';
 import 'package:lrf/pages/feed_page.dart';
-import 'package:lrf/pages/main_page.dart';
+// import 'package:lrf/pages/main_page.dart';
 import 'package:lrf/services/database.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -34,7 +34,7 @@ class Authentication {
 
     if (user != null) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => MainPage(user: user)),
+        MaterialPageRoute(builder: (context) => FeedPage(user: user)),
       );
     }
 

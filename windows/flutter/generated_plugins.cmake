@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  maps_launcher
+  geolocator_windows
   url_launcher_windows
 )
 

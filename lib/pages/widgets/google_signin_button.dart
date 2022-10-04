@@ -2,8 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lrf/pages/feed_page.dart';
-import 'package:lrf/pages/main_page.dart';
+
 import 'package:lrf/provider/authentication.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   @override
@@ -12,6 +13,13 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   bool _isSigningIn = false;
+
+  Future saveUsertoLocal(String displayName, String uid, String photoUrl) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('currentUserName', displayName.toString());
+    prefs.setString('currentUserUid', uid.toString());
+    prefs.setString('currentUserPhotoUrl', photoUrl.toString());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +49,12 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 });
 
                 if (user != null) {
+                  await saveUsertoLocal(user.displayName!, user.uid, user.photoURL!);
+
                   if (mounted) {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                          builder: (context) => MainPage(
+                          builder: (context) => FeedPage(
                                 user: user,
                               )),
                     );
