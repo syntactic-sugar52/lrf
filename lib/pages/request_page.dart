@@ -19,13 +19,15 @@ class _RequestPageState extends State<RequestPage> {
   String price = '';
   // Uint8List? _file;
   bool isLoading = false;
+  bool needValidator = false;
 
+  final _formKey = GlobalKey<FormState>();
 // text controllers for textfield
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
   final TextEditingController _contactEmailController = TextEditingController();
-
+  bool _validate = false;
   late Database db;
   String userId = '';
   @override
@@ -94,98 +96,125 @@ class _RequestPageState extends State<RequestPage> {
     }
   }
 
-//todo  : add images
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
         elevation: 0,
         actions: [
           TextButton(
               onPressed: () async {
-                if (_titleController.text.isNotEmpty &&
-                    _descriptionController.text.isNotEmpty &&
-                    _contactEmailController.text.isNotEmpty &&
-                    _contactNumberController.text.isNotEmpty) {
+                final formState = _formKey.currentState;
+                if (formState!.validate() && _titleController.text.isNotEmpty && _descriptionController.text.isNotEmpty) {
                   postRequest(db.user.uid, db.user.displayName!, db.user.photoURL!);
                 } else {
                   if (mounted) {
-                    showSnackBar(context, 'Please enter fields.');
+                    showSnackBar(context, 'Please enter all fields.');
                   }
                 }
               },
               child: const Text(
                 'POST',
-                style: TextStyle(
-                    color: Colors.green,
-                    // Color(0xffF1F1F1
-                    // )
-                    fontWeight: FontWeight.w800),
+                style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.w800),
               )),
         ],
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.all(8),
-        margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: ListView(
-          physics: const ClampingScrollPhysics(),
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          children: [
-            ListTile(
-              dense: true,
-              title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: textFieldRequest(
-                      controller: _titleController,
-                      maxLines: 2,
-                      maxLength: 80,
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputType: TextInputType.text)),
-            ),
-            ListTile(
-              dense: true,
-              title: const Text('Contact Number : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: textFieldRequest(
-                      controller: _contactNumberController,
-                      maxLines: null,
-                      maxLength: null,
-                      textCapitalization: TextCapitalization.none,
-                      textInputType: TextInputType.number)),
-            ),
-            ListTile(
-              dense: true,
-              title: const Text('Contact Email : ', style: TextStyle(fontSize: 16, color: Colors.white)),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: textFieldRequest(
-                      controller: _contactEmailController,
-                      maxLines: null,
-                      maxLength: null,
-                      textCapitalization: TextCapitalization.none,
-                      textInputType: TextInputType.emailAddress)),
-            ),
-            ListTile(
-              dense: true,
-              title: const Text('Description : ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
-              subtitle: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: textFieldRequest(
-                      controller: _descriptionController,
-                      maxLines: 25,
-                      maxLength: 820,
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputType: TextInputType.multiline)),
-            ),
-            const SizedBox(height: 40),
-          ],
+      body: Form(
+        key: _formKey,
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          padding: const EdgeInsets.all(8),
+          margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: ListView(
+            physics: const ClampingScrollPhysics(),
+            shrinkWrap: true,
+            scrollDirection: Axis.vertical,
+            children: [
+              ListTile(
+                dense: true,
+                title: const Text('Title : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: textFieldRequest(
+                        controller: _titleController,
+                        maxLines: 2,
+                        hintText: 'Looking for..',
+                        onChanged: (value) {},
+                        maxLength: 80,
+                        validate: _validate,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputType: TextInputType.text)),
+              ),
+              ListTile(
+                dense: true,
+                title: const Text('Contact Number : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: textFieldRequest(
+                        controller: _contactNumberController,
+                        maxLines: null,
+                        maxLength: null,
+                        validate: _validate,
+                        validator: (value) {
+                          String patttern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
+                          RegExp regExp = RegExp(patttern);
+                          if (value!.isEmpty) {
+                            return 'Please enter mobile number';
+                          } else if (!regExp.hasMatch(value)) {
+                            return 'Please enter valid mobile number';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {},
+                        hintText: '+1234567',
+                        textCapitalization: TextCapitalization.none,
+                        textInputType: TextInputType.number)),
+              ),
+              ListTile(
+                dense: true,
+                title: const Text('Contact Email : ', style: TextStyle(fontSize: 16, color: Colors.white)),
+                subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: textFieldRequest(
+                        controller: _contactEmailController,
+                        maxLines: null,
+                        maxLength: null,
+                        validate: _validate,
+                        onChanged: (value) {},
+                        hintText: 'hello@lastrest.com',
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Email is Required';
+                          }
+                          if (!RegExp(r"^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$").hasMatch(value)) {
+                            return 'Please enter a valid Email';
+                          }
+                          return null;
+                        },
+                        textCapitalization: TextCapitalization.none,
+                        textInputType: TextInputType.emailAddress)),
+              ),
+              ListTile(
+                dense: true,
+                title: const Text('Description : ', style: TextStyle(fontSize: 16, color: Color(0xffF1F1F1))),
+                subtitle: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: textFieldRequest(
+                        controller: _descriptionController,
+                        maxLines: 25,
+                        hintText: '',
+                        validate: _validate,
+                        onChanged: (value) {},
+                        maxLength: 820,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputType: TextInputType.multiline)),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:expandable/expandable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +7,11 @@ import 'package:glass/glass.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class Card2 extends StatefulWidget {
   const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea}) : super(key: key);
@@ -35,6 +35,7 @@ class _Card2State extends State<Card2> {
   void initState() {
     // TODO: implement initState
     db = Database();
+
     super.initState();
   }
 
@@ -75,7 +76,7 @@ class _Card2State extends State<Card2> {
                 Text(
                   widget.snap['username'].toString(),
                   // username,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.blueGrey.shade100),
                 ),
               ],
             ),
@@ -85,7 +86,7 @@ class _Card2State extends State<Card2> {
                   DateFormat.yMMMd().format(
                     widget.snap['datePublished'].toDate(),
                   ),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.blueGrey.shade100),
                   // style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -109,7 +110,10 @@ class _Card2State extends State<Card2> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 widget.snap['title'].toString(),
-                style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 17, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 17,
+                ),
               ),
             ),
           ),
@@ -132,7 +136,10 @@ class _Card2State extends State<Card2> {
             Row(
               children: [
                 Icon(Icons.location_pin, color: Colors.green.shade600),
-                Text(widget.subAdministrativeArea),
+                Text(
+                  widget.snap['subAdminArea'],
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ],
             ),
             widget.snap['userId'].toString() == widget.user.uid.toString()
@@ -144,7 +151,9 @@ class _Card2State extends State<Card2> {
                             String res = await db.deletePostRequest(postId: widget.snap['postId']);
 
                             if (res == 'success') {
-                              print('delete success');
+                              if (mounted) {
+                                showSnackBar(context, 'Deleted!');
+                              }
                             } else {
                               if (mounted) {
                                 showSnackBar(context, 'Delete Unsuccessful. Try Agin.');
@@ -159,7 +168,7 @@ class _Card2State extends State<Card2> {
                         },
                         child: const Text('Delete', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700))),
                   )
-                : const SizedBox.shrink(),
+                : Text('Last Resrt', style: TextStyle(color: Colors.green.shade600, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -167,32 +176,24 @@ class _Card2State extends State<Card2> {
   }
 
   buildExpanded2() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          children: const <Widget>[],
-        ),
-      ],
-    );
+    return Container();
   }
 
   _textMe(String number) async {
-    // final separator = Platform.isIOS ? '&' : '?';
-    //   _launchURL('sms:$number${separator}body=${Uri.encodeFull(content)}&subject=${Uri.encodeFull(subject)}');
-    final smsUri = Uri(
-      scheme: 'sms',
-      path: number,
-    );
+    // final smsUri = Uri(
+    //   scheme: 'sms',
+    //   path: number,
+    //   query: encodeQueryParameters(<String, String>{'body': 'Hey I am inquring about your post in Last Resrt'}),
+    // );
 
     try {
-      if (await canLaunchUrl(
-        smsUri,
-      )) {
-        await launchUrl(smsUri);
+      if (await canLaunchUrlString(number)) {
+        await launchUrlString(number);
       }
     } catch (e) {
-      showSnackBar(context, 'Some error occured');
+      if (mounted) {
+        showSnackBar(context, 'Some error occured');
+      }
     }
   }
 
@@ -200,7 +201,7 @@ class _Card2State extends State<Card2> {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: email,
-      queryParameters: {'subject': 'Last Resrt Inquiry', 'body': ''},
+      queryParameters: {'subject': 'LastResrt', 'body': ''},
     );
     launchUrl(emailLaunchUri);
   }
@@ -216,7 +217,12 @@ class _Card2State extends State<Card2> {
           ),
           Text(
             widget.snap['description'].toString(),
-            style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              color: Colors.white70,
+              // color: Colors.blueGrey.shade100,
+              fontSize: 16,
+              letterSpacing: .5,
+            ),
             softWrap: true,
           ),
           const SizedBox(
@@ -229,7 +235,11 @@ class _Card2State extends State<Card2> {
                 const SizedBox(
                   width: 10,
                 ),
-                const Text('Contact number: '),
+                Icon(Icons.numbers, color: Colors.amber.shade800),
+                // Text(
+                //   'Contact number: ',
+                //   style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
+                // ),
                 TextButton(
                     onPressed: () async {
                       try {
@@ -251,21 +261,22 @@ class _Card2State extends State<Card2> {
                           }
                         } else {
                           if (mounted) {
-                            showSnackBar(context, 'Try a different card');
+                            showSnackBar(context, 'Contact Someone Else');
                           }
                         }
                       } catch (e) {
                         if (mounted) {
                           showSnackBar(context, e.toString());
                         }
-                        print(e);
+
                         Future.error(e);
                       }
                     },
                     child: Text(
                       widget.snap['contactNumber'].toString(),
-                      style: TextStyle(
-                        color: Colors.green.shade400,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        // color: Colors.blueGrey.shade100,
                         fontSize: 14,
                         letterSpacing: .5,
                         fontWeight: FontWeight.w500,
@@ -282,7 +293,11 @@ class _Card2State extends State<Card2> {
                 const SizedBox(
                   width: 10,
                 ),
-                const Text('Contact Email: '),
+                Icon(Icons.mail, color: Colors.blue.shade800),
+                // Text(
+                //   'Contact Email: ',
+                //   style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
+                // ),
                 TextButton(
                   onPressed: () async {
                     try {
@@ -306,21 +321,21 @@ class _Card2State extends State<Card2> {
                         }
                       } else {
                         if (mounted) {
-                          showSnackBar(context, 'Try a different card');
+                          showSnackBar(context, 'Contact Someone Else');
                         }
                       }
                     } catch (e) {
                       if (mounted) {
                         showSnackBar(context, e.toString());
                       }
-                      print(e);
+
                       Future.error(e);
                     }
                   },
                   child: Text(
                     widget.snap['contactEmail'].toString(),
-                    style: TextStyle(
-                      color: Colors.green.shade400,
+                    style: const TextStyle(
+                      color: Colors.white70,
                       fontSize: 14,
                       letterSpacing: .5,
                       fontWeight: FontWeight.w500,
@@ -379,7 +394,7 @@ class _Card2State extends State<Card2> {
                           Container(
                             width: 15,
                           ),
-                          Text(widget.snap['upVote'].length.toString()),
+                          Text(widget.snap['upVote'].length.toString(), style: const TextStyle(color: Colors.white70)),
                           DangerAnimation(
                             isAnimating: widget.snap['upVote'].contains(widget.user.uid),
                             smallLike: true,
@@ -388,9 +403,9 @@ class _Card2State extends State<Card2> {
                               height: 40,
                               child: IconButton(
                                 icon: widget.snap['upVote'].contains(widget.user.uid)
-                                    ? const Icon(
+                                    ? Icon(
                                         Icons.arrow_circle_up_outlined,
-                                        color: Colors.green,
+                                        color: Colors.green.shade700,
                                       )
                                     : const Icon(
                                         Icons.arrow_circle_up_outlined,
@@ -408,7 +423,10 @@ class _Card2State extends State<Card2> {
                           Container(
                             width: 15,
                           ),
-                          Text(widget.snap['downVote'].length.toString()),
+                          Text(
+                            widget.snap['downVote'].length.toString(),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                           DangerAnimation(
                             isAnimating: widget.snap['downVote'].contains(widget.user.uid),
                             smallLike: true,
@@ -417,9 +435,9 @@ class _Card2State extends State<Card2> {
                               height: 40,
                               child: IconButton(
                                 icon: widget.snap['downVote'].contains(widget.user.uid)
-                                    ? const Icon(
+                                    ? Icon(
                                         Icons.arrow_circle_down_rounded,
-                                        color: Colors.pink,
+                                        color: Colors.pink.shade700,
                                       )
                                     : const Icon(
                                         Icons.arrow_circle_down_rounded,
@@ -429,6 +447,25 @@ class _Card2State extends State<Card2> {
                               ),
                             ),
                           ),
+                          const VerticalDivider(
+                            thickness: 1,
+                            color: Colors.black,
+                          ),
+                          SizedBox(
+                            width: 50,
+                            height: 40,
+                            child: IconButton(
+                                iconSize: 18,
+                                onPressed: () {
+                                  Share.share(
+                                    'Check this out on Last Resrt!, Download the app now. - ${widget.snap['title']}',
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.share,
+                                  color: Colors.white70,
+                                )),
+                          )
                         ],
                       ),
                     ),

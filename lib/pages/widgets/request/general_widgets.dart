@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
-TextField textFieldRequest(
+TextFormField textFieldRequest(
     {required TextEditingController controller,
     required maxLines,
     required maxLength,
     required TextCapitalization textCapitalization,
+    required bool validate,
+    required Function(String?) onChanged,
+    required String hintText,
+    String? Function(String?)? validator,
     required TextInputType textInputType}) {
-  return TextField(
+  return TextFormField(
     maxLines: maxLines,
     maxLength: maxLength,
     keyboardType: textInputType,
@@ -17,31 +21,35 @@ TextField textFieldRequest(
     ),
     autofocus: true,
     controller: controller,
-    decoration: const InputDecoration(
-      counterStyle: TextStyle(color: Colors.white),
+    onChanged: onChanged,
+    validator: validator,
+    decoration: InputDecoration(
+      counterStyle: const TextStyle(color: Colors.white),
+      errorText: validate ? 'Fields Can\'t Be Empty' : null,
       filled: true,
       fillColor: Colors.transparent,
-      border: OutlineInputBorder(
+      hintText: hintText,
+      border: const OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(15.0)),
         borderSide: BorderSide(
           width: 2.0,
         ),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.blueGrey),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
         borderSide: BorderSide(
           color: Color(0xffCFFFDC),
         ),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.redAccent),
       ),
-      focusedErrorBorder: OutlineInputBorder(
+      focusedErrorBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.orangeAccent),
       ),
-      disabledBorder: OutlineInputBorder(
+      disabledBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
       ),
     ),

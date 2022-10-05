@@ -13,7 +13,7 @@ class ContactUsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
-        title: const Text('Contact Us'),
+        title: const Text('Contact Last Resrt'),
       ),
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
@@ -37,10 +37,12 @@ class ContactUsPage extends StatelessWidget {
                 color: Colors.grey,
               ),
               ListTile(
-                leading: const FaIcon(FontAwesomeIcons.discord),
+                leading: const FaIcon(FontAwesomeIcons.discord, size: 18, color: Colors.white60),
                 title: const Text(
                   'https://discord.gg/ESBqwvkN',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
                 trailing: IconButton(
                     onPressed: () {
@@ -48,16 +50,18 @@ class ContactUsPage extends StatelessWidget {
                         showSnackBar(context, "Copied to clipboard");
                       });
                     },
-                    icon: const Icon(Icons.copy)),
+                    icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
               ),
               const Divider(
                 color: Colors.grey,
               ),
               ListTile(
-                leading: const Icon(Icons.mail),
+                leading: const Icon(Icons.mail, size: 18, color: Colors.white60),
                 title: const Text(
                   'hello@lastresrt.com',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
                 trailing: IconButton(
                     onPressed: () {
@@ -65,7 +69,7 @@ class ContactUsPage extends StatelessWidget {
                         showSnackBar(context, "Copied to clipboard");
                       });
                     },
-                    icon: const Icon(Icons.copy)),
+                    icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
               ),
               const Divider(
                 color: Colors.grey,

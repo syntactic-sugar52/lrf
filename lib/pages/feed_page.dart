@@ -11,6 +11,7 @@ import 'package:lrf/main.dart';
 import 'package:lrf/pages/contact_us_page.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/pages/request_page.dart';
+import 'package:lrf/pages/search_page.dart';
 
 import 'package:lrf/pages/widgets/home/card_widget.dart';
 import 'package:lrf/provider/authentication.dart';
@@ -30,6 +31,7 @@ class _FeedPageState extends State<FeedPage> {
   String? _currentAddress;
   Position? _currentPosition;
   String? _subAdminArea;
+  String? _subLocality;
   @override
   void initState() {
     // TODO: implement initState
@@ -94,7 +96,8 @@ class _FeedPageState extends State<FeedPage> {
         Placemark place = placemarks[0];
         setState(() {
           _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
-          _subAdminArea = ' ${place.subAdministrativeArea}';
+          _subAdminArea = '${place.subAdministrativeArea}';
+          _subLocality = '${place.subLocality}';
         });
         String res = await Database().updateUserCollection(
             address: _currentAddress.toString(),
@@ -102,7 +105,7 @@ class _FeedPageState extends State<FeedPage> {
             lng: _currentPosition!.longitude.toString(),
             uid: widget.user.uid.toString());
         sharedPreferences.setString('address', _currentAddress.toString());
-        sharedPreferences.setString('subAdminArea', _subAdminArea.toString());
+        sharedPreferences.setString('subAdminArea', _subAdminArea == null ? _subAdminArea.toString() : _subLocality.toString());
 
         if (res == "success") {
           print('success');
@@ -122,7 +125,7 @@ class _FeedPageState extends State<FeedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.green.shade800,
         highlightElevation: 50,
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestPage()));
@@ -157,7 +160,7 @@ class _FeedPageState extends State<FeedPage> {
                 style: TextStyle(fontSize: 14.0),
               ),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ContactUsPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsPage()));
               },
             ),
             ListTile(
@@ -167,9 +170,14 @@ class _FeedPageState extends State<FeedPage> {
                 style: TextStyle(fontSize: 14.0),
               ),
               onTap: () async {
-                await Authentication.signOut(context: context);
-                if (mounted) {
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+                try {
+                  await Authentication.signOut(context: context);
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+                  }
+                } catch (e) {
+                  showSnackBar(context, 'Something went wrong.');
+                  Future.error(e);
                 }
               },
             ),
@@ -179,10 +187,20 @@ class _FeedPageState extends State<FeedPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(40.0),
         child: AppBar(
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage()));
+                },
+                icon: const Icon(Icons.search))
+          ],
           elevation: 0,
           centerTitle: true,
-          title: const Text('Last Resrt',
-              style: TextStyle(fontSize: 16, color: Colors.green, fontWeight: FontWeight.bold, letterSpacing: 1, fontFamily: 'Roboto')),
+          title: const CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.black,
+            child: Text('LR', style: TextStyle(color: Colors.green, fontWeight: FontWeight.w700, fontFamily: 'Roboto')),
+          ),
           backgroundColor: kAppBackgroundColor,
         ),
       ),
@@ -219,7 +237,12 @@ class _FeedPageState extends State<FeedPage> {
                 );
               },
             )
-          : const SizedBox.shrink(),
+          : const Center(
+              child: CircularProgressIndicator(
+                color: Colors.green,
+              ),
+              // child: Text('Location is required to access the app.'),
+            ),
     );
   }
 }

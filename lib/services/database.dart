@@ -24,11 +24,18 @@ class Database {
     return docData;
   }
 
-  Future createUser(String displayName, String email, String id, String photoURL) async {
-    final docUser = usersRef.doc(id);
-    final user = {'id': id, 'displayName': displayName, 'email': email, 'photoUrl': photoURL, 'createdAt': DateTime.now()};
+  Future<String> createUser(String displayName, String email, String id, String photoURL) async {
+    String res = "Some error occurred";
+    try {
+      final docUser = usersRef.doc(id);
+      final user = {'id': id, 'displayName': displayName, 'email': email, 'photoUrl': photoURL, 'createdAt': DateTime.now()};
 
-    await docUser.set(user);
+      await docUser.set(user);
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
   }
 
   Future<String> updateUserCollection({required String address, required String lat, required String lng, required String uid}) async {
@@ -53,12 +60,6 @@ class Database {
 
   String getConversationID(String userID, String peerID) {
     return userID.hashCode <= peerID.hashCode ? '${userID}_$peerID' : '${peerID}_$userID';
-  }
-
-  Future getMessageList(String uid) async {
-    QuerySnapshot documentSnapshot = await _firestore.collection('messageList').doc(uid).collection('list').get();
-
-    return documentSnapshot.docs;
   }
 
   Future<String> createPostRequest(

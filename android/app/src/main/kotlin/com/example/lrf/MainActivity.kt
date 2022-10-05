@@ -1,4 +1,4 @@
-package com.example.lrf
+package com.lastresort.lr
 
 import io.flutter.embedding.android.FlutterActivity
 
