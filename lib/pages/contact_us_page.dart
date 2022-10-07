@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
 
 class ContactUsPage extends StatelessWidget {
@@ -14,6 +16,7 @@ class ContactUsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
         title: const Text('Contact Last Resrt'),
+        centerTitle: false,
       ),
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
@@ -24,12 +27,39 @@ class ContactUsPage extends StatelessWidget {
               const SizedBox(
                 height: 30,
               ),
-              const Text(
-                'Join Our Growing Community',
-                style: TextStyle(
-                  fontSize: 16,
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              ),
+                elevation: 5,
+                color: Colors.black54,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  width: MediaQuery.of(context).size.width,
+                  height: 80,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Join Our Growing Community',
+                        style: TextStyle(
+                          fontSize: 16,
+                          letterSpacing: .5,
+                          color: Colors.green,
+                          // color: Colors.blueGrey.shade100,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 1.0,
+                              color: Theme.of(context).primaryColor,
+                              offset: const Offset(0.4, 0.2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ).asGlass(),
               const SizedBox(
                 height: 30,
               ),
@@ -37,39 +67,45 @@ class ContactUsPage extends StatelessWidget {
                 color: Colors.grey,
               ),
               ListTile(
-                leading: const FaIcon(FontAwesomeIcons.discord, size: 18, color: Colors.white60),
+                leading: const FaIcon(FontAwesomeIcons.discord, size: 18, color: Colors.indigoAccent),
                 title: const Text(
                   'https://discord.gg/ESBqwvkN',
                   style: TextStyle(
                     fontSize: 14,
                   ),
                 ),
-                trailing: IconButton(
-                    onPressed: () {
-                      Clipboard.setData(const ClipboardData(text: 'https://discord.gg/ESBqwvkN')).then((_) {
-                        showSnackBar(context, "Copied to clipboard");
-                      });
-                    },
-                    icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
+                trailing: CircleAvatar(
+                  child: IconButton(
+                      onPressed: () {
+                        Clipboard.setData(const ClipboardData(text: 'https://discord.gg/ESBqwvkN')).then((_) {
+                          showSnackBar(context, "Copied to clipboard");
+                        });
+                      },
+                      icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
+                ),
               ),
               const Divider(
                 color: Colors.grey,
               ),
               ListTile(
-                leading: const Icon(Icons.mail, size: 18, color: Colors.white60),
+                leading: const Icon(Icons.mail, size: 18, color: Colors.blueAccent),
                 title: const Text(
                   'hello@lastresrt.com',
                   style: TextStyle(
                     fontSize: 14,
                   ),
                 ),
-                trailing: IconButton(
-                    onPressed: () {
-                      Clipboard.setData(const ClipboardData(text: 'hello@lastresrt.com')).then((_) {
-                        showSnackBar(context, "Copied to clipboard");
-                      });
-                    },
-                    icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
+                trailing: CircleAvatar(
+                  child: IconButton(
+                      onPressed: () {
+                        try {
+                          Database().sendEmail('hello@lastresrt.com');
+                        } catch (e) {
+                          Future.error(e.toString());
+                        }
+                      },
+                      icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
+                ),
               ),
               const Divider(
                 color: Colors.grey,

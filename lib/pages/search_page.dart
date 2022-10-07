@@ -3,6 +3,7 @@ import 'package:expandable/expandable.dart';
 import 'package:firestore_search/firestore_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/services/database.dart';
 import 'dart:math' as math;
@@ -20,6 +21,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   late Database db;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -41,7 +43,59 @@ class _SearchPageState extends State<SearchPage> {
       searchBodyBackgroundColor: kAppBackgroundColor,
       searchBackgroundColor: Colors.white70,
       searchBy: 'title',
-      scaffoldBody: const Center(),
+      scaffoldBody: Container(
+        padding: const EdgeInsets.all(12),
+        height: 100,
+        width: MediaQuery.of(context).size.width,
+        child: Card(
+          elevation: 8,
+          color: Colors.black87,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 5,
+              ),
+              Text('Search for a Title',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white70,
+                    // color: Colors.white70,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 1.0,
+                        color: Theme.of(context).primaryColor,
+                        offset: const Offset(0.4, 0.2),
+                      ),
+                    ],
+                  )),
+              const SizedBox(
+                height: 5,
+              ),
+              Text('All Title Start with an Uppercase Letter',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    // color: Colors.white70,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 1.0,
+                        color: Theme.of(context).primaryColor,
+                        offset: const Offset(0.4, 0.2),
+                      ),
+                    ],
+                  )),
+              const SizedBox(
+                height: 5,
+              ),
+            ],
+          ),
+        ).asGlass(),
+      ),
       scaffoldBackgroundColor: kAppBackgroundColor,
       dataListFromSnapshot: DataModel().dataListFromSnapshot,
       builder: (context, snapshot) {
@@ -50,7 +104,7 @@ class _SearchPageState extends State<SearchPage> {
 
           if (dataList!.isEmpty) {
             return const Center(
-              child: Text('No Title Found, Try Searching with Uppercase.'),
+              child: Text('No Title Found'),
             );
           }
           return ListView.builder(
@@ -209,14 +263,16 @@ class _SearchPageState extends State<SearchPage> {
                                                   postOwnerId: data.userId.toString(),
                                                   isEmail: true,
                                                   isSms: false,
+                                                  isSearchPage: true,
                                                   postId: data.postId.toString());
                                               if (res == 'success') {
-                                                Clipboard.setData(ClipboardData(text: data.contactEmail ?? '')).then((_) {
-                                                  showSnackBar(context, "Copied to clipboard");
-                                                });
+                                                db.sendEmail(data.contactEmail ?? '');
                                               } else {
                                                 if (mounted) {
                                                   showSnackBar(context, res);
+                                                  Clipboard.setData(ClipboardData(text: data.contactEmail ?? '')).then((_) {
+                                                    showSnackBar(context, "Copied to clipboard");
+                                                  });
                                                 }
                                               }
                                             } else {
@@ -261,15 +317,18 @@ class _SearchPageState extends State<SearchPage> {
                                                   userPostedId: db.user.uid.toString(),
                                                   postOwnerId: data.userId.toString(),
                                                   isEmail: true,
+                                                  isSearchPage: true,
                                                   isSms: false,
                                                   postId: data.postId.toString());
                                               if (res == 'success') {
-                                                Clipboard.setData(ClipboardData(text: data.contactNumber ?? '')).then((_) {
-                                                  showSnackBar(context, "Copied to clipboard");
+                                                setState(() {
+                                                  db.textMe("sms:${data.contactNumber.toString()}", mounted, context);
                                                 });
                                               } else {
                                                 if (mounted) {
-                                                  showSnackBar(context, res);
+                                                  Clipboard.setData(ClipboardData(text: data.contactNumber ?? '')).then((_) {
+                                                    showSnackBar(context, "Copied to clipboard");
+                                                  });
                                                 }
                                               }
                                             } else {
@@ -369,18 +428,6 @@ class _SearchPageState extends State<SearchPage> {
 }
 
 class DataModel {
-  final String? title;
-  final String? description;
-  final String? username;
-  final String? subAdminArea;
-  final String? profImage;
-  final String? contactNumber;
-  final String? contactEmail;
-  final List? downVote;
-  final List? upvote;
-  final String? userId;
-  final String? postId;
-  final Timestamp? datePublished;
   DataModel(
       {this.title,
       this.description,
@@ -394,6 +441,19 @@ class DataModel {
       this.postId,
       this.upvote,
       this.userId});
+
+  final String? contactEmail;
+  final String? contactNumber;
+  final Timestamp? datePublished;
+  final String? description;
+  final List? downVote;
+  final String? postId;
+  final String? profImage;
+  final String? subAdminArea;
+  final String? title;
+  final List? upvote;
+  final String? userId;
+  final String? username;
 
   //Create a method to convert QuerySnapshot from Cloud Firestore to a list of objects of this DataModel
   //This function in essential to the working of FirestoreSearchScaffold

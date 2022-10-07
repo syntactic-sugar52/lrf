@@ -16,20 +16,25 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
-  String price = '';
+  String? currentAddress;
+  late Database db;
   // Uint8List? _file;
   bool isLoading = false;
-  bool needValidator = false;
 
-  final _formKey = GlobalKey<FormState>();
+  bool needValidator = false;
+  String price = '';
+  String? subAdminArea;
+  String userId = '';
+
+  final TextEditingController _contactEmailController = TextEditingController();
+  final TextEditingController _contactNumberController = TextEditingController();
 // text controllers for textfield
   final TextEditingController _descriptionController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contactNumberController = TextEditingController();
-  final TextEditingController _contactEmailController = TextEditingController();
-  bool _validate = false;
-  late Database db;
-  String userId = '';
+  final bool _validate = false;
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -40,8 +45,6 @@ class _RequestPageState extends State<RequestPage> {
     super.dispose();
   }
 
-  String? subAdminArea;
-  String? currentAddress;
   @override
   void initState() {
     // TODO: implement initState
@@ -143,7 +146,7 @@ class _RequestPageState extends State<RequestPage> {
                         maxLines: 2,
                         hintText: 'Looking for..',
                         onChanged: (value) {},
-                        maxLength: 80,
+                        maxLength: 120,
                         validate: _validate,
                         textCapitalization: TextCapitalization.sentences,
                         textInputType: TextInputType.text)),
@@ -204,7 +207,7 @@ class _RequestPageState extends State<RequestPage> {
                     padding: const EdgeInsets.all(8.0),
                     child: textFieldRequest(
                         controller: _descriptionController,
-                        maxLines: 25,
+                        maxLines: 20,
                         hintText: '',
                         validate: _validate,
                         onChanged: (value) {},

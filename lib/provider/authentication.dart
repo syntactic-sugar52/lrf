@@ -1,29 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:lrf/models/user_model.dart';
 import 'package:lrf/pages/feed_page.dart';
-// import 'package:lrf/pages/main_page.dart';
 import 'package:lrf/services/database.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:lrf/utils/utils.dart';
 
 class Authentication {
   final googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _user;
   GoogleSignInAccount get user => _user!;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  static SnackBar customSnackBar({required String content}) {
-    return SnackBar(
-      backgroundColor: Colors.black,
-      content: Text(
-        content,
-        style: const TextStyle(color: Colors.redAccent, letterSpacing: 0.5),
-      ),
-    );
-  }
 
   static Future<FirebaseApp> initializeFirebase({
     required BuildContext context,
@@ -50,10 +37,9 @@ class Authentication {
 
       try {
         final UserCredential userCredential = await auth.signInWithPopup(authProvider);
-
         user = userCredential.user;
       } catch (e) {
-        print(e);
+        Future.error(e);
       }
     } else {
       final GoogleSignIn googleSignIn = GoogleSignIn();
@@ -74,39 +60,33 @@ class Authentication {
           user = userCredential.user;
 
           if (user != null) {
-            await Database().createUser(
+            final res = await Database().createUser(
               user.displayName!,
               user.email!,
               userCredential.user!.uid,
               user.photoURL!,
             );
+            if (res == "success") {
+            } else {
+              if (mounted) {
+                showSnackBar(context, 'Something went wrong. Please Try Again.');
+              }
+            }
           }
         } on FirebaseAuthException catch (e) {
           if (e.code == 'account-exists-with-different-credential') {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                Authentication.customSnackBar(
-                  content: 'The account already exists with a different credential.',
-                ),
-              );
+              showSnackBar(context, 'The account already exists with a different credential.');
             }
           } else if (e.code == 'invalid-credential') {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                Authentication.customSnackBar(
-                  content: 'Error occurred while accessing credentials. Try again.',
-                ),
-              );
+              showSnackBar(context, 'Error occurred while accessing credentials. Try again.');
             }
           }
         } catch (e) {
           Future.error(e);
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              Authentication.customSnackBar(
-                content: 'Error occurred using Google Sign-In. Try again.',
-              ),
-            );
+            showSnackBar(context, 'Error occurred using Google Sign-In. Try again.');
           }
         }
       }
@@ -124,11 +104,7 @@ class Authentication {
       }
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        Authentication.customSnackBar(
-          content: 'Error signing out. Try again.',
-        ),
-      );
+      showSnackBar(context, 'Error signing out. Try again.');
     }
   }
 }

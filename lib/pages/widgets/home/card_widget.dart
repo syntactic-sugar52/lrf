@@ -1,8 +1,10 @@
 import 'package:expandable/expandable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:glass/glass.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
@@ -17,9 +19,9 @@ class Card2 extends StatefulWidget {
   const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea}) : super(key: key);
 
   final snap;
+  final String subAdministrativeArea;
   final User user;
 
-  final String subAdministrativeArea;
   @override
   State<Card2> createState() => _Card2State();
 }
@@ -35,7 +37,6 @@ class _Card2State extends State<Card2> {
   void initState() {
     // TODO: implement initState
     db = Database();
-
     super.initState();
   }
 
@@ -75,7 +76,6 @@ class _Card2State extends State<Card2> {
                 ),
                 Text(
                   widget.snap['username'].toString(),
-                  // username,
                   style: TextStyle(color: Colors.blueGrey.shade100),
                 ),
               ],
@@ -87,7 +87,6 @@ class _Card2State extends State<Card2> {
                     widget.snap['datePublished'].toDate(),
                   ),
                   style: TextStyle(color: Colors.blueGrey.shade100),
-                  // style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             )
@@ -179,33 +178,6 @@ class _Card2State extends State<Card2> {
     return Container();
   }
 
-  _textMe(String number) async {
-    // final smsUri = Uri(
-    //   scheme: 'sms',
-    //   path: number,
-    //   query: encodeQueryParameters(<String, String>{'body': 'Hey I am inquring about your post in Last Resrt'}),
-    // );
-
-    try {
-      if (await canLaunchUrlString(number)) {
-        await launchUrlString(number);
-      }
-    } catch (e) {
-      if (mounted) {
-        showSnackBar(context, 'Some error occured');
-      }
-    }
-  }
-
-  void _sendEmail(String email) {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: email,
-      queryParameters: {'subject': 'LastResrt', 'body': ''},
-    );
-    launchUrl(emailLaunchUri);
-  }
-
   buildExpanded3() {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -236,10 +208,6 @@ class _Card2State extends State<Card2> {
                   width: 10,
                 ),
                 Icon(Icons.numbers, color: Colors.amber.shade800),
-                // Text(
-                //   'Contact number: ',
-                //   style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
-                // ),
                 TextButton(
                     onPressed: () async {
                       try {
@@ -249,36 +217,46 @@ class _Card2State extends State<Card2> {
                               postOwnerId: widget.snap['userId'].toString(),
                               isEmail: false,
                               isSms: true,
+                              isSearchPage: false,
                               postId: widget.snap['postId'].toString());
                           if (res == 'success') {
                             setState(() {
-                              _textMe("sms:${widget.snap['contactNumber'].toString()}");
+                              db.textMe("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
                             });
                           } else {
                             if (mounted) {
-                              showSnackBar(context, res);
+                              Clipboard.setData(ClipboardData(
+                                text: widget.snap['contactNumber'].toString(),
+                              )).then((_) {
+                                showSnackBar(context, "Copied to clipboard");
+                              });
                             }
                           }
                         } else {
                           if (mounted) {
-                            showSnackBar(context, 'Contact Someone Else');
+                            showSnackBar(context, 'Contacting yourself is not allowed.');
                           }
                         }
                       } catch (e) {
                         if (mounted) {
-                          showSnackBar(context, e.toString());
+                          showSnackBar(context, 'Something went wrong. Try Again.');
                         }
-
                         Future.error(e);
                       }
                     },
                     child: Text(
                       widget.snap['contactNumber'].toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white70,
-                        // color: Colors.blueGrey.shade100,
                         fontSize: 14,
                         letterSpacing: .5,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 1.0,
+                            color: Theme.of(context).primaryColor,
+                            offset: const Offset(0.4, 0.2),
+                          ),
+                        ],
                         fontWeight: FontWeight.w500,
                         decoration: TextDecoration.underline,
                       ),
@@ -294,10 +272,6 @@ class _Card2State extends State<Card2> {
                   width: 10,
                 ),
                 Icon(Icons.mail, color: Colors.blue.shade800),
-                // Text(
-                //   'Contact Email: ',
-                //   style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 16, letterSpacing: .5, fontWeight: FontWeight.w500),
-                // ),
                 TextButton(
                   onPressed: () async {
                     try {
@@ -306,22 +280,27 @@ class _Card2State extends State<Card2> {
                             userPostedId: db.user.uid.toString(),
                             postOwnerId: widget.snap['userId'].toString(),
                             isEmail: true,
+                            isSearchPage: false,
                             isSms: false,
                             postId: widget.snap['postId'].toString());
                         if (res == 'success') {
                           setState(() {
-                            _sendEmail(
+                            db.sendEmail(
                               widget.snap['contactEmail'].toString(),
                             );
                           });
                         } else {
                           if (mounted) {
-                            showSnackBar(context, res);
+                            Clipboard.setData(ClipboardData(
+                              text: widget.snap['contactEmail'].toString(),
+                            )).then((_) {
+                              showSnackBar(context, "Copied to clipboard");
+                            });
                           }
                         }
                       } else {
                         if (mounted) {
-                          showSnackBar(context, 'Contact Someone Else');
+                          showSnackBar(context, 'Contacting yourself is not allowed.');
                         }
                       }
                     } catch (e) {
@@ -334,10 +313,17 @@ class _Card2State extends State<Card2> {
                   },
                   child: Text(
                     widget.snap['contactEmail'].toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                       letterSpacing: .5,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 1.0,
+                          color: Theme.of(context).primaryColor,
+                          offset: const Offset(0.4, 0.2),
+                        ),
+                      ],
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                     ),
@@ -354,7 +340,6 @@ class _Card2State extends State<Card2> {
 
   @override
   Widget build(BuildContext context) {
-    // super.build;
     return ExpandableNotifier(
         child: Padding(
       padding: EdgeInsets.zero,
@@ -387,7 +372,7 @@ class _Card2State extends State<Card2> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Card(
-                    elevation: 2,
+                    elevation: 8,
                     child: IntrinsicHeight(
                       child: Row(
                         children: [
@@ -465,7 +450,7 @@ class _Card2State extends State<Card2> {
                                   Icons.share,
                                   color: Colors.white70,
                                 )),
-                          )
+                          ),
                         ],
                       ),
                     ),
@@ -477,8 +462,15 @@ class _Card2State extends State<Card2> {
                         child: Text(
                           controller.expanded ? "CLOSE" : "OPEN",
                           style: Theme.of(context).textTheme.button!.copyWith(
-                                color: const Color(0xffCFFFDC),
+                            color: const Color(0xffCFFFDC),
+                            shadows: [
+                              Shadow(
+                                blurRadius: 1.0,
+                                color: Theme.of(context).primaryColor,
+                                offset: const Offset(0.2, 0.2),
                               ),
+                            ],
+                          ),
                         ),
                         onPressed: () {
                           controller.toggle();

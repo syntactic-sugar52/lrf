@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 
 import 'package:lrf/pages/widgets/google_signin_button.dart';
@@ -18,14 +19,7 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              const SizedBox(
-                width: 280,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.black,
-                  child: Text('LR', style: TextStyle(color: Colors.green, fontSize: 40, fontWeight: FontWeight.w700, fontFamily: 'Roboto')),
-                ),
-              ),
+              Card(color: Colors.transparent, elevation: 12, child: SizedBox(width: 220, child: Image.asset('assets/LRlogo.png')).asGlass()),
               const Spacer(),
               const Align(
                 alignment: Alignment.centerLeft,
@@ -46,7 +40,9 @@ class LoginPage extends StatelessWidget {
               ),
               const Spacer(),
               FutureBuilder(
-                future: Authentication.initializeFirebase(context: context),
+                future: Authentication.initializeFirebase(
+                  context: context,
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong. Try agin.');

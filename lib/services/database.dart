@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:lrf/utils/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -113,7 +117,12 @@ class Database {
   }
 
   Future<String> updateContactedCollection(
-      {required String userPostedId, required String postOwnerId, required bool isEmail, required bool isSms, required String postId}) async {
+      {required String userPostedId,
+      required String postOwnerId,
+      required bool isEmail,
+      required bool isSms,
+      required String postId,
+      required bool isSearchPage}) async {
     final id = const Uuid().v4();
 
     final docRequest = FirebaseFirestore.instance.collection('contacted').doc(id);
@@ -125,6 +134,7 @@ class Database {
         'isSms': isSms,
         'users': [userPostedId, postOwnerId],
         'datePublished': DateTime.now(),
+        'isSearchPage': isSearchPage
       };
 // create document and write data to firebase
       await docRequest.set(posts, SetOptions(merge: true));
@@ -221,5 +231,26 @@ class Database {
       res = err.toString();
     }
     return res;
+  }
+
+  void textMe(String number, var mounted, BuildContext context) async {
+    try {
+      if (await canLaunchUrlString(number)) {
+        await launchUrlString(number);
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnackBar(context, 'Some error occured');
+      }
+    }
+  }
+
+  void sendEmail(String email) {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {'subject': 'LastResrt', 'body': ''},
+    );
+    launchUrl(emailLaunchUri);
   }
 }
