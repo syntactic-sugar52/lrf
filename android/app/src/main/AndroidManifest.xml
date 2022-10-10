@@ -19,7 +19,7 @@
   </intent>
 </queries>
    <application
-        android:label="lr"
+        android:label="Last Resrt"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

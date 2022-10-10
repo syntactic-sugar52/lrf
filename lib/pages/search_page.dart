@@ -340,7 +340,6 @@ class _SearchPageState extends State<SearchPage> {
                                             if (mounted) {
                                               showSnackBar(context, e.toString());
                                             }
-
                                             Future.error(e);
                                           }
                                         },

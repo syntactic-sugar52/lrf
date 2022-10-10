@@ -89,6 +89,7 @@ class Database {
         'title': title,
         'upVote': [],
         'downVote': [],
+        'share': [],
         'description': description,
         'datePublished': DateTime.now(),
         'profImage': photoURL,
@@ -164,15 +165,37 @@ class Database {
   Future<String> upvotePost(String postId, String uid, List upvote) async {
     String res = "Some error occurred";
     try {
+      _firestore.collection('posts').doc(postId).update({
+        'upVote': FieldValue.arrayUnion([uid])
+      });
+      // if (upvote.contains(uid)) {
+      //   // if the  list contains the user uid, we need to remove it
+      //   _firestore.collection('posts').doc(postId).update({
+      //     'upVote': FieldValue.arrayRemove([uid])
+      //   });
+      // } else {
+      //   // else we need to add uid to the likes array
+
+      // }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> sharePost(String postId, String uid, List upvote) async {
+    String res = "Some error occurred";
+    try {
       if (upvote.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
         _firestore.collection('posts').doc(postId).update({
-          'upVote': FieldValue.arrayRemove([uid])
+          'share': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
         _firestore.collection('posts').doc(postId).update({
-          'upVote': FieldValue.arrayUnion([uid])
+          'share': FieldValue.arrayUnion([uid])
         });
       }
       res = 'success';

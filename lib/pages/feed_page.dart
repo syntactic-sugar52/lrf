@@ -25,8 +25,9 @@ import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
 
 class FeedPage extends StatefulWidget {
-  final User user;
   const FeedPage({Key? key, required this.user}) : super(key: key);
+
+  final User user;
 
   @override
   State<FeedPage> createState() => _FeedPageState();
@@ -35,20 +36,20 @@ class FeedPage extends StatefulWidget {
 class _FeedPageState extends State<FeedPage> {
   String? _currentAddress;
   Position? _currentPosition;
-  String? _subAdminArea;
-  String? _subLocality;
   final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
   bool _locationServiceEnabled = false;
+  LocationPermission? _permissionStatus;
+  String? _postalCode;
+  String? _subAdminArea;
+  String? _subLocality;
+
   @override
   void initState() {
-    // TODO: implement initState
     _getCurrentPosition();
-
     super.initState();
   }
 
-  LocationPermission? _permissionStatus;
-  Future<bool> navigateToUserLocation(BuildContext context) async {
+  Future<bool> getUserLocation(BuildContext context) async {
     // get permission if not provided
     _permissionStatus = await _geolocator.checkPermission();
     // if inital permission denied, request permission
@@ -88,7 +89,7 @@ class _FeedPageState extends State<FeedPage> {
         _currentPosition = await _geolocator.getCurrentPosition();
       } catch (e) {
         if (mounted) {
-          showSnackBar(context, 'Warning: Location service is disabled. Please enable it to navigate to your location.');
+          showSnackBar(context, 'Warning: Location service is disabled. Please enable it to continue with the app.');
         }
 
         return Future.error('Location service is disabled');
@@ -110,14 +111,19 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Future<void> _getCurrentPosition() async {
-    final hasPermission = await navigateToUserLocation(context);
+    final hasPermission = await getUserLocation(context);
     try {
       if (!hasPermission) {
-        StreamSubscription<ServiceStatus> serviceStatusStream = Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
-          // print(status.name.toLowerCase());
+        StreamSubscription<ServiceStatus> serviceStatusStream = Geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
+          bool locationSettingEnabled = await Geolocator.openLocationSettings();
+          if (locationSettingEnabled == true) {
+            await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
+              setState(() => _currentPosition = position);
+              _getAddressFromLatLng(_currentPosition!);
+            });
+          }
         });
       }
-
       await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
         setState(() => _currentPosition = position);
         _getAddressFromLatLng(_currentPosition!);
@@ -140,6 +146,7 @@ class _FeedPageState extends State<FeedPage> {
           _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
           _subAdminArea = '${place.subAdministrativeArea}';
           _subLocality = '${place.subLocality}';
+          _postalCode = '${place.postalCode}';
         });
         String res = await Database().updateUserCollection(
             address: _currentAddress.toString(),
@@ -148,7 +155,7 @@ class _FeedPageState extends State<FeedPage> {
             uid: widget.user.uid.toString());
         sharedPreferences.setString('address', _currentAddress.toString());
         sharedPreferences.setString('subAdminArea', _subAdminArea == null ? _subAdminArea.toString() : _subLocality.toString());
-
+        sharedPreferences.setString('postalCOde', _postalCode == null ? _postalCode.toString() : '');
         if (res == "success") {
         } else {
           if (mounted) {
@@ -286,6 +293,7 @@ class _FeedPageState extends State<FeedPage> {
                           child: Card2(
                             snap: snapshot.data!.docs[index].data(),
                             user: widget.user,
+                            postalCode: _postalCode.toString(),
                             subAdministrativeArea: _subAdminArea.toString(),
                           )),
                     ),
@@ -297,7 +305,6 @@ class _FeedPageState extends State<FeedPage> {
               child: CircularProgressIndicator(
                 color: Colors.green,
               ),
-              // child: Text('Location is required to access the app.'),
             ),
     );
   }

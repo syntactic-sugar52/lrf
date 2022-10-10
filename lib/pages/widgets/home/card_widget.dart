@@ -2,26 +2,20 @@ import 'package:expandable/expandable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:glass/glass.dart';
-import 'package:image_picker/image_picker.dart';
-
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
-
-import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class Card2 extends StatefulWidget {
-  const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea}) : super(key: key);
+  const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea, required this.postalCode}) : super(key: key);
 
   final snap;
   final String subAdministrativeArea;
   final User user;
-
+  final String postalCode;
   @override
   State<Card2> createState() => _Card2State();
 }
@@ -136,7 +130,7 @@ class _Card2State extends State<Card2> {
               children: [
                 Icon(Icons.location_pin, color: Colors.green.shade600),
                 Text(
-                  widget.snap['subAdminArea'],
+                  widget.snap['subAdminArea'] ?? 'Postal Code: ${widget.postalCode.toString()}',
                   style: const TextStyle(color: Colors.white70),
                 ),
               ],
@@ -441,7 +435,7 @@ class _Card2State extends State<Card2> {
                             height: 40,
                             child: IconButton(
                                 iconSize: 18,
-                                onPressed: () {
+                                onPressed: () async {
                                   Share.share(
                                     'Check this out on Last Resrt!, Download the app now. - ${widget.snap['title']}',
                                   );

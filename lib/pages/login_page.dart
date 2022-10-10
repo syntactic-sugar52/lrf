@@ -20,6 +20,13 @@ class LoginPage extends StatelessWidget {
             children: [
               const Spacer(),
               Card(color: Colors.transparent, elevation: 12, child: SizedBox(width: 220, child: Image.asset('assets/LRlogo.png')).asGlass()),
+              const SizedBox(
+                height: 8,
+              ),
+              const Text(
+                'Faster Personal Ads',
+                style: TextStyle(fontSize: 20, color: Colors.white70),
+              ),
               const Spacer(),
               const Align(
                 alignment: Alignment.centerLeft,
