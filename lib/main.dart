@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'routes/routes.dart' as router;
 
 final navigatorKey = GlobalKey<NavigatorState>();
 late SharedPreferences sharedPreferences;
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         highlightColor: Colors.green,
         scaffoldBackgroundColor: mobileBackgroundColor,
       ),
+      onGenerateRoute: router.generateRoute,
       home: const LoginPage(),
     );
   }

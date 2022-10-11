@@ -24,7 +24,6 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     db = Database();
     super.initState();
   }
@@ -173,7 +172,7 @@ class _SearchPageState extends State<SearchPage> {
 
                                                     if (res == 'success') {
                                                       if (mounted) {
-                                                        showSnackBar(context, 'Deleted');
+                                                        showSnackBar(context, 'Post Deleted');
                                                       }
                                                     } else {
                                                       if (mounted) {
@@ -321,9 +320,9 @@ class _SearchPageState extends State<SearchPage> {
                                                   isSms: false,
                                                   postId: data.postId.toString());
                                               if (res == 'success') {
-                                                setState(() {
+                                                if (mounted) {
                                                   db.textMe("sms:${data.contactNumber.toString()}", mounted, context);
-                                                });
+                                                }
                                               } else {
                                                 if (mounted) {
                                                   Clipboard.setData(ClipboardData(text: data.contactNumber ?? '')).then((_) {

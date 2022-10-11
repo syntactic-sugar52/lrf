@@ -18,22 +18,23 @@ class RequestPage extends StatefulWidget {
 class _RequestPageState extends State<RequestPage> {
   String? currentAddress;
   late Database db;
-  // Uint8List? _file;
   bool isLoading = false;
-
+  final bool _validate = false;
   bool needValidator = false;
   String price = '';
   String? subAdminArea;
   String userId = '';
-
-  final TextEditingController _contactEmailController = TextEditingController();
-  final TextEditingController _contactNumberController = TextEditingController();
+  String? postalCode;
+  String? currentUserName;
+  String? currentUserId;
+  String? currentUserPhotoUrl;
 // text controllers for textfield
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _contactEmailController = TextEditingController();
+  final TextEditingController _contactNumberController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final bool _validate = false;
 
   @override
   void dispose() {
@@ -47,11 +48,13 @@ class _RequestPageState extends State<RequestPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     db = Database();
     subAdminArea = sharedPreferences.getString('subAdminArea');
     currentAddress = sharedPreferences.getString('address');
-
+    postalCode = sharedPreferences.getString('postalCode');
+    currentUserId = sharedPreferences.getString('currentUserUid');
+    currentUserName = sharedPreferences.getString('currentUserName');
+    currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
     super.initState();
   }
 
@@ -92,10 +95,7 @@ class _RequestPageState extends State<RequestPage> {
       setState(() {
         isLoading = false;
       });
-      showSnackBar(
-        context,
-        err.toString(),
-      );
+      showSnackBar(context, 'Something went wrong. Try again');
     }
   }
 
@@ -106,12 +106,15 @@ class _RequestPageState extends State<RequestPage> {
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
         elevation: 0,
+        title: const Text('Post Ad'),
         actions: [
           TextButton(
               onPressed: () async {
                 final formState = _formKey.currentState;
-                if (formState!.validate() && _titleController.text.isNotEmpty && _descriptionController.text.isNotEmpty) {
-                  postRequest(db.user.uid, db.user.displayName!, db.user.photoURL!);
+                //if form is not empty
+                if (formState!.validate()) {
+                  // add to post collection in db
+                  postRequest(currentUserId ?? db.user.uid, currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
                 } else {
                   if (mounted) {
                     showSnackBar(context, 'Please enter all fields.');
@@ -146,6 +149,12 @@ class _RequestPageState extends State<RequestPage> {
                         maxLines: 2,
                         hintText: 'Looking for..',
                         onChanged: (value) {},
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Title is Required';
+                          }
+                          return null;
+                        },
                         maxLength: 120,
                         validate: _validate,
                         textCapitalization: TextCapitalization.sentences,
@@ -165,9 +174,9 @@ class _RequestPageState extends State<RequestPage> {
                           String patttern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
                           RegExp regExp = RegExp(patttern);
                           if (value!.isEmpty) {
-                            return 'Please enter mobile number';
+                            return 'Mobile Number is Required';
                           } else if (!regExp.hasMatch(value)) {
-                            return 'Please enter valid mobile number';
+                            return 'Please enter a valid mobile number';
                           }
                           return null;
                         },
@@ -211,6 +220,12 @@ class _RequestPageState extends State<RequestPage> {
                         hintText: '',
                         validate: _validate,
                         onChanged: (value) {},
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Description is Required';
+                          }
+                          return null;
+                        },
                         maxLength: 820,
                         textCapitalization: TextCapitalization.sentences,
                         textInputType: TextInputType.multiline)),

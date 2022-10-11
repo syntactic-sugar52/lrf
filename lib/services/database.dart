@@ -238,7 +238,7 @@ class Database {
     try {
       if (text.isNotEmpty) {
         // if the likes list contains the user uid, we need to remove it
-        String commentId = const Uuid().v4();
+
         _firestore.collection('posts').doc(postId).collection('message').doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
           'content': content,
           'idFrom': idFrom,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 void showAlert(
     {required context,
-    IconData? title_icon,
+    IconData? titleIcon,
     required String title,
     required Widget messageBody,
     String? textButton1,
@@ -24,9 +24,9 @@ void showAlert(
         ),
         title: Row(
           children: [
-            title_icon != null
+            titleIcon != null
                 ? Row(children: [
-                    Icon(title_icon, color: Colors.black, size: 25.0),
+                    Icon(titleIcon, color: Colors.black, size: 25.0),
                     const SizedBox(width: 10.0),
                   ])
                 : Container(),

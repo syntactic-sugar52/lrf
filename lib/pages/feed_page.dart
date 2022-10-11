@@ -41,11 +41,15 @@ class _FeedPageState extends State<FeedPage> {
   LocationPermission? _permissionStatus;
   String? _postalCode;
   String? _subAdminArea;
+  String? username;
   String? _subLocality;
+  String? currentUserPhotoUrl;
 
   @override
   void initState() {
     _getCurrentPosition();
+    username = sharedPreferences.getString('currentUserName');
+    currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
     super.initState();
   }
 
@@ -91,7 +95,6 @@ class _FeedPageState extends State<FeedPage> {
         if (mounted) {
           showSnackBar(context, 'Warning: Location service is disabled. Please enable it to continue with the app.');
         }
-
         return Future.error('Location service is disabled');
       }
     } else {
@@ -105,26 +108,24 @@ class _FeedPageState extends State<FeedPage> {
       if (mounted) {
         showSnackBar(context, 'Warning: Your location can\'t be detected.');
       }
-
       return false;
     }
   }
 
   Future<void> _getCurrentPosition() async {
     final hasPermission = await getUserLocation(context);
+
     try {
       if (!hasPermission) {
-        StreamSubscription<ServiceStatus> serviceStatusStream = Geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
-          bool locationSettingEnabled = await Geolocator.openLocationSettings();
-          if (locationSettingEnabled == true) {
-            await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
-              setState(() => _currentPosition = position);
-              _getAddressFromLatLng(_currentPosition!);
-            });
-          }
-        });
+        Position? position = await Geolocator.getLastKnownPosition();
+        if (mounted) {
+          setState(() {
+            _currentPosition = position;
+          });
+          _getAddressFromLatLng(_currentPosition!);
+        }
       }
-      await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((Position position) {
+      await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation).then((Position position) {
         setState(() => _currentPosition = position);
         _getAddressFromLatLng(_currentPosition!);
       }).catchError((e) {
@@ -155,7 +156,7 @@ class _FeedPageState extends State<FeedPage> {
             uid: widget.user.uid.toString());
         sharedPreferences.setString('address', _currentAddress.toString());
         sharedPreferences.setString('subAdminArea', _subAdminArea == null ? _subAdminArea.toString() : _subLocality.toString());
-        sharedPreferences.setString('postalCOde', _postalCode == null ? _postalCode.toString() : '');
+        sharedPreferences.setString('postalCode', _postalCode == null ? _postalCode.toString() : '');
         if (res == "success") {
         } else {
           if (mounted) {
@@ -170,16 +171,13 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
-//todo: change to service enabled instead
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green.shade800,
         highlightElevation: 50,
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestPage()));
-        },
+        onPressed: () => Navigator.pushNamed(context, '/post'),
         child: const Icon(
           Icons.add,
           size: 28,
@@ -193,14 +191,14 @@ class _FeedPageState extends State<FeedPage> {
           children: [
             UserAccountsDrawerHeader(
               currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(widget.user.photoURL.toString()),
+                backgroundImage: NetworkImage(currentUserPhotoUrl ?? widget.user.photoURL.toString()),
                 radius: 14,
               ),
               accountEmail: Text(
                 widget.user.email.toString(),
               ),
               accountName: Text(
-                widget.user.displayName.toString(),
+                username ?? widget.user.displayName.toString(),
                 style: const TextStyle(
                   fontSize: 16.0,
                 ),
@@ -219,9 +217,7 @@ class _FeedPageState extends State<FeedPage> {
                   fontSize: 14.0,
                 ),
               ),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ContactUsPage()));
-              },
+              onTap: () => Navigator.pushNamed(context, '/contactUs'),
             ),
             ListTile(
               leading: const Icon(
@@ -269,7 +265,6 @@ class _FeedPageState extends State<FeedPage> {
               stream: FirebaseFirestore.instance.collection('posts').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  // todo: add shimmer loading effect
                   return const Center(
                     child: Hero(
                       tag: 'loading',

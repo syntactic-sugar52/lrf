@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glass/glass.dart';
+import 'package:lrf/main.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
@@ -12,29 +13,35 @@ import 'package:intl/intl.dart';
 class Card2 extends StatefulWidget {
   const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea, required this.postalCode}) : super(key: key);
 
-  final snap;
+  final String postalCode;
+  final Map<String, dynamic> snap;
   final String subAdministrativeArea;
   final User user;
-  final String postalCode;
+
   @override
   State<Card2> createState() => _Card2State();
 }
 
 class _Card2State extends State<Card2> {
-  // String currentUserId = '';
+  String? currentUserId;
+  String? currentUserName;
+  String? currentUserPhotoUrl;
   bool dangerTapped = false;
-
   late Database db;
+  String? postalCode;
   dynamic userDetails;
 
   @override
   void initState() {
-    // TODO: implement initState
     db = Database();
+    currentUserId = sharedPreferences.getString('currentUserUid');
+    currentUserName = sharedPreferences.getString('currentUserName');
+    currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
+    postalCode = sharedPreferences.getString('postalCode');
     super.initState();
   }
 
-  buildImg(
+  buildInnerCard(
     Color color,
     double height,
     Widget child,
@@ -52,7 +59,7 @@ class _Card2State extends State<Card2> {
         )).asGlass();
   }
 
-  buildCollapsed1() {
+  buildCollapsedHeader() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Padding(
         padding: const EdgeInsets.all(8),
@@ -90,10 +97,9 @@ class _Card2State extends State<Card2> {
     ]);
   }
 
-  buildCollapsed2() {
-    return buildImg(
+  Widget buildCollapsedBody() {
+    return buildInnerCard(
       Colors.transparent,
-      //todo: dynamic height
       MediaQuery.of(context).size.height / 6,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -115,11 +121,11 @@ class _Card2State extends State<Card2> {
     );
   }
 
-  buildCollapsed3() {
+  Widget buildCollapsedImgDetails() {
     return Container();
   }
 
-  buildExpanded1() {
+  Widget buildExpandedHeader() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Padding(
         padding: const EdgeInsets.all(8),
@@ -130,7 +136,7 @@ class _Card2State extends State<Card2> {
               children: [
                 Icon(Icons.location_pin, color: Colors.green.shade600),
                 Text(
-                  widget.snap['subAdminArea'] ?? 'Postal Code: ${widget.postalCode.toString()}',
+                  widget.snap['subAdminArea'] ?? 'Postal Code: ${postalCode ?? widget.postalCode.toString()}',
                   style: const TextStyle(color: Colors.white70),
                 ),
               ],
@@ -145,7 +151,7 @@ class _Card2State extends State<Card2> {
 
                             if (res == 'success') {
                               if (mounted) {
-                                showSnackBar(context, 'Deleted!');
+                                showSnackBar(context, 'Post Deleted!');
                               }
                             } else {
                               if (mounted) {
@@ -168,11 +174,11 @@ class _Card2State extends State<Card2> {
     ]);
   }
 
-  buildExpanded2() {
+  buildExpandedBody() {
     return Container();
   }
 
-  buildExpanded3() {
+  buildExpandedDetails() {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -185,7 +191,6 @@ class _Card2State extends State<Card2> {
             widget.snap['description'].toString(),
             style: const TextStyle(
               color: Colors.white70,
-              // color: Colors.blueGrey.shade100,
               fontSize: 16,
               letterSpacing: .5,
             ),
@@ -194,137 +199,149 @@ class _Card2State extends State<Card2> {
           const SizedBox(
             height: 20,
           ),
-          //todo: fix url launcher
           Card(
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 10,
-                ),
-                Icon(Icons.numbers, color: Colors.amber.shade800),
-                TextButton(
-                    onPressed: () async {
-                      try {
-                        if (db.user.uid.toString() != widget.snap['userId'].toString()) {
-                          String res = await db.updateContactedCollection(
-                              userPostedId: db.user.uid.toString(),
-                              postOwnerId: widget.snap['userId'].toString(),
-                              isEmail: false,
-                              isSms: true,
-                              isSearchPage: false,
-                              postId: widget.snap['postId'].toString());
-                          if (res == 'success') {
-                            setState(() {
-                              db.textMe("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
-                            });
-                          } else {
-                            if (mounted) {
-                              Clipboard.setData(ClipboardData(
-                                text: widget.snap['contactNumber'].toString(),
-                              )).then((_) {
-                                showSnackBar(context, "Copied to clipboard");
-                              });
-                            }
-                          }
-                        } else {
-                          if (mounted) {
-                            showSnackBar(context, 'Contacting yourself is not allowed.');
-                          }
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          showSnackBar(context, 'Something went wrong. Try Again.');
-                        }
-                        Future.error(e);
-                      }
-                    },
-                    child: Text(
-                      widget.snap['contactNumber'].toString(),
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        letterSpacing: .5,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 1.0,
-                            color: Theme.of(context).primaryColor,
-                            offset: const Offset(0.4, 0.2),
-                          ),
-                        ],
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.underline,
-                      ),
-                    )),
-              ],
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
             ),
-          ),
-
-          Card(
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 10,
+            child: ListTile(
+              dense: true,
+              leading: Icon(Icons.numbers, color: Colors.amber.shade800, size: 22),
+              title: Text(
+                widget.snap['contactNumber'].toString(),
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  letterSpacing: .5,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 1.0,
+                      color: Theme.of(context).primaryColor,
+                      offset: const Offset(0.4, 0.2),
+                    ),
+                  ],
+                  fontWeight: FontWeight.w500,
                 ),
-                Icon(Icons.mail, color: Colors.blue.shade800),
-                TextButton(
-                  onPressed: () async {
-                    try {
-                      if (db.user.uid.toString() != widget.snap['userId'].toString()) {
-                        String res = await db.updateContactedCollection(
-                            userPostedId: db.user.uid.toString(),
-                            postOwnerId: widget.snap['userId'].toString(),
-                            isEmail: true,
-                            isSearchPage: false,
-                            isSms: false,
-                            postId: widget.snap['postId'].toString());
-                        if (res == 'success') {
-                          setState(() {
-                            db.sendEmail(
-                              widget.snap['contactEmail'].toString(),
-                            );
-                          });
-                        } else {
-                          if (mounted) {
-                            Clipboard.setData(ClipboardData(
-                              text: widget.snap['contactEmail'].toString(),
-                            )).then((_) {
-                              showSnackBar(context, "Copied to clipboard");
-                            });
-                          }
-                        }
+              ),
+              trailing: InkWell(
+                onTap: () async {
+                  try {
+                    if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                      String res = await db.updateContactedCollection(
+                          userPostedId: currentUserId ?? db.user.uid.toString(),
+                          postOwnerId: widget.snap['userId'].toString(),
+                          isEmail: false,
+                          isSms: true,
+                          isSearchPage: false,
+                          postId: widget.snap['postId'].toString());
+                      if (res == 'success') {
+                        setState(() {
+                          db.textMe("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
+                        });
                       } else {
                         if (mounted) {
-                          showSnackBar(context, 'Contacting yourself is not allowed.');
+                          Clipboard.setData(ClipboardData(
+                            text: widget.snap['contactNumber'].toString(),
+                          )).then((_) {
+                            showSnackBar(context, "Copied to clipboard");
+                          });
                         }
                       }
-                    } catch (e) {
+                    } else {
                       if (mounted) {
-                        showSnackBar(context, e.toString());
+                        showSnackBar(context, 'Contacting yourself is not allowed.');
                       }
-
-                      Future.error(e);
                     }
-                  },
-                  child: Text(
-                    widget.snap['contactEmail'].toString(),
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      letterSpacing: .5,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 1.0,
-                          color: Theme.of(context).primaryColor,
-                          offset: const Offset(0.4, 0.2),
-                        ),
-                      ],
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.underline,
+                  } catch (e) {
+                    if (mounted) {
+                      showSnackBar(context, 'Something went wrong. Try Again.');
+                    }
+                    Future.error(e);
+                  }
+                },
+                child: CircleAvatar(
+                    radius: 14,
+                    child: Icon(
+                      Icons.copy,
+                      size: 14,
+                      color: Colors.blueGrey.shade100,
+                    )),
+              ),
+            ),
+          ),
+          Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: ListTile(
+              dense: true,
+              leading: Icon(Icons.mail, color: Colors.blue.shade800, size: 22),
+              title: Text(
+                widget.snap['contactEmail'].toString(),
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  overflow: TextOverflow.ellipsis,
+                  letterSpacing: .5,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 1.0,
+                      color: Theme.of(context).primaryColor,
+                      offset: const Offset(0.4, 0.2),
                     ),
-                    softWrap: true,
-                  ),
+                  ],
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
+                softWrap: true,
+              ),
+              trailing: InkWell(
+                onTap: () async {
+                  try {
+                    if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                      String res = await db.updateContactedCollection(
+                          userPostedId: db.user.uid.toString(),
+                          postOwnerId: widget.snap['userId'].toString(),
+                          isEmail: true,
+                          isSearchPage: false,
+                          isSms: false,
+                          postId: widget.snap['postId'].toString());
+                      if (res == 'success') {
+                        setState(() {
+                          db.sendEmail(
+                            widget.snap['contactEmail'].toString(),
+                          );
+                        });
+                      } else {
+                        if (mounted) {
+                          Clipboard.setData(ClipboardData(
+                            text: widget.snap['contactEmail'].toString(),
+                          )).then((_) {
+                            showSnackBar(context, "Copied to clipboard");
+                          });
+                        }
+                      }
+                    } else {
+                      if (mounted) {
+                        showSnackBar(context, 'Contacting yourself is not allowed.');
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      showSnackBar(context, e.toString());
+                    }
+
+                    Future.error(e);
+                  }
+                },
+                child: CircleAvatar(
+                    radius: 14,
+                    child: Icon(
+                      Icons.copy,
+                      size: 14,
+                      color: Colors.blueGrey.shade100,
+                    )),
+              ),
             ),
           ),
         ],
@@ -348,20 +365,21 @@ class _Card2State extends State<Card2> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expandable(
-                collapsed: buildCollapsed1(),
-                expanded: buildExpanded1(),
+                collapsed: buildCollapsedHeader(),
+                expanded: buildExpandedHeader(),
               ),
               Expandable(
-                collapsed: buildCollapsed2(),
-                expanded: buildExpanded2(),
+                collapsed: buildCollapsedBody(),
+                expanded: buildExpandedBody(),
               ),
               Expandable(
-                collapsed: buildCollapsed3(),
-                expanded: buildExpanded3(),
+                collapsed: buildCollapsedImgDetails(),
+                expanded: buildExpandedDetails(),
               ),
               const Divider(
                 height: 1,
               ),
+              // Card Footer
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[

@@ -7,7 +7,7 @@ Widget customButton({required String text, required Function onPressed, required
     onPressed: () => onPressed(),
     style: ElevatedButton.styleFrom(
         elevation: 12,
-        primary: color,
+        backgroundColor: color,
         // Color(0xff3A3A3A),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),

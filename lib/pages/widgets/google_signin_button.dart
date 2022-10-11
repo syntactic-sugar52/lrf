@@ -1,19 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:glass/glass.dart';
-import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/feed_page.dart';
 
 import 'package:lrf/provider/authentication.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleSignInButton extends StatefulWidget {
+  const GoogleSignInButton({super.key});
+
   @override
-  _GoogleSignInButtonState createState() => _GoogleSignInButtonState();
+  State<GoogleSignInButton> createState() => GoogleSignInButtonState();
 }
 
-class _GoogleSignInButtonState extends State<GoogleSignInButton> {
+class GoogleSignInButtonState extends State<GoogleSignInButton> {
   bool _isSigningIn = false;
 
   Future saveUsertoLocal(String displayName, String uid, String photoUrl) async {
@@ -28,9 +28,9 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     return Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
         child: _isSigningIn
-            ? Hero(
+            ? const Hero(
                 tag: 'loading',
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
                 ),
               )

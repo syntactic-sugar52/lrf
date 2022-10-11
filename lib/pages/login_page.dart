@@ -54,7 +54,7 @@ class LoginPage extends StatelessWidget {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong. Try agin.');
                   } else if (snapshot.connectionState == ConnectionState.done) {
-                    return GoogleSignInButton();
+                    return const GoogleSignInButton();
                   }
                   return const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
