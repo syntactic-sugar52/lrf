@@ -144,8 +144,8 @@ class _Card2State extends State<Card2> {
             widget.snap['userId'].toString() == widget.user.uid.toString()
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: TextButton(
-                        onPressed: () async {
+                    child: InkWell(
+                        onTap: () async {
                           try {
                             String res = await db.deletePostRequest(postId: widget.snap['postId']);
 
@@ -262,7 +262,7 @@ class _Card2State extends State<Card2> {
                 child: CircleAvatar(
                     radius: 14,
                     child: Icon(
-                      Icons.copy,
+                      Icons.contact_page_outlined,
                       size: 14,
                       color: Colors.blueGrey.shade100,
                     )),
@@ -337,7 +337,7 @@ class _Card2State extends State<Card2> {
                 child: CircleAvatar(
                     radius: 14,
                     child: Icon(
-                      Icons.copy,
+                      Icons.contact_page_outlined,
                       size: 14,
                       color: Colors.blueGrey.shade100,
                     )),

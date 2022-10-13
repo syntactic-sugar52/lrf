@@ -52,7 +52,7 @@ class _RequestPageState extends State<RequestPage> {
     subAdminArea = sharedPreferences.getString('subAdminArea');
     currentAddress = sharedPreferences.getString('address');
     postalCode = sharedPreferences.getString('postalCode');
-    currentUserId = sharedPreferences.getString('currentUserUid');
+    // currentUserId = sharedPreferences.getString('currentUserUid');
     currentUserName = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
     super.initState();
@@ -107,6 +107,7 @@ class _RequestPageState extends State<RequestPage> {
         backgroundColor: kAppBackgroundColor,
         elevation: 0,
         title: const Text('Post Ad'),
+        centerTitle: false,
         actions: [
           TextButton(
               onPressed: () async {
@@ -114,7 +115,7 @@ class _RequestPageState extends State<RequestPage> {
                 //if form is not empty
                 if (formState!.validate()) {
                   // add to post collection in db
-                  postRequest(currentUserId ?? db.user.uid, currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
+                  postRequest(db.user.uid, currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
                 } else {
                   if (mounted) {
                     showSnackBar(context, 'Please enter all fields.');

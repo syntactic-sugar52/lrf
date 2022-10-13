@@ -23,8 +23,8 @@ dependencies:
   firebase_dynamic_links: ^4.3.5 
   cloud_firestore: ^3.4.5
   geolocator: ^9.0.2
-  fluttertoast: ^8.0.9
-  image_picker: ^0.8.5+3
+  fade_shimmer: ^2.0.1
+
   google_sign_in: ^5.4.1
   geocoding: ^2.0.5
   shared_preferences: ^2.0.15
@@ -32,6 +32,7 @@ dependencies:
   url_launcher: ^6.1.6
   firestore_search: ^0.1.9
   share_plus: ^4.5.0 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

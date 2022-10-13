@@ -69,7 +69,7 @@ class ContactUsPage extends StatelessWidget {
               ListTile(
                 leading: const FaIcon(FontAwesomeIcons.discord, size: 18, color: Colors.indigoAccent),
                 title: const Text(
-                  'https://discord.gg/ESBqwvkN',
+                  'https://discord.gg/4eJ5McjnAE',
                   style: TextStyle(
                     fontSize: 14,
                   ),
@@ -77,7 +77,7 @@ class ContactUsPage extends StatelessWidget {
                 trailing: CircleAvatar(
                   child: IconButton(
                       onPressed: () {
-                        Clipboard.setData(const ClipboardData(text: 'https://discord.gg/ESBqwvkN')).then((_) {
+                        Clipboard.setData(const ClipboardData(text: 'https://discord.gg/4eJ5McjnAE')).then((_) {
                           showSnackBar(context, "Copied to clipboard");
                         });
                       },
@@ -104,7 +104,7 @@ class ContactUsPage extends StatelessWidget {
                           Future.error(e.toString());
                         }
                       },
-                      icon: const Icon(Icons.copy, size: 18, color: Colors.white70)),
+                      icon: const Icon(Icons.contact_page_outlined, size: 18, color: Colors.white70)),
                 ),
               ),
               const Divider(

@@ -16,11 +16,12 @@ class GoogleSignInButton extends StatefulWidget {
 class GoogleSignInButtonState extends State<GoogleSignInButton> {
   bool _isSigningIn = false;
 
-  Future saveUsertoLocal(String displayName, String uid, String photoUrl) async {
+  Future saveUsertoLocal(String displayName, String uid, String photoUrl, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('currentUserName', displayName.toString());
-    prefs.setString('currentUserUid', uid.toString());
+    // prefs.setString('currentUserUid', uid.toString());
     prefs.setString('currentUserPhotoUrl', photoUrl.toString());
+    prefs.setString('currentUserEmail', email.toString());
   }
 
   @override
@@ -31,7 +32,8 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
             ? const Hero(
                 tag: 'loading',
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+                  backgroundColor: Colors.green,
                 ),
               )
             : OutlinedButton(
@@ -45,17 +47,21 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
                   ),
                 ),
                 onPressed: () async {
-                  setState(() {
-                    _isSigningIn = true;
-                  });
-                  User? user = await Authentication().signInWithGoogle(context: context, mounted: mounted);
+                  if (mounted) {
+                    setState(() {
+                      _isSigningIn = true;
+                    });
+                  }
 
-                  setState(() {
-                    _isSigningIn = false;
-                  });
+                  User? user = await Authentication().signInWithGoogle(context: context, mounted: mounted);
+                  if (mounted) {
+                    setState(() {
+                      _isSigningIn = false;
+                    });
+                  }
 
                   if (user != null) {
-                    await saveUsertoLocal(user.displayName!, user.uid, user.photoURL!);
+                    await saveUsertoLocal(user.displayName!, user.uid, user.photoURL!, user.email!);
 
                     if (mounted) {
                       Navigator.of(context).pushReplacement(

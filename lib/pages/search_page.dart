@@ -172,7 +172,7 @@ class _SearchPageState extends State<SearchPage> {
 
                                                     if (res == 'success') {
                                                       if (mounted) {
-                                                        showSnackBar(context, 'Post Deleted');
+                                                        showSnackBar(context, 'Post Deleted!');
                                                       }
                                                     } else {
                                                       if (mounted) {
@@ -181,7 +181,7 @@ class _SearchPageState extends State<SearchPage> {
                                                     }
                                                   } catch (e) {
                                                     if (mounted) {
-                                                      showSnackBar(context, 'Something went wrong.');
+                                                      showSnackBar(context, 'Something went wrong. Try again');
                                                     }
                                                     Future.error(e);
                                                   }
@@ -276,7 +276,7 @@ class _SearchPageState extends State<SearchPage> {
                                               }
                                             } else {
                                               if (mounted) {
-                                                showSnackBar(context, 'Contact someone else.');
+                                                showSnackBar(context, 'Contacting yourself is not allowed.');
                                               }
                                             }
                                           } catch (e) {
@@ -290,7 +290,7 @@ class _SearchPageState extends State<SearchPage> {
                                         child: CircleAvatar(
                                             backgroundColor: Colors.black87,
                                             child: Icon(
-                                              Icons.copy,
+                                              Icons.contact_page_outlined,
                                               size: 18,
                                               color: Colors.blueGrey.shade100,
                                             ))),
@@ -332,7 +332,7 @@ class _SearchPageState extends State<SearchPage> {
                                               }
                                             } else {
                                               if (mounted) {
-                                                showSnackBar(context, 'Contact someone else');
+                                                showSnackBar(context, 'Contacting yourself is not allowed.');
                                               }
                                             }
                                           } catch (e) {
@@ -345,7 +345,7 @@ class _SearchPageState extends State<SearchPage> {
                                         child: CircleAvatar(
                                             backgroundColor: Colors.black,
                                             child: Icon(
-                                              Icons.copy,
+                                              Icons.contact_page_outlined,
                                               size: 18,
                                               color: Colors.blueGrey.shade100,
                                             ))),
