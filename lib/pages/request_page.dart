@@ -52,7 +52,7 @@ class _RequestPageState extends State<RequestPage> {
     subAdminArea = sharedPreferences.getString('subAdminArea');
     currentAddress = sharedPreferences.getString('address');
     postalCode = sharedPreferences.getString('postalCode');
-    // currentUserId = sharedPreferences.getString('currentUserUid');
+
     currentUserName = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
     super.initState();

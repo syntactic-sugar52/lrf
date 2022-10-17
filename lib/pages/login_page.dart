@@ -58,8 +58,9 @@ class LoginPage extends StatelessWidget {
                   }
                   return const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.green,
+                      Colors.greenAccent,
                     ),
+                    backgroundColor: Colors.green,
                   );
                 },
               ),

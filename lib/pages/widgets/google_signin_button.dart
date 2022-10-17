@@ -19,7 +19,7 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
   Future saveUsertoLocal(String displayName, String uid, String photoUrl, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('currentUserName', displayName.toString());
-    // prefs.setString('currentUserUid', uid.toString());
+
     prefs.setString('currentUserPhotoUrl', photoUrl.toString());
     prefs.setString('currentUserEmail', email.toString());
   }

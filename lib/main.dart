@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         visualDensity: VisualDensity.adaptivePlatformDensity,
         highlightColor: Colors.green,
-        scaffoldBackgroundColor: mobileBackgroundColor,
+        scaffoldBackgroundColor: kAppBackgroundColor,
       ),
       onGenerateRoute: router.generateRoute,
       home: const LoginPage(),

@@ -98,7 +98,6 @@ class _FeedPageState extends State<FeedPage> {
               _currentPosition = await _geolocator.getCurrentPosition();
               break;
             case ServiceStatus.disabled:
-              print('disabled');
               break;
           }
         });

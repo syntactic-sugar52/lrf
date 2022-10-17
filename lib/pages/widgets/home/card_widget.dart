@@ -236,7 +236,7 @@ class _Card2State extends State<Card2> {
                           postId: widget.snap['postId'].toString());
                       if (res == 'success') {
                         setState(() {
-                          db.textMe("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
+                          db.sendSms("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
                         });
                       } else {
                         if (mounted) {
@@ -408,7 +408,7 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_up_outlined,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => Database().upvotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['upVote']),
+                                onPressed: () => db.upvotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['upVote']),
                               ),
                             ),
                           ),
@@ -440,7 +440,7 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_down_rounded,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => Database().downVotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['downVote']),
+                                onPressed: () => db.downVotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['downVote']),
                               ),
                             ),
                           ),
@@ -479,7 +479,7 @@ class _Card2State extends State<Card2> {
                               Shadow(
                                 blurRadius: 1.0,
                                 color: Theme.of(context).primaryColor,
-                                offset: const Offset(0.2, 0.2),
+                                offset: const Offset(0.3, 0.3),
                               ),
                             ],
                           ),

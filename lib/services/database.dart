@@ -165,37 +165,15 @@ class Database {
   Future<String> upvotePost(String postId, String uid, List upvote) async {
     String res = "Some error occurred";
     try {
-      _firestore.collection('posts').doc(postId).update({
-        'upVote': FieldValue.arrayUnion([uid])
-      });
-      // if (upvote.contains(uid)) {
-      //   // if the  list contains the user uid, we need to remove it
-      //   _firestore.collection('posts').doc(postId).update({
-      //     'upVote': FieldValue.arrayRemove([uid])
-      //   });
-      // } else {
-      //   // else we need to add uid to the likes array
-
-      // }
-      res = 'success';
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
-  Future<String> sharePost(String postId, String uid, List upvote) async {
-    String res = "Some error occurred";
-    try {
       if (upvote.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
         _firestore.collection('posts').doc(postId).update({
-          'share': FieldValue.arrayRemove([uid])
+          'downVote': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
         _firestore.collection('posts').doc(postId).update({
-          'share': FieldValue.arrayUnion([uid])
+          'downVote': FieldValue.arrayUnion([uid])
         });
       }
       res = 'success';
@@ -256,7 +234,7 @@ class Database {
     return res;
   }
 
-  void textMe(String number, var mounted, BuildContext context) async {
+  void sendSms(String number, var mounted, BuildContext context) async {
     try {
       if (await canLaunchUrlString(number)) {
         await launchUrlString(number);
