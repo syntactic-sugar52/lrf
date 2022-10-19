@@ -41,9 +41,9 @@ class ContactUsPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Join Our Growing Community',
+                        'Ask Us Anything',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           letterSpacing: .5,
                           color: Colors.green,
                           // color: Colors.blueGrey.shade100,

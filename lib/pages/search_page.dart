@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/models/data_model.dart';
+import 'package:lrf/pages/comment_screen.dart';
 import 'package:lrf/services/database.dart';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
@@ -386,6 +387,33 @@ class _SearchPageState extends State<SearchPage> {
                                     ),
                                   ),
                                   ListTile(
+                                    leading: Icon(
+                                      Icons.comment,
+                                      color: Colors.teal.shade400,
+                                      size: 22,
+                                    ),
+                                    title: Text(
+                                      'Comments',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.blueGrey.shade100,
+                                      ),
+                                    ),
+                                    trailing: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context, MaterialPageRoute(builder: (context) => CommentScreen(postId: data.postId.toString())));
+                                      },
+                                      child: CircleAvatar(
+                                          backgroundColor: Colors.black87,
+                                          child: Icon(
+                                            Icons.arrow_forward,
+                                            size: 18,
+                                            color: Colors.blueGrey.shade100,
+                                          )),
+                                    ),
+                                  ),
+                                  ListTile(
                                     title: Text(
                                       data.description ?? '',
                                       style: TextStyle(
@@ -413,7 +441,7 @@ class _SearchPageState extends State<SearchPage> {
         if (snapshot.connectionState == ConnectionState.done) {
           if (!snapshot.hasData) {
             return const Center(
-              child: Text('No Results Returned'),
+              child: Text('No Results Found'),
             );
           }
         }

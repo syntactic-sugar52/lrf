@@ -138,7 +138,7 @@ class _FeedPageState extends State<FeedPage> {
         setState(() => _currentPosition = position);
         _getAddressFromLatLng(_currentPosition!);
       }).catchError((e) {
-        debugPrint(e);
+        Future.error(e);
       });
     } catch (e) {
       Future.error(e);
@@ -174,7 +174,7 @@ class _FeedPageState extends State<FeedPage> {
           }
         }
       }).catchError((e) {
-        debugPrint(e);
+        Future.error(e);
       });
     } catch (e) {
       Future.error(e);
@@ -268,7 +268,6 @@ class _FeedPageState extends State<FeedPage> {
                   },
                   icon: const Icon(Icons.search))
             ],
-            elevation: 0,
             centerTitle: true,
             title: Container(padding: const EdgeInsets.all(5), width: 100, height: 50, child: Image.asset('assets/LRlogo.png')),
             backgroundColor: kAppBackgroundColor,
@@ -276,7 +275,7 @@ class _FeedPageState extends State<FeedPage> {
         ),
         body: _currentAddress != null
             ? StreamBuilder(
-                stream: FirebaseFirestore.instance.collection('posts').snapshots(),
+                stream: FirebaseFirestore.instance.collection('posts').orderBy('datePublished', descending: true).snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(

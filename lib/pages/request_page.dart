@@ -105,7 +105,6 @@ class _RequestPageState extends State<RequestPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: kAppBackgroundColor,
-        elevation: 0,
         title: const Text('Post Ad'),
         centerTitle: false,
         actions: [

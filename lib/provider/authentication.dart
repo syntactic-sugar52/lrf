@@ -28,26 +28,11 @@ class Authentication {
     return firebaseApp;
   }
 
-  Future<User?> signInWithGoogle({required BuildContext context, required var mounted}) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
-    User? user;
+  static Future<void> signInWithGoogleSilently() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
 
-    if (kIsWeb) {
-      GoogleAuthProvider authProvider = GoogleAuthProvider();
-
-      try {
-        final UserCredential userCredential = await auth.signInWithPopup(authProvider);
-        user = userCredential.user;
-      } catch (e) {
-        Future.error(e);
-      }
-    } else {
-      final GoogleSignIn googleSignIn = GoogleSignIn(scopes: [
-        // 'email',
-        // 'https://www.googleapis.com/auth/contacts.readonly',
-      ]);
-
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signInSilently();
 
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
@@ -57,43 +42,66 @@ class Authentication {
           idToken: googleSignInAuthentication.idToken,
         );
 
-        try {
-          final UserCredential userCredential = await auth.signInWithCredential(credential);
+        final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        print(userCredential.user);
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
 
-          user = userCredential.user;
+  Future<User?> signInWithGoogle({required BuildContext context, required var mounted}) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user;
 
-          if (user != null) {
-            final res = await Database().createUser(
-              user.displayName!,
-              user.email!,
-              userCredential.user!.uid,
-              user.photoURL!,
-            );
-            if (res == "success") {
-            } else {
-              if (mounted) {
-                showSnackBar(context, 'Something went wrong. Please Try Again.');
-              }
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential = await auth.signInWithCredential(credential);
+
+        user = userCredential.user;
+
+        if (user != null) {
+          final res = await Database().createUser(
+            user.displayName!,
+            user.email!,
+            userCredential.user!.uid,
+            user.photoURL!,
+          );
+          if (res == "success") {
+          } else {
+            if (mounted) {
+              showSnackBar(context, 'Something went wrong. Please Try Again.');
             }
           }
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'account-exists-with-different-credential') {
-            if (mounted) {
-              showSnackBar(context, 'The account already exists with a different credential.');
-            }
-          } else if (e.code == 'invalid-credential') {
-            if (mounted) {
-              showSnackBar(context, 'Error occurred while accessing credentials. Try again.');
-            }
-          }
-        } catch (e) {
-          Future.error(e);
+        }
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
           if (mounted) {
-            showSnackBar(context, 'Error occurred using Google Sign-In. Try again.');
+            showSnackBar(context, 'The account already exists with a different credential.');
           }
+        } else if (e.code == 'invalid-credential') {
+          if (mounted) {
+            showSnackBar(context, 'Error occurred while accessing credentials. Try again.');
+          }
+        }
+      } catch (e) {
+        Future.error(e);
+        if (mounted) {
+          showSnackBar(context, 'Error occurred using Google Sign-In. Try again.');
         }
       }
     }
+    // }
 
     return user;
   }

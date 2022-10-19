@@ -2,8 +2,10 @@ import 'package:expandable/expandable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/main.dart';
+import 'package:lrf/pages/comment_screen.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
@@ -84,7 +86,7 @@ class _Card2State extends State<Card2> {
             Row(
               children: <Widget>[
                 Text(
-                  DateFormat.yMMMd().format(
+                  DateFormat.yMMMMd().format(
                     widget.snap['datePublished'].toDate(),
                   ),
                   style: TextStyle(color: Colors.blueGrey.shade100),
@@ -259,13 +261,18 @@ class _Card2State extends State<Card2> {
                     Future.error(e);
                   }
                 },
-                child: CircleAvatar(
-                    radius: 14,
-                    child: Icon(
-                      Icons.contact_page_outlined,
-                      size: 14,
-                      color: Colors.blueGrey.shade100,
-                    )),
+                child: PhysicalModel(
+                  color: Colors.black,
+                  elevation: 15.0,
+                  shape: BoxShape.circle,
+                  child: CircleAvatar(
+                      radius: 14,
+                      child: Icon(
+                        Icons.contact_page_outlined,
+                        size: 14,
+                        color: Colors.blueGrey.shade100,
+                      )),
+                ),
               ),
             ),
           ),
@@ -334,13 +341,18 @@ class _Card2State extends State<Card2> {
                     Future.error(e);
                   }
                 },
-                child: CircleAvatar(
-                    radius: 14,
-                    child: Icon(
-                      Icons.contact_page_outlined,
-                      size: 14,
-                      color: Colors.blueGrey.shade100,
-                    )),
+                child: PhysicalModel(
+                  color: Colors.black,
+                  elevation: 15.0,
+                  shape: BoxShape.circle,
+                  child: CircleAvatar(
+                      radius: 14,
+                      child: Icon(
+                        Icons.contact_page_outlined,
+                        size: 14,
+                        color: Colors.blueGrey.shade100,
+                      )),
+                ),
               ),
             ),
           ),
@@ -389,14 +401,14 @@ class _Card2State extends State<Card2> {
                       child: Row(
                         children: [
                           Container(
-                            width: 15,
+                            width: 10,
                           ),
                           Text(widget.snap['upVote'].length.toString(), style: const TextStyle(color: Colors.white70)),
                           DangerAnimation(
                             isAnimating: widget.snap['upVote'].contains(widget.user.uid),
                             smallLike: true,
                             child: SizedBox(
-                              width: 50,
+                              width: 30,
                               height: 40,
                               child: IconButton(
                                 icon: widget.snap['upVote'].contains(widget.user.uid)
@@ -418,7 +430,7 @@ class _Card2State extends State<Card2> {
                             color: Colors.black,
                           ),
                           Container(
-                            width: 15,
+                            width: 5,
                           ),
                           Text(
                             widget.snap['downVote'].length.toString(),
@@ -428,7 +440,7 @@ class _Card2State extends State<Card2> {
                             isAnimating: widget.snap['downVote'].contains(widget.user.uid),
                             smallLike: true,
                             child: SizedBox(
-                              width: 50,
+                              width: 30,
                               height: 40,
                               child: IconButton(
                                 icon: widget.snap['downVote'].contains(widget.user.uid)
@@ -449,7 +461,7 @@ class _Card2State extends State<Card2> {
                             color: Colors.black,
                           ),
                           SizedBox(
-                            width: 50,
+                            width: 30,
                             height: 40,
                             child: IconButton(
                                 iconSize: 18,
@@ -460,6 +472,24 @@ class _Card2State extends State<Card2> {
                                 },
                                 icon: const Icon(
                                   Icons.share,
+                                  color: Colors.white70,
+                                )),
+                          ),
+                          const VerticalDivider(
+                            thickness: 1,
+                            color: Colors.black,
+                          ),
+                          SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: IconButton(
+                                iconSize: 18,
+                                onPressed: () async {
+                                  Navigator.push(
+                                      context, MaterialPageRoute(builder: (context) => CommentScreen(postId: widget.snap['postId'].toString())));
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.comment,
                                   color: Colors.white70,
                                 )),
                           ),

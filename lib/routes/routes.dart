@@ -35,6 +35,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           return slideNavigation(child, animation, secondaryAnimation);
         },
       );
+    //   case '/comment':
+    // return PageRouteBuilder(
+    //   pageBuilder: (context, animation, secondaryAnimation) => const Co(),
+    //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //     return slideNavigation(child, animation, secondaryAnimation);
+    //   },
+    // );
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

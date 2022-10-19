@@ -24,7 +24,7 @@ class LoginPage extends StatelessWidget {
                 height: 8,
               ),
               const Text(
-                'Faster Personal Ads',
+                'Find what you\'re looking for',
                 style: TextStyle(fontSize: 20, color: Colors.white70),
               ),
               const Spacer(),
