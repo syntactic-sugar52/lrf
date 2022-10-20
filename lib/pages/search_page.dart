@@ -78,14 +78,14 @@ class _SearchPageState extends State<SearchPage> {
               Text('All Title Start with an Uppercase Letter',
                   style: TextStyle(
                     color: Colors.green,
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     // color: Colors.white70,
                     shadows: [
                       Shadow(
                         blurRadius: 1.0,
                         color: Theme.of(context).primaryColor,
-                        offset: const Offset(0.4, 0.2),
+                        offset: const Offset(0.4, 0.4),
                       ),
                     ],
                   )),
@@ -389,7 +389,7 @@ class _SearchPageState extends State<SearchPage> {
                                   ListTile(
                                     leading: Icon(
                                       Icons.comment,
-                                      color: Colors.teal.shade400,
+                                      color: Colors.teal.shade700,
                                       size: 22,
                                     ),
                                     title: Text(

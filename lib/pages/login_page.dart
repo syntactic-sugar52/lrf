@@ -23,26 +23,26 @@ class LoginPage extends StatelessWidget {
               const SizedBox(
                 height: 8,
               ),
-              const Text(
-                'Find what you\'re looking for',
-                style: TextStyle(fontSize: 20, color: Colors.white70),
+              Text(
+                'Find What You\'re Looking For..',
+                style: TextStyle(fontSize: 16, color: Colors.greenAccent),
               ),
               const Spacer(),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Hey there,',
-                  style: TextStyle(fontSize: 24, color: Colors.white70),
-                ),
-              ),
+              // const Align(
+              //   alignment: Alignment.centerLeft,
+              //   child: Text(
+              //     'Hey there,',
+              //     style: TextStyle(fontSize: 24, color: Colors.white70),
+              //   ),
+              // ),
               const SizedBox(
                 height: 8,
               ),
               const Align(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: Text(
                   'Login or Sign up to your account to continue',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                  style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.w600),
                 ),
               ),
               const Spacer(),

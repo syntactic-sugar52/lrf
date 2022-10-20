@@ -46,6 +46,7 @@ class ContactUsPage extends StatelessWidget {
                           fontSize: 18,
                           letterSpacing: .5,
                           color: Colors.green,
+                          fontWeight: FontWeight.w700,
                           // color: Colors.blueGrey.shade100,
                           shadows: [
                             Shadow(

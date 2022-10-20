@@ -24,7 +24,7 @@ dependencies:
   cloud_firestore: ^3.4.5
   geolocator: ^9.0.2
   fade_shimmer: ^2.0.1
-
+  sign_in_with_apple: ^4.1.0
   google_sign_in: ^5.4.1
   geocoding: ^2.0.5
   shared_preferences: ^2.0.15
