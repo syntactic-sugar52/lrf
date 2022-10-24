@@ -15,8 +15,8 @@ class Database {
   User get user => _auth.currentUser!;
 
   // get user details
-  Future getUserDetails() async {
-    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(user.uid).get();
+  Future getUserDetails({required String uid}) async {
+    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(uid).get();
     // returns map string dynamic
     return documentSnapshot.data();
     // return UserModel.fromSnap(documentSnapshot);
@@ -73,6 +73,7 @@ class Database {
       required String contactNumber,
       required String contactEmail,
       required String username,
+      required String country,
       required String currentAddress,
       required String subAdminArea,
       required String photoURL}) async {
@@ -87,6 +88,7 @@ class Database {
         'contactNumber': contactNumber,
         'contactEmail': contactEmail,
         'title': title,
+        'country': country,
         'upVote': [],
         'downVote': [],
         'description': description,

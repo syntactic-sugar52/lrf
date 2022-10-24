@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
+import 'package:random_avatar/random_avatar.dart';
 
 class CommentCard extends StatefulWidget {
   final snap;
@@ -26,12 +27,7 @@ class _CommentCardState extends State<CommentCard> {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(
-              widget.snap.data()['profilePic'],
-            ),
-            radius: 18,
-          ),
+          randomAvatar(widget.snap.data()['profilePic'], height: 40),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 16),
@@ -55,14 +51,30 @@ class _CommentCardState extends State<CommentCard> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      DateFormat.yMMMd().format(
-                        widget.snap.data()['datePublished'].toDate(),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          DateFormat.yMMMd().format(
+                            widget.snap.data()['datePublished'].toDate(),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          DateFormat.jm().format(
+                            widget.snap.data()['datePublished'].toDate(),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   widget.dbUserUid.toString() == widget.snap.data()['uid'].toString()

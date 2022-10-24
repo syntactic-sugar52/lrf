@@ -10,11 +10,13 @@ import 'package:lrf/services/database.dart';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
 import 'package:lrf/utils/utils.dart';
+import 'package:random_avatar/random_avatar.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({
-    super.key,
-  });
+  const SearchPage({super.key, required this.currentUser, required this.currentUserId});
+
+  final Map<String, dynamic>? currentUser;
+  final String? currentUserId;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -162,7 +164,7 @@ class _SearchPageState extends State<SearchPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  db.user.uid == data.userId
+                                  widget.currentUser?['id'].toString() == data.userId
                                       ? Row(
                                           mainAxisAlignment: MainAxisAlignment.end,
                                           children: [
@@ -217,10 +219,7 @@ class _SearchPageState extends State<SearchPage> {
                                     ),
                                     title: Row(
                                       children: [
-                                        CircleAvatar(
-                                          backgroundImage: NetworkImage(data.profImage ?? ''),
-                                          radius: 14,
-                                        ),
+                                        randomAvatar(data.profImage ?? '', height: 35),
                                         const SizedBox(
                                           width: 5,
                                         ),
@@ -257,9 +256,9 @@ class _SearchPageState extends State<SearchPage> {
                                     trailing: InkWell(
                                         onTap: () async {
                                           try {
-                                            if (db.user.uid.toString() != data.userId.toString()) {
+                                            if (widget.currentUser?['id'] != data.userId.toString()) {
                                               String res = await db.updateContactedCollection(
-                                                  userPostedId: db.user.uid.toString(),
+                                                  userPostedId: widget.currentUser?['id'] ?? widget.currentUserId,
                                                   postOwnerId: data.userId.toString(),
                                                   isEmail: true,
                                                   isSms: false,
@@ -312,9 +311,9 @@ class _SearchPageState extends State<SearchPage> {
                                     trailing: InkWell(
                                         onTap: () async {
                                           try {
-                                            if (db.user.uid.toString() != data.userId.toString()) {
+                                            if (widget.currentUser?['id'] != data.userId.toString()) {
                                               String res = await db.updateContactedCollection(
-                                                  userPostedId: db.user.uid.toString(),
+                                                  userPostedId: widget.currentUser?['id'] ?? widget.currentUserId,
                                                   postOwnerId: data.userId.toString(),
                                                   isEmail: true,
                                                   isSearchPage: true,
@@ -360,6 +359,39 @@ class _SearchPageState extends State<SearchPage> {
                                   ),
                                   ListTile(
                                     leading: Icon(
+                                      Icons.comment,
+                                      color: Colors.teal.shade700,
+                                      size: 22,
+                                    ),
+                                    title: Text(
+                                      'Comments',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.blueGrey.shade100,
+                                      ),
+                                    ),
+                                    trailing: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => CommentScreen(
+                                                      postId: data.postId.toString(),
+                                                      currentUser: widget.currentUser,
+                                                      currentUserUid: widget.currentUserId,
+                                                    )));
+                                      },
+                                      child: CircleAvatar(
+                                          backgroundColor: Colors.black87,
+                                          child: Icon(
+                                            Icons.arrow_forward,
+                                            size: 18,
+                                            color: Colors.blueGrey.shade100,
+                                          )),
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: Icon(
                                       Icons.arrow_upward_outlined,
                                       color: Colors.indigoAccent.shade100,
                                       size: 22,
@@ -384,33 +416,6 @@ class _SearchPageState extends State<SearchPage> {
                                         fontSize: 15,
                                         color: Colors.blueGrey.shade100,
                                       ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.comment,
-                                      color: Colors.teal.shade700,
-                                      size: 22,
-                                    ),
-                                    title: Text(
-                                      'Comments',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.blueGrey.shade100,
-                                      ),
-                                    ),
-                                    trailing: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context, MaterialPageRoute(builder: (context) => CommentScreen(postId: data.postId.toString())));
-                                      },
-                                      child: CircleAvatar(
-                                          backgroundColor: Colors.black87,
-                                          child: Icon(
-                                            Icons.arrow_forward,
-                                            size: 18,
-                                            color: Colors.blueGrey.shade100,
-                                          )),
                                     ),
                                   ),
                                   ListTile(

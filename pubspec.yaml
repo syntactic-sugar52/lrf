@@ -24,7 +24,6 @@ dependencies:
   cloud_firestore: ^3.4.5
   geolocator: ^9.0.2
   fade_shimmer: ^2.0.1
-  sign_in_with_apple: ^4.1.0
   google_sign_in: ^5.4.1
   geocoding: ^2.0.5
   shared_preferences: ^2.0.15
@@ -32,7 +31,10 @@ dependencies:
   url_launcher: ^6.1.6
   firestore_search: ^0.1.9
   share_plus: ^4.5.0 
-
+  random_avatar: ^0.0.7
+  crypto: ^3.0.2
+  the_apple_sign_in: ^1.1.1
+  sign_in_with_apple: ^4.1.0 
 dev_dependencies:
   flutter_test:
     sdk: flutter

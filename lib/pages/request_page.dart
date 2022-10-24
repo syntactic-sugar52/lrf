@@ -9,32 +9,34 @@ import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
 
 class RequestPage extends StatefulWidget {
-  const RequestPage({Key? key}) : super(key: key);
+  const RequestPage({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<RequestPage> createState() => _RequestPageState();
 }
 
 class _RequestPageState extends State<RequestPage> {
+  String? country;
   String? currentAddress;
+  String? currentUserEmail;
+  String? currentUserId;
+  String? currentUserName;
+  String? currentUserPhotoUrl;
   late Database db;
   bool isLoading = false;
-  final bool _validate = false;
-  bool needValidator = false;
-  String price = '';
-  String? subAdminArea;
-  String userId = '';
   String? postalCode;
-  String? currentUserName;
-  String? currentUserId;
-  String? currentUserPhotoUrl;
-// text controllers for textfield
-  final TextEditingController _descriptionController = TextEditingController();
+  String? subAdminArea;
+
   final TextEditingController _contactEmailController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
+// text controllers for textfield
+  final TextEditingController _descriptionController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final bool _validate = false;
 
   @override
   void dispose() {
@@ -52,9 +54,10 @@ class _RequestPageState extends State<RequestPage> {
     subAdminArea = sharedPreferences.getString('subAdminArea');
     currentAddress = sharedPreferences.getString('address');
     postalCode = sharedPreferences.getString('postalCode');
-
+    currentUserId = sharedPreferences.getString('currentUserUid');
     currentUserName = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
+    country = sharedPreferences.getString('country');
     super.initState();
   }
 
@@ -69,12 +72,13 @@ class _RequestPageState extends State<RequestPage> {
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
           userId: uid,
+          country: country ?? '',
           contactNumber: _contactNumberController.text.trim(),
           contactEmail: _contactEmailController.text.trim(),
           username: username,
           photoURL: profImage,
-          subAdminArea: subAdminArea!,
-          currentAddress: currentAddress!);
+          subAdminArea: subAdminArea ?? '',
+          currentAddress: currentAddress ?? '');
       if (res == "success") {
         setState(() {
           isLoading = false;
@@ -84,7 +88,7 @@ class _RequestPageState extends State<RequestPage> {
             context,
             'Posted!',
           );
-          Navigator.push(context, MaterialPageRoute(builder: (context) => FeedPage(user: db.user)));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedPage()));
         }
       } else {
         if (mounted) {
@@ -114,7 +118,8 @@ class _RequestPageState extends State<RequestPage> {
                 //if form is not empty
                 if (formState!.validate()) {
                   // add to post collection in db
-                  postRequest(db.user.uid, currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
+
+                  postRequest(currentUserId.toString(), currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
                 } else {
                   if (mounted) {
                     showSnackBar(context, 'Please enter all fields.');

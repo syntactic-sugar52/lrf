@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable/expandable.dart';
 import 'package:fade_shimmer/fade_shimmer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -23,16 +23,28 @@ import 'package:lrf/provider/authentication.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
 
-class FeedPage extends StatefulWidget {
-  const FeedPage({Key? key, required this.user}) : super(key: key);
+import 'package:random_avatar/random_avatar.dart';
 
-  final User user;
+class FeedPage extends StatefulWidget {
+  const FeedPage({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage> {
+class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<FeedPage> {
+  Map<String, dynamic>? currentUser;
+  String? currentUserId;
+  String? currentUserPhotoUrl;
+
+  late Database db;
+  String? email;
+
+  String? username;
+
+  String? _country;
   String? _currentAddress;
   Position? _currentPosition;
   final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
@@ -40,18 +52,22 @@ class _FeedPageState extends State<FeedPage> {
   LocationPermission? _permissionStatus;
   String? _postalCode;
   String? _subAdminArea;
-  String? username;
   String? _subLocality;
-  String? currentUserPhotoUrl;
 
   @override
   void initState() {
-    _getCurrentPosition();
+    db = Database();
+    currentUserId = sharedPreferences.getString('currentUserUid');
     username = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
-
+    email = sharedPreferences.getString('currentUserEmail');
+    _getCurrentPosition();
+    getUser(currentUserId.toString());
     super.initState();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   Future<bool> getUserLocation(BuildContext context) async {
     // get permission if not provided
@@ -64,6 +80,10 @@ class _FeedPageState extends State<FeedPage> {
         setState(() {
           _permissionStatus == LocationPermission.denied;
         });
+
+        if (mounted) {
+          showLocationPermissionRequired(context);
+        }
         return Future.error("Location permission denied");
       } else if (_permissionStatus == LocationPermission.deniedForever) {
         setState(() {
@@ -87,23 +107,12 @@ class _FeedPageState extends State<FeedPage> {
     }
     // check access to location service
     _locationServiceEnabled = await _geolocator.isLocationServiceEnabled();
+
     if (!_locationServiceEnabled) {
       try {
         // if location service is not enabled, try to get it enabled
         _currentPosition = await _geolocator.getCurrentPosition();
       } catch (e) {
-        StreamSubscription<ServiceStatus> serviceStatusStream = _geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
-          switch (status) {
-            case ServiceStatus.enabled:
-              _currentPosition = await _geolocator.getCurrentPosition();
-              break;
-            case ServiceStatus.disabled:
-              break;
-          }
-        });
-        if (mounted) {
-          showSnackBar(context, 'Warning: Location service is disabled. Please enable it to continue with the app.');
-        }
         return Future.error('Location service is disabled');
       }
     } else {
@@ -114,11 +123,32 @@ class _FeedPageState extends State<FeedPage> {
     if (_currentPosition != null) {
       return true;
     } else {
+      _geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
+        switch (status) {
+          case ServiceStatus.enabled:
+            _currentPosition = await _geolocator.getCurrentPosition();
+            break;
+          case ServiceStatus.disabled:
+            if (mounted) {
+              showSnackBar(context, 'Warning: Location service is disabled. Please enable it to continue with the app.');
+            }
+            break;
+        }
+      });
       if (mounted) {
         showSnackBar(context, 'Warning: Your location can\'t be detected.');
       }
       return false;
     }
+  }
+
+  Future<Map<String, dynamic>> getUser(String currentUserId) async {
+    var details = await db.getUserDetails(uid: currentUserId);
+    setState(() {
+      currentUser = details;
+    });
+
+    return currentUser ?? {};
   }
 
   Future<void> _getCurrentPosition() async {
@@ -135,7 +165,9 @@ class _FeedPageState extends State<FeedPage> {
         }
       }
       await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation).then((Position position) {
-        setState(() => _currentPosition = position);
+        setState(() {
+          _currentPosition = position;
+        });
         _getAddressFromLatLng(_currentPosition!);
       }).catchError((e) {
         Future.error(e);
@@ -152,20 +184,24 @@ class _FeedPageState extends State<FeedPage> {
     try {
       await placemarkFromCoordinates(_currentPosition!.latitude, _currentPosition!.longitude).then((List<Placemark> placemarks) async {
         Placemark place = placemarks[0];
+
         setState(() {
-          _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+          _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode},${place.country}';
           _subAdminArea = '${place.subAdministrativeArea}';
           _subLocality = '${place.subLocality}';
           _postalCode = '${place.postalCode}';
+          _country = '${place.country}';
         });
-        String res = await Database().updateUserCollection(
+
+        String res = await db.updateUserCollection(
             address: _currentAddress.toString(),
             lat: _currentPosition!.latitude.toString(),
             lng: _currentPosition!.longitude.toString(),
-            uid: widget.user.uid.toString());
+            uid: currentUserId!);
         sharedPreferences.setString('address', _currentAddress.toString());
         sharedPreferences.setString('subAdminArea', _subAdminArea == null ? _subAdminArea.toString() : _subLocality.toString());
         sharedPreferences.setString('postalCode', _postalCode == null ? _postalCode.toString() : '');
+        sharedPreferences.setString('country', _country ?? '');
         if (res == "success") {
           return;
         } else {
@@ -183,9 +219,10 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
         floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.green.shade900,
+          backgroundColor: Colors.green.shade800,
           highlightElevation: 50,
           elevation: 8,
           onPressed: () => Navigator.pushNamed(context, '/post'),
@@ -196,20 +233,15 @@ class _FeedPageState extends State<FeedPage> {
           ),
         ),
         drawer: Drawer(
-          backgroundColor: kAppBackgroundColor,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
+            backgroundColor: kAppBackgroundColor,
+            child: ListView(padding: EdgeInsets.zero, children: [
               UserAccountsDrawerHeader(
-                currentAccountPicture: CircleAvatar(
-                  backgroundImage: NetworkImage(currentUserPhotoUrl ?? widget.user.photoURL.toString()),
-                  radius: 14,
-                ),
+                currentAccountPicture: randomAvatar(currentUser?['photoUrl'] ?? currentUserPhotoUrl),
                 accountEmail: Text(
-                  widget.user.email.toString(),
+                  email ?? currentUser?['email'],
                 ),
                 accountName: Text(
-                  username ?? widget.user.displayName.toString(),
+                  username ?? currentUser?['displayName'],
                   style: const TextStyle(
                     fontSize: 16.0,
                   ),
@@ -244,7 +276,7 @@ class _FeedPageState extends State<FeedPage> {
                   try {
                     await Authentication.signOut(context: context);
                     if (mounted) {
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginPage()));
                     }
                   } catch (e) {
                     if (mounted) {
@@ -254,17 +286,21 @@ class _FeedPageState extends State<FeedPage> {
                     Future.error(e);
                   }
                 },
-              ),
-            ],
-          ),
-        ),
+              )
+            ])),
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(40.0),
           child: AppBar(
             actions: [
               IconButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SearchPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SearchPage(
+                                  currentUser: currentUser,
+                                  currentUserId: currentUserId,
+                                )));
                   },
                   icon: const Icon(Icons.search))
             ],
@@ -301,8 +337,9 @@ class _FeedPageState extends State<FeedPage> {
                             ),
                             child: Card2(
                               snap: snapshot.data!.docs[index].data(),
-                              user: widget.user,
+                              user: currentUser,
                               postalCode: _postalCode.toString(),
+                              country: _country.toString(),
                               subAdministrativeArea: _subAdminArea.toString(),
                             )),
                       ),

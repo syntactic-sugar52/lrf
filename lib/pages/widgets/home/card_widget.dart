@@ -9,16 +9,20 @@ import 'package:lrf/pages/comment_screen.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
+import 'package:random_avatar/random_avatar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 
 class Card2 extends StatefulWidget {
-  const Card2({Key? key, required this.snap, required this.user, required this.subAdministrativeArea, required this.postalCode}) : super(key: key);
+  const Card2(
+      {Key? key, required this.snap, required this.user, required this.subAdministrativeArea, required this.postalCode, required this.country})
+      : super(key: key);
 
   final String postalCode;
   final Map<String, dynamic> snap;
   final String subAdministrativeArea;
-  final User user;
+  final Map<String, dynamic>? user;
+  final String country;
 
   @override
   State<Card2> createState() => _Card2State();
@@ -28,10 +32,10 @@ class _Card2State extends State<Card2> {
   String? currentUserId;
   String? currentUserName;
   String? currentUserPhotoUrl;
+  String? country;
   bool dangerTapped = false;
   late Database db;
   String? postalCode;
-  dynamic userDetails;
 
   @override
   void initState() {
@@ -39,7 +43,9 @@ class _Card2State extends State<Card2> {
     currentUserId = sharedPreferences.getString('currentUserUid');
     currentUserName = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
+
     postalCode = sharedPreferences.getString('postalCode');
+
     super.initState();
   }
 
@@ -70,10 +76,7 @@ class _Card2State extends State<Card2> {
           children: <Widget>[
             Row(
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(widget.snap['profImage'].toString()),
-                  radius: 15,
-                ),
+                randomAvatar(widget.snap['profImage'].toString(), height: 30),
                 const SizedBox(
                   width: 10,
                 ),
@@ -83,13 +86,19 @@ class _Card2State extends State<Card2> {
                 ),
               ],
             ),
-            Row(
+            Column(
               children: <Widget>[
                 Text(
-                  DateFormat.yMMMMd().format(
+                  DateFormat.jm().format(
                     widget.snap['datePublished'].toDate(),
                   ),
-                  style: TextStyle(color: Colors.blueGrey.shade100),
+                  style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 12),
+                ),
+                Text(
+                  DateFormat.yMMMd().format(
+                    widget.snap['datePublished'].toDate(),
+                  ),
+                  style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 12),
                 ),
               ],
             )
@@ -138,12 +147,12 @@ class _Card2State extends State<Card2> {
               children: [
                 Icon(Icons.location_pin, color: Colors.green.shade600),
                 Text(
-                  widget.snap['subAdminArea'] ?? 'Postal Code: ${postalCode ?? widget.postalCode.toString()}',
-                  style: const TextStyle(color: Colors.white70),
+                  '${widget.snap['subAdminArea']}, ${widget.snap['country'].toString()}',
+                  style: const TextStyle(color: Colors.white70, overflow: TextOverflow.ellipsis),
                 ),
               ],
             ),
-            widget.snap['userId'].toString() == widget.user.uid.toString()
+            widget.snap['userId'].toString() == widget.user?['id']
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: InkWell(
@@ -228,7 +237,7 @@ class _Card2State extends State<Card2> {
               trailing: InkWell(
                 onTap: () async {
                   try {
-                    if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                    if (widget.user?['id'] != widget.snap['userId'].toString()) {
                       String res = await db.updateContactedCollection(
                           userPostedId: currentUserId ?? db.user.uid.toString(),
                           postOwnerId: widget.snap['userId'].toString(),
@@ -305,7 +314,7 @@ class _Card2State extends State<Card2> {
               trailing: InkWell(
                 onTap: () async {
                   try {
-                    if (db.user.uid.toString() != widget.snap['userId'].toString()) {
+                    if (widget.user?['id'] != widget.snap['userId'].toString()) {
                       String res = await db.updateContactedCollection(
                           userPostedId: db.user.uid.toString(),
                           postOwnerId: widget.snap['userId'].toString(),
@@ -405,13 +414,13 @@ class _Card2State extends State<Card2> {
                           ),
                           Text(widget.snap['upVote'].length.toString(), style: const TextStyle(color: Colors.white70)),
                           DangerAnimation(
-                            isAnimating: widget.snap['upVote'].contains(widget.user.uid),
+                            isAnimating: widget.snap['upVote'].contains(currentUserId ?? widget.user?['id']),
                             smallLike: true,
                             child: SizedBox(
                               width: 30,
                               height: 40,
                               child: IconButton(
-                                icon: widget.snap['upVote'].contains(widget.user.uid)
+                                icon: widget.snap['upVote'].contains(currentUserId ?? widget.user?['id'])
                                     ? Icon(
                                         Icons.arrow_circle_up_outlined,
                                         color: Colors.green.shade700,
@@ -420,7 +429,8 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_up_outlined,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => db.upvotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['upVote']),
+                                onPressed: () =>
+                                    db.upvotePost(widget.snap['postId'].toString(), currentUserId ?? widget.user?['id'], widget.snap['upVote']),
                               ),
                             ),
                           ),
@@ -437,13 +447,13 @@ class _Card2State extends State<Card2> {
                             style: const TextStyle(color: Colors.white70),
                           ),
                           DangerAnimation(
-                            isAnimating: widget.snap['downVote'].contains(widget.user.uid),
+                            isAnimating: widget.snap['downVote'].contains(currentUserId ?? widget.user?['id']),
                             smallLike: true,
                             child: SizedBox(
                               width: 30,
                               height: 40,
                               child: IconButton(
-                                icon: widget.snap['downVote'].contains(widget.user.uid)
+                                icon: widget.snap['downVote'].contains(currentUserId ?? widget.user?['id'])
                                     ? Icon(
                                         Icons.arrow_circle_down_rounded,
                                         color: Colors.pink.shade700,
@@ -452,7 +462,8 @@ class _Card2State extends State<Card2> {
                                         Icons.arrow_circle_down_rounded,
                                         color: Colors.white70,
                                       ),
-                                onPressed: () => db.downVotePost(widget.snap['postId'].toString(), db.user.uid, widget.snap['downVote']),
+                                onPressed: () =>
+                                    db.downVotePost(widget.snap['postId'].toString(), currentUserId ?? widget.user?['id'], widget.snap['downVote']),
                               ),
                             ),
                           ),
@@ -466,9 +477,8 @@ class _Card2State extends State<Card2> {
                             child: IconButton(
                                 iconSize: 18,
                                 onPressed: () async {
-                                  Share.share(
-                                    'Check this out on Last Resrt!, Download the app now. - ${widget.snap['title']}',
-                                  );
+                                  Share.share('Check this out on Last Resrt, Download the app now. - ${widget.snap['title']}',
+                                      subject: 'apps.apple.com/app/id6443890292');
                                 },
                                 icon: const Icon(
                                   Icons.share,
@@ -486,7 +496,13 @@ class _Card2State extends State<Card2> {
                                 iconSize: 18,
                                 onPressed: () async {
                                   Navigator.push(
-                                      context, MaterialPageRoute(builder: (context) => CommentScreen(postId: widget.snap['postId'].toString())));
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => CommentScreen(
+                                                postId: widget.snap['postId'].toString(),
+                                                currentUser: widget.user,
+                                                currentUserUid: widget.user?['id'],
+                                              )));
                                 },
                                 icon: const FaIcon(
                                   FontAwesomeIcons.comment,

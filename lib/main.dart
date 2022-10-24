@@ -2,6 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/login_page.dart';
+import 'package:lrf/provider/authentication.dart';
+import 'package:lrf/root.dart';
+import 'package:provider/provider.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'routes/routes.dart' as router;
 
@@ -10,7 +14,9 @@ late SharedPreferences sharedPreferences;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
   sharedPreferences = await SharedPreferences.getInstance();
+
   runApp(const MyApp());
 }
 
@@ -19,18 +25,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      title: 'Last Resrt App',
-      color: Colors.white,
-      theme: ThemeData.dark().copyWith(
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        highlightColor: Colors.green,
-        scaffoldBackgroundColor: kAppBackgroundColor,
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => Authentication())],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
+        title: 'Last Resrt App',
+        color: Colors.white,
+        theme: ThemeData.dark().copyWith(
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          highlightColor: Colors.green,
+          scaffoldBackgroundColor: kAppBackgroundColor,
+        ),
+        onGenerateRoute: router.generateRoute,
+        home: const RootPage(),
       ),
-      onGenerateRoute: router.generateRoute,
-      home: const LoginPage(),
     );
   }
 }
