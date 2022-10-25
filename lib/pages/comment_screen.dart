@@ -8,10 +8,11 @@ import 'package:lrf/utils/utils.dart';
 import 'package:random_avatar/random_avatar.dart';
 
 class CommentScreen extends StatefulWidget {
-  final String postId;
+  const CommentScreen({super.key, required this.postId, required this.currentUser, required this.currentUserUid});
+
   final Map<String, dynamic>? currentUser;
   final String? currentUserUid;
-  const CommentScreen({super.key, required this.postId, required this.currentUser, required this.currentUserUid});
+  final String postId;
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -20,11 +21,15 @@ class CommentScreen extends StatefulWidget {
 class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveClientMixin {
   final TextEditingController commentEditingController = TextEditingController();
   late Database db;
+
   @override
   void initState() {
     db = Database();
     super.initState();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   void postComment(String uid, String name, String profilePic) async {
     try {
@@ -51,9 +56,6 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
       );
     }
   }
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
@@ -126,12 +128,6 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
                 ),
               ),
             );
-            // return const Center(
-            //   child: CircularProgressIndicator(
-            //     color: Colors.greenAccent,
-            //     backgroundColor: Colors.green,
-            //   ),
-            // );
           }
 
           return ListView.builder(

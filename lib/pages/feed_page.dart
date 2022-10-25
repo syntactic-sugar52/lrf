@@ -38,10 +38,8 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
   Map<String, dynamic>? currentUser;
   String? currentUserId;
   String? currentUserPhotoUrl;
-
   late Database db;
   String? email;
-
   String? username;
 
   String? _country;

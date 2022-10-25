@@ -5,16 +5,16 @@ import 'package:lrf/utils/utils.dart';
 import 'package:random_avatar/random_avatar.dart';
 
 class CommentCard extends StatefulWidget {
-  final snap;
-  final String dbUserUid;
-  final String postId;
-
   const CommentCard({
     Key? key,
     required this.snap,
     required this.dbUserUid,
     required this.postId,
   }) : super(key: key);
+
+  final String dbUserUid;
+  final String postId;
+  final snap;
 
   @override
   State<CommentCard> createState() => _CommentCardState();

@@ -14,7 +14,6 @@ late SharedPreferences sharedPreferences;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   sharedPreferences = await SharedPreferences.getInstance();
 
   runApp(const MyApp());

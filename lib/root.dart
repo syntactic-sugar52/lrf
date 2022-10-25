@@ -20,9 +20,7 @@ class _RootPageState extends State<RootPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
     Authentication user = Provider.of<Authentication>(context, listen: false);
-
     String returnString = await user.onStartUp();
-
     if (returnString == "success") {
       if (mounted) {
         setState(() {

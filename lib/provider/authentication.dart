@@ -1,22 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lrf/main.dart';
-import 'package:lrf/models/user_model.dart';
-
+import 'package:lrf/pages/feed_page.dart';
 import 'package:lrf/services/database.dart';
-
 import 'package:lrf/utils/utils.dart';
-
 import 'package:the_apple_sign_in/the_apple_sign_in.dart';
 
 class Authentication extends ChangeNotifier {
-  final googleSignIn = GoogleSignIn();
-  GoogleSignInAccount? _user;
-  GoogleSignInAccount get user => _user!;
   FirebaseAuth auth = FirebaseAuth.instance;
+  Map<String, dynamic>? currentUser;
+  final googleSignIn = GoogleSignIn();
+
+  GoogleSignInAccount? _user;
+
+  GoogleSignInAccount get user => _user!;
 
   Future<User?> signInWithGoogle({required BuildContext context, required var mounted}) async {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -60,10 +59,8 @@ class Authentication extends ChangeNotifier {
               showSnackBar(context, 'Something went wrong. Please Try Again.');
             }
           }
-          sharedPreferences.setBool('isLoggedIn', true);
         } else if (user?.uid == sharedPreferences.getString('currentUserUid') && sharedPreferences.getBool('isLoggedIn') == false) {
           sharedPreferences.setBool('isLoggedIn', true);
-          print('isLoggin true else if');
         }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
@@ -89,7 +86,7 @@ class Authentication extends ChangeNotifier {
   static Future<void> signOut({required BuildContext context}) async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     User? user = FirebaseAuth.instance.currentUser;
-    user = null;
+
     try {
       await FirebaseAuth.instance.signOut();
       await googleSignIn.signOut();
@@ -137,7 +134,7 @@ class Authentication extends ChangeNotifier {
           );
 
           if (res == "success") {
-            // save to local
+            // save credentials to local
             sharedPreferences.setBool('isLoggedIn', true);
             sharedPreferences.setString('currentUserName', displayName.toString());
             sharedPreferences.setString('currentUserEmail', email.toString());
@@ -145,6 +142,12 @@ class Authentication extends ChangeNotifier {
               'currentUserUid',
               userCredential.user!.uid,
             );
+            //navigate to feed page
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const FeedPage()),
+              );
+            }
           } else {
             if (mounted) {
               showSnackBar(context, 'Something went wrong. Please Try Again.');
@@ -156,8 +159,6 @@ class Authentication extends ChangeNotifier {
             userCredential.additionalUserInfo!.isNewUser == false) {
           // set isLoggedIn to true
           sharedPreferences.setBool('isLoggedIn', true);
-          // navigate to feed page
-
         }
 
         return user!;
@@ -179,7 +180,6 @@ class Authentication extends ChangeNotifier {
     }
   }
 
-  Map<String, dynamic>? currentUser;
   Future<String> onStartUp() async {
     String retVal = 'error';
     User? firebaseUser = auth.currentUser;
