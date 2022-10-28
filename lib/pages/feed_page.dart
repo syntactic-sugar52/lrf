@@ -19,6 +19,7 @@ import 'package:lrf/pages/search_page.dart';
 
 import 'package:lrf/pages/widgets/home/card_widget.dart';
 import 'package:lrf/provider/authentication.dart';
+import 'package:lrf/root.dart';
 
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
@@ -35,31 +36,35 @@ class FeedPage extends StatefulWidget {
 }
 
 class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<FeedPage> {
-  Map<String, dynamic>? currentUser;
-  String? currentUserId;
-  String? currentUserPhotoUrl;
   late Database db;
+  //shared prference
   String? email;
   String? username;
-
   String? _country;
   String? _currentAddress;
   Position? _currentPosition;
-  final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
-  bool _locationServiceEnabled = false;
-  LocationPermission? _permissionStatus;
+  Map<String, dynamic>? currentUser;
+  String? currentUserId;
+  String? currentUserPhotoUrl;
   String? _postalCode;
   String? _subAdminArea;
   String? _subLocality;
-
+  // location
+  final GeolocatorPlatform _geolocator = GeolocatorPlatform.instance;
+  bool _locationServiceEnabled = false;
+  LocationPermission? _permissionStatus;
   @override
   void initState() {
+    // intitialize database
     db = Database();
+    // get values from local
     currentUserId = sharedPreferences.getString('currentUserUid');
     username = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
     email = sharedPreferences.getString('currentUserEmail');
+    // get user location
     _getCurrentPosition();
+    // get current user info from database
     getUser(currentUserId.toString());
     super.initState();
   }
@@ -141,11 +146,13 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
   }
 
   Future<Map<String, dynamic>> getUser(String currentUserId) async {
+    //get user details from database if userID is the same with locally saved user id
     var details = await db.getUserDetails(uid: currentUserId);
+    // move details data to current user
     setState(() {
       currentUser = details;
     });
-
+    // return current user, if null, return empty object
     return currentUser ?? {};
   }
 
@@ -153,7 +160,9 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
     final hasPermission = await getUserLocation(context);
 
     try {
+      // if  user  does not accepts location permission
       if (!hasPermission) {
+        // get last known position
         Position? position = await _geolocator.getLastKnownPosition();
         if (mounted) {
           setState(() {
@@ -162,6 +171,7 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
           _getAddressFromLatLng(_currentPosition!);
         }
       }
+      // if accepted, get current position and covert to address
       await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation).then((Position position) {
         setState(() {
           _currentPosition = position;
@@ -180,9 +190,10 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
 
   Future<void> _getAddressFromLatLng(Position position) async {
     try {
+      // convert coordinates to place values
       await placemarkFromCoordinates(_currentPosition!.latitude, _currentPosition!.longitude).then((List<Placemark> placemarks) async {
         Placemark place = placemarks[0];
-
+        // save state
         setState(() {
           _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode},${place.country}';
           _subAdminArea = '${place.subAdministrativeArea}';
@@ -190,17 +201,19 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
           _postalCode = '${place.postalCode}';
           _country = '${place.country}';
         });
-
+        // update user collection with new values
         String res = await db.updateUserCollection(
             address: _currentAddress.toString(),
             lat: _currentPosition!.latitude.toString(),
             lng: _currentPosition!.longitude.toString(),
             uid: currentUserId!);
+        // save to local
         sharedPreferences.setString('address', _currentAddress.toString());
         sharedPreferences.setString('subAdminArea', _subAdminArea == null ? _subAdminArea.toString() : _subLocality.toString());
         sharedPreferences.setString('postalCode', _postalCode == null ? _postalCode.toString() : '');
         sharedPreferences.setString('country', _country ?? '');
         if (res == "success") {
+          // if success return nothing
           return;
         } else {
           if (mounted) {
@@ -274,7 +287,7 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
                   try {
                     await Authentication.signOut(context: context);
                     if (mounted) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginPage()));
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const RootPage()));
                     }
                   } catch (e) {
                     if (mounted) {
@@ -307,6 +320,7 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin<
             backgroundColor: kAppBackgroundColor,
           ),
         ),
+        // if current address is not null show card data in feed, if null, show loading image
         body: _currentAddress != null
             ? StreamBuilder(
                 stream: FirebaseFirestore.instance.collection('posts').orderBy('datePublished', descending: true).snapshots(),

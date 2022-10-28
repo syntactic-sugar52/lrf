@@ -38,11 +38,12 @@ class _Card2State extends State<Card2> {
 
   @override
   void initState() {
+    // initialize database
     db = Database();
+    //get locally saved data
     currentUserId = sharedPreferences.getString('currentUserUid');
     currentUserName = sharedPreferences.getString('currentUserName');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
-
     postalCode = sharedPreferences.getString('postalCode');
 
     super.initState();
@@ -151,6 +152,7 @@ class _Card2State extends State<Card2> {
                 ),
               ],
             ),
+            // if user id is the same as user id in database
             widget.snap['userId'].toString() == widget.user?['id']
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8),
@@ -158,7 +160,6 @@ class _Card2State extends State<Card2> {
                         onTap: () async {
                           try {
                             String res = await db.deletePostRequest(postId: widget.snap['postId']);
-
                             if (res == 'success') {
                               if (mounted) {
                                 showSnackBar(context, 'Post Deleted!');

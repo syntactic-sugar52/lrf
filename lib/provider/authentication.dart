@@ -125,6 +125,14 @@ class Authentication extends ChangeNotifier {
           svg = DateTime.now().toIso8601String();
           final displayName = '${fullName?.givenName} ${fullName?.familyName}';
           sharedPreferences.setString('currentUserPhotoUrl', svg);
+          // save credentials to local
+          sharedPreferences.setBool('isLoggedIn', true);
+          sharedPreferences.setString('currentUserName', displayName.toString());
+          sharedPreferences.setString('currentUserEmail', email.toString());
+          sharedPreferences.setString(
+            'currentUserUid',
+            userCredential.user!.uid,
+          );
           // create user in db
           final res = await Database().createUser(
             displayName,
@@ -134,14 +142,6 @@ class Authentication extends ChangeNotifier {
           );
 
           if (res == "success") {
-            // save credentials to local
-            sharedPreferences.setBool('isLoggedIn', true);
-            sharedPreferences.setString('currentUserName', displayName.toString());
-            sharedPreferences.setString('currentUserEmail', email.toString());
-            sharedPreferences.setString(
-              'currentUserUid',
-              userCredential.user!.uid,
-            );
             //navigate to feed page
             if (mounted) {
               Navigator.of(context).pushReplacement(

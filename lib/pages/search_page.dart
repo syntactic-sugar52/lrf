@@ -82,7 +82,6 @@ class _SearchPageState extends State<SearchPage> {
                     color: Colors.green,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    // color: Colors.white70,
                     shadows: [
                       Shadow(
                         blurRadius: 1.0,
@@ -172,7 +171,6 @@ class _SearchPageState extends State<SearchPage> {
                                                 onPressed: () async {
                                                   try {
                                                     String res = await db.deletePostRequest(postId: data.postId!);
-
                                                     if (res == 'success') {
                                                       if (mounted) {
                                                         showSnackBar(context, 'Post Deleted!');
@@ -442,7 +440,6 @@ class _SearchPageState extends State<SearchPage> {
                 ));
               });
         }
-
         if (snapshot.connectionState == ConnectionState.done) {
           if (!snapshot.hasData) {
             return const Center(

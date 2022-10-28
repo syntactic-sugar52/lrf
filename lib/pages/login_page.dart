@@ -1,16 +1,11 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/pages/widgets/login/apple_Sign_in_button.dart';
 
 import 'package:lrf/pages/widgets/login/google_signin_button.dart';
-
-import 'package:lrf/provider/authentication.dart';
-
-import 'feed_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);

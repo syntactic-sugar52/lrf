@@ -8,7 +8,6 @@ Widget customButton({required String text, required Function onPressed, required
     style: ElevatedButton.styleFrom(
         elevation: 12,
         backgroundColor: color,
-        // Color(0xff3A3A3A),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),

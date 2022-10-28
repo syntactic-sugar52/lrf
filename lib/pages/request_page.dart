@@ -26,17 +26,16 @@ class _RequestPageState extends State<RequestPage> {
   String? currentUserPhotoUrl;
   late Database db;
   bool isLoading = false;
+  final bool _validate = false;
   String? postalCode;
   String? subAdminArea;
-
+// text controllers for textfield
   final TextEditingController _contactEmailController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
-// text controllers for textfield
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
-  final bool _validate = false;
 
   @override
   void dispose() {
@@ -118,7 +117,6 @@ class _RequestPageState extends State<RequestPage> {
                 //if form is not empty
                 if (formState!.validate()) {
                   // add to post collection in db
-
                   postRequest(currentUserId.toString(), currentUserName ?? db.user.displayName!, currentUserPhotoUrl ?? db.user.photoURL!);
                 } else {
                   if (mounted) {

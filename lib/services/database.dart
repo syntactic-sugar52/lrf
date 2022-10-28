@@ -22,12 +22,6 @@ class Database {
     // return UserModel.fromSnap(documentSnapshot);
   }
 
-  Future<Map> getUserDataFromFirestore(String uid) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    Map docData = doc.data() as Map;
-    return docData;
-  }
-
   Future<String> createUser(String displayName, String email, String id, String photoURL) async {
     String res = "Some error occurred";
     try {

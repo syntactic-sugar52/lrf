@@ -46,6 +46,7 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
           showSnackBar(context, res);
         }
       }
+      // clear comment controller
       setState(() {
         commentEditingController.text = "";
       });
