@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/pages/contact_us_page.dart';
+import 'package:lrf/pages/feed_page.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/provider/authentication.dart';
 import 'package:lrf/root.dart';
@@ -25,20 +28,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => Authentication())],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        title: 'Last Resrt App',
-        color: Colors.white,
-        theme: ThemeData.dark().copyWith(
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          highlightColor: Colors.green,
-          scaffoldBackgroundColor: kAppBackgroundColor,
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => Authentication(FirebaseAuth.instance),
         ),
-        onGenerateRoute: router.generateRoute,
-        home: const RootPage(),
-      ),
+        StreamProvider(
+          create: (context) => context.read<Authentication>().authStateChanges,
+          initialData: null,
+        ),
+      ],
+      child: MaterialApp(
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          title: 'Bounty Bay App',
+          onGenerateRoute: router.generateRoute,
+          home: const RootPage()),
     );
   }
 }

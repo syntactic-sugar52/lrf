@@ -38,17 +38,12 @@ class _CommentCardState extends State<CommentCard> {
                   RichText(
                     text: TextSpan(
                       children: [
-                        TextSpan(
-                            text: widget.snap.data()['name'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            )),
-                        TextSpan(
-                          text: ' --- ${widget.snap.data()['text']}',
-                        ),
+                        TextSpan(text: widget.snap.data()['name'], style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black)),
+                        // TextSpan(text: ' --- ${widget.snap.data()['text']}', style: const TextStyle(color: Colors.black)),
                       ],
                     ),
                   ),
+                  Text('${widget.snap.data()['text']}', style: const TextStyle(color: Colors.black)),
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Row(

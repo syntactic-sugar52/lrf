@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>281394997658-7q650tp9l165qgf8bgq6mtbo25t04k63.apps.googleusercontent.com</string>
+	<string>859672609504-3fpbj8606vrtogle3tvg8uvd80mtdarr.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.281394997658-7q650tp9l165qgf8bgq6mtbo25t04k63</string>
+	<string>com.googleusercontent.apps.859672609504-3fpbj8606vrtogle3tvg8uvd80mtdarr</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>859672609504-rn2rd18nne9mot33e8sjre9kl7eb4hc0.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAcg2nYydTjF7b_-CjJ24rsOtjxqlLJbiM</string>
+	<string>AIzaSyDrS0touIWSiHuUMSn7c_73_5sbP0EkEKo</string>
 	<key>GCM_SENDER_ID</key>
-	<string>281394997658</string>
+	<string>859672609504</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.lastresort.lr</string>
+	<string>com.bountybay.bb</string>
 	<key>PROJECT_ID</key>
-	<string>last-resort-89e02</string>
+	<string>bountybay-96d6e</string>
 	<key>STORAGE_BUCKET</key>
-	<string>last-resort-89e02.appspot.com</string>
+	<string>bountybay-96d6e.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:281394997658:ios:d1af614c852afc0c7d7223</string>
+	<string>1:859672609504:ios:833b0af429647ab2fcc685</string>
 </dict>
 </plist>

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glass/glass.dart';
+import 'package:lrf/constants/constants.dart';
 import 'package:lrf/main.dart';
 import 'package:lrf/pages/comment_screen.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
@@ -11,17 +14,18 @@ import 'package:lrf/utils/utils.dart';
 import 'package:random_avatar/random_avatar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class Card2 extends StatefulWidget {
-  const Card2(
-      {Key? key, required this.snap, required this.user, required this.subAdministrativeArea, required this.postalCode, required this.country})
-      : super(key: key);
+  const Card2({
+    Key? key,
+    required this.snap,
+    required this.user,
+  }) : super(key: key);
 
-  final String postalCode;
   final Map<String, dynamic> snap;
-  final String subAdministrativeArea;
+
   final Map<String, dynamic>? user;
-  final String country;
 
   @override
   State<Card2> createState() => _Card2State();
@@ -35,18 +39,28 @@ class _Card2State extends State<Card2> {
   bool dangerTapped = false;
   late Database db;
   String? postalCode;
-
+  int commentLength = 0;
   @override
   void initState() {
     // initialize database
     db = Database();
     //get locally saved data
     currentUserId = sharedPreferences.getString('currentUserUid');
-    currentUserName = sharedPreferences.getString('currentUserName');
-    currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
-    postalCode = sharedPreferences.getString('postalCode');
 
+    getCommentLength();
+    getImageConvertToBase64String(url: widget.snap['imagePath'].toString());
     super.initState();
+  }
+
+  Future getCommentLength() async {
+    if (mounted) {
+      int totalCommentLength = await db.getCommentLength(widget.snap['postId'].toString());
+      if (mounted) {
+        setState(() {
+          commentLength = totalCommentLength;
+        });
+      }
+    }
   }
 
   buildInnerCard(
@@ -54,17 +68,19 @@ class _Card2State extends State<Card2> {
     double height,
     Widget child,
   ) {
-    return SizedBox(
-        height: height,
-        width: double.infinity,
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.rectangle,
-          ),
-          child: child,
-        )).asGlass();
+    return Card(
+      child: SizedBox(
+          height: height,
+          width: double.infinity,
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.rectangle,
+            ),
+            child: child,
+          )).asGlass(),
+    );
   }
 
   buildCollapsedHeader() {
@@ -82,7 +98,6 @@ class _Card2State extends State<Card2> {
                 ),
                 Text(
                   widget.snap['username'].toString(),
-                  style: TextStyle(color: Colors.blueGrey.shade100),
                 ),
               ],
             ),
@@ -92,13 +107,13 @@ class _Card2State extends State<Card2> {
                   DateFormat.jm().format(
                     widget.snap['datePublished'].toDate(),
                   ),
-                  style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
                 Text(
                   DateFormat.yMMMd().format(
                     widget.snap['datePublished'].toDate(),
                   ),
-                  style: TextStyle(color: Colors.blueGrey.shade100, fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                 ),
               ],
             )
@@ -110,7 +125,7 @@ class _Card2State extends State<Card2> {
 
   Widget buildCollapsedBody() {
     return buildInnerCard(
-      Colors.transparent,
+      kWhite,
       MediaQuery.of(context).size.height / 6,
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -121,7 +136,6 @@ class _Card2State extends State<Card2> {
               child: Text(
                 widget.snap['title'].toString(),
                 style: const TextStyle(
-                  color: Colors.white70,
                   fontSize: 17,
                 ),
               ),
@@ -145,11 +159,19 @@ class _Card2State extends State<Card2> {
           children: <Widget>[
             Row(
               children: [
-                Icon(Icons.location_pin, color: Colors.green.shade600),
-                Text(
-                  '${widget.snap['subAdminArea']}, ${widget.snap['country'].toString()}',
-                  style: const TextStyle(color: Colors.white70, overflow: TextOverflow.ellipsis),
-                ),
+                Container(
+                    margin: const EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade900,
+
+                      borderRadius: const BorderRadius.all(Radius.circular(10.0)), // Set rounded corner radius
+                    ),
+                    child: Text(
+                      widget.snap['category'].toString(),
+                      style: const TextStyle(color: Colors.white),
+                    ))
               ],
             ),
             // if user id is the same as user id in database
@@ -176,9 +198,9 @@ class _Card2State extends State<Card2> {
                             Future.error(e);
                           }
                         },
-                        child: const Text('Delete', style: TextStyle(color: Color(0xff42855B), fontWeight: FontWeight.w700))),
+                        child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.w700))),
                   )
-                : Text('Last Resrt', style: TextStyle(color: Colors.green.shade600, fontWeight: FontWeight.w600)),
+                : const Text('BountyBay', style: TextStyle(fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -189,183 +211,230 @@ class _Card2State extends State<Card2> {
     return Container();
   }
 
-  buildExpandedDetails() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(
-            height: 20,
-          ),
-          Text(
-            widget.snap['description'].toString(),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-              letterSpacing: .5,
-            ),
-            softWrap: true,
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Card(
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: ListTile(
-              dense: true,
-              leading: Icon(Icons.numbers, color: Colors.amber.shade800, size: 22),
-              title: Text(
-                widget.snap['contactNumber'].toString(),
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  letterSpacing: .5,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 1.0,
-                      color: Theme.of(context).primaryColor,
-                      offset: const Offset(0.4, 0.2),
-                    ),
-                  ],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              trailing: InkWell(
-                onTap: () async {
-                  try {
-                    if (widget.user?['id'] != widget.snap['userId'].toString()) {
-                      String res = await db.updateContactedCollection(
-                          userPostedId: currentUserId ?? db.user.uid.toString(),
-                          postOwnerId: widget.snap['userId'].toString(),
-                          isEmail: false,
-                          isSms: true,
-                          isSearchPage: false,
-                          postId: widget.snap['postId'].toString());
-                      if (res == 'success') {
-                        setState(() {
-                          db.sendSms("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
-                        });
-                      } else {
-                        if (mounted) {
-                          Clipboard.setData(ClipboardData(
-                            text: widget.snap['contactNumber'].toString(),
-                          )).then((_) {
-                            showSnackBar(context, "Copied to clipboard");
-                          });
-                        }
-                      }
-                    } else {
-                      if (mounted) {
-                        showSnackBar(context, 'Contacting yourself is not allowed.');
-                      }
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      showSnackBar(context, 'Something went wrong. Try Again.');
-                    }
-                    Future.error(e);
-                  }
-                },
-                child: PhysicalModel(
-                  color: Colors.black,
-                  elevation: 15.0,
-                  shape: BoxShape.circle,
-                  child: CircleAvatar(
-                      radius: 14,
-                      child: Icon(
-                        Icons.contact_page_outlined,
-                        size: 14,
-                        color: Colors.blueGrey.shade100,
-                      )),
-                ),
-              ),
-            ),
-          ),
-          Card(
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: ListTile(
-              dense: true,
-              leading: Icon(Icons.mail, color: Colors.blue.shade800, size: 22),
-              title: Text(
-                widget.snap['contactEmail'].toString(),
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  overflow: TextOverflow.ellipsis,
-                  letterSpacing: .5,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 1.0,
-                      color: Theme.of(context).primaryColor,
-                      offset: const Offset(0.4, 0.2),
-                    ),
-                  ],
-                  fontWeight: FontWeight.w500,
-                ),
-                softWrap: true,
-              ),
-              trailing: InkWell(
-                onTap: () async {
-                  try {
-                    if (widget.user?['id'] != widget.snap['userId'].toString()) {
-                      String res = await db.updateContactedCollection(
-                          userPostedId: db.user.uid.toString(),
-                          postOwnerId: widget.snap['userId'].toString(),
-                          isEmail: true,
-                          isSearchPage: false,
-                          isSms: false,
-                          postId: widget.snap['postId'].toString());
-                      if (res == 'success') {
-                        setState(() {
-                          db.sendEmail(
-                            widget.snap['contactEmail'].toString(),
-                          );
-                        });
-                      } else {
-                        if (mounted) {
-                          Clipboard.setData(ClipboardData(
-                            text: widget.snap['contactEmail'].toString(),
-                          )).then((_) {
-                            showSnackBar(context, "Copied to clipboard");
-                          });
-                        }
-                      }
-                    } else {
-                      if (mounted) {
-                        showSnackBar(context, 'Contacting yourself is not allowed.');
-                      }
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      showSnackBar(context, e.toString());
-                    }
+  /// Convert base64 text string into Image to display
+  Image imageFromBase64String(String base64String) {
+    return Image.memory(
+      base64Decode(base64String),
+      fit: BoxFit.fill,
+    );
+  }
 
-                    Future.error(e);
-                  }
-                },
-                child: PhysicalModel(
-                  color: Colors.black,
-                  elevation: 15.0,
-                  shape: BoxShape.circle,
-                  child: CircleAvatar(
-                      radius: 14,
-                      child: Icon(
-                        Icons.contact_page_outlined,
-                        size: 14,
-                        color: Colors.blueGrey.shade100,
-                      )),
+  /// Retrieve the image from remote URL and convert bytes to base64 encoded text string
+  Future<String> getImageConvertToBase64String({required String url}) async {
+    // Get Image from server
+    final response = await http.get(
+      Uri.parse(url),
+    );
+
+    return base64Encode(response.bodyBytes);
+  }
+
+  buildExpandedDetails() {
+    return Card(
+      color: kWhite,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 12,
+                    child: Image.network(
+                      widget.snap['imagePath'].toString(),
+                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                )),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              widget.snap['description'].toString(),
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                letterSpacing: .2,
+              ),
+              softWrap: true,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Card(
+              elevation: 3,
+              color: Colors.white54,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: ListTile(
+                dense: true,
+                leading: Icon(
+                  Icons.numbers,
+                  size: 22,
+                  color: Colors.grey.shade600,
+                ),
+                title: Text(
+                  widget.snap['contactNumber'].toString(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                    // letterSpacing: .5,
+                  ),
+                ),
+                trailing: InkWell(
+                  onTap: () async {
+                    try {
+                      if (widget.user?['id'] != widget.snap['userId'].toString()) {
+                        String res = await db.updateContactedCollection(
+                            userPostedId: currentUserId ?? db.user.uid.toString(),
+                            postOwnerId: widget.snap['userId'].toString(),
+                            isEmail: false,
+                            isSms: true,
+                            isSearchPage: false,
+                            postId: widget.snap['postId'].toString());
+                        if (res == 'success') {
+                          if (mounted) {
+                            setState(() {
+                              db.sendSms("sms:${widget.snap['contactNumber'].toString()}", mounted, context);
+                            });
+                          }
+                        } else {
+                          if (mounted) {
+                            Clipboard.setData(ClipboardData(
+                              text: widget.snap['contactNumber'].toString(),
+                            )).then((_) {
+                              showSnackBar(context, "Copied to clipboard");
+                            });
+                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          showSnackBar(context, 'Contacting yourself is not allowed.');
+                        }
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        showSnackBar(context, 'Something went wrong. Try Again.');
+                      }
+                      Future.error(e);
+                    }
+                  },
+                  child: const PhysicalModel(
+                    color: Colors.black,
+                    elevation: 2.0,
+                    shape: BoxShape.circle,
+                    child: CircleAvatar(
+                        radius: 14,
+                        child: Icon(
+                          Icons.arrow_forward,
+                          size: 14,
+                        )),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+            Card(
+              color: Colors.white54,
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: ListTile(
+                dense: true,
+                leading: Icon(
+                  Icons.mail,
+                  size: 22,
+                  color: Colors.grey.shade600,
+                ),
+                title: Text(
+                  widget.snap['contactEmail'].toString(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    overflow: TextOverflow.ellipsis,
+                    color: Colors.black,
+                  ),
+                  softWrap: true,
+                ),
+                trailing: InkWell(
+                  onTap: () async {
+                    try {
+                      if (widget.user?['id'] != widget.snap['userId'].toString()) {
+                        String res = await db.updateContactedCollection(
+                            userPostedId: db.user.uid.toString(),
+                            postOwnerId: widget.snap['userId'].toString(),
+                            isEmail: true,
+                            isSearchPage: false,
+                            isSms: false,
+                            postId: widget.snap['postId'].toString());
+                        if (res == 'success') {
+                          setState(() {
+                            db.sendEmail(
+                              widget.snap['contactEmail'].toString(),
+                            );
+                          });
+                        } else {
+                          if (mounted) {
+                            Clipboard.setData(ClipboardData(
+                              text: widget.snap['contactEmail'].toString(),
+                            )).then((_) {
+                              showSnackBar(context, "Copied to clipboard");
+                            });
+                          }
+                        }
+                      } else {
+                        if (mounted) {
+                          showSnackBar(context, 'Contacting yourself is not allowed.');
+                        }
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        showSnackBar(context, e.toString());
+                      }
+
+                      Future.error(e);
+                    }
+                  },
+                  child: const PhysicalModel(
+                    color: mobileBackgroundColor,
+                    elevation: 3.0,
+                    shape: BoxShape.circle,
+                    child: CircleAvatar(
+                        radius: 14,
+                        child: Icon(
+                          Icons.arrow_forward,
+                          size: 14,
+                        )),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     ).asGlass();
   }
@@ -379,8 +448,8 @@ class _Card2State extends State<Card2> {
         scrollOnCollapse: true,
         scrollOnExpand: true,
         child: Card(
-          elevation: 8,
-          color: Colors.blueGrey.shade900,
+          color: Colors.blueGrey.shade100,
+          elevation: 3,
           clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,14 +474,17 @@ class _Card2State extends State<Card2> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Card(
-                    elevation: 8,
+                    elevation: 2,
+                    color: kWhite,
                     child: IntrinsicHeight(
                       child: Row(
                         children: [
                           Container(
                             width: 10,
                           ),
-                          Text(widget.snap['upVote'].length.toString(), style: const TextStyle(color: Colors.white70)),
+                          Text(
+                            widget.snap['upVote'].length.toString(),
+                          ),
                           DangerAnimation(
                             isAnimating: widget.snap['upVote'].contains(currentUserId ?? widget.user?['id']),
                             smallLike: true,
@@ -427,10 +499,9 @@ class _Card2State extends State<Card2> {
                                       )
                                     : const Icon(
                                         Icons.arrow_circle_up_outlined,
-                                        color: Colors.white70,
                                       ),
-                                onPressed: () =>
-                                    db.upvotePost(widget.snap['postId'].toString(), currentUserId ?? widget.user?['id'], widget.snap['upVote']),
+                                onPressed: () => db.upvotePost(widget.snap['postId'].toString(), currentUserId ?? widget.user?['id'],
+                                    widget.snap['upVote'], widget.snap['token'], widget.snap['title'], widget.snap['username']),
                               ),
                             ),
                           ),
@@ -444,7 +515,6 @@ class _Card2State extends State<Card2> {
                           ),
                           Text(
                             widget.snap['downVote'].length.toString(),
-                            style: const TextStyle(color: Colors.white70),
                           ),
                           DangerAnimation(
                             isAnimating: widget.snap['downVote'].contains(currentUserId ?? widget.user?['id']),
@@ -453,17 +523,16 @@ class _Card2State extends State<Card2> {
                               width: 30,
                               height: 40,
                               child: IconButton(
-                                icon: widget.snap['downVote'].contains(currentUserId ?? widget.user?['id'])
+                                icon: widget.snap['downVote'].contains(widget.user?['id'])
                                     ? Icon(
                                         Icons.arrow_circle_down_rounded,
                                         color: Colors.pink.shade700,
                                       )
                                     : const Icon(
                                         Icons.arrow_circle_down_rounded,
-                                        color: Colors.white70,
                                       ),
-                                onPressed: () =>
-                                    db.downVotePost(widget.snap['postId'].toString(), currentUserId ?? widget.user?['id'], widget.snap['downVote']),
+                                onPressed: () => db.downVotePost(widget.snap['postId'].toString(), widget.user?['id'], widget.snap['downVote'],
+                                    widget.snap['token'], widget.snap['title'], widget.snap['username']),
                               ),
                             ),
                           ),
@@ -477,17 +546,20 @@ class _Card2State extends State<Card2> {
                             child: IconButton(
                                 iconSize: 18,
                                 onPressed: () async {
-                                  Share.share('Check this out on Last Resrt, Download the app now. - ${widget.snap['title']}',
-                                      subject: 'apps.apple.com/app/id6443890292');
+                                  Share.share(
+                                    'Check this out on BountyBay, Download the app now. - ${widget.snap['title']}',
+                                  );
                                 },
                                 icon: const Icon(
                                   Icons.share,
-                                  color: Colors.white70,
                                 )),
                           ),
                           const VerticalDivider(
                             thickness: 1,
                             color: Colors.black,
+                          ),
+                          Text(
+                            commentLength.toString(),
                           ),
                           SizedBox(
                             width: 40,
@@ -502,11 +574,14 @@ class _Card2State extends State<Card2> {
                                                 postId: widget.snap['postId'].toString(),
                                                 currentUser: widget.user,
                                                 currentUserUid: widget.user?['id'],
+                                                token: widget.snap['token'].toString(),
+                                                postOwnerId: widget.snap['userId'].toString(),
+                                                postTitle: widget.snap['title'].toString(),
+                                                postOwnerName: widget.snap['username'].toString(),
                                               )));
                                 },
                                 icon: const FaIcon(
                                   FontAwesomeIcons.comment,
-                                  color: Colors.white70,
                                 )),
                           ),
                         ],
@@ -520,7 +595,6 @@ class _Card2State extends State<Card2> {
                         child: Text(
                           controller.expanded ? "CLOSE" : "OPEN",
                           style: Theme.of(context).textTheme.button!.copyWith(
-                            color: const Color(0xffCFFFDC),
                             shadows: [
                               Shadow(
                                 blurRadius: 1.0,

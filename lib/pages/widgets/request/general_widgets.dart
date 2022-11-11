@@ -16,15 +16,12 @@ TextFormField textFieldRequest(
     keyboardType: textInputType,
     textCapitalization: textCapitalization,
     cursorColor: Colors.grey,
-    style: const TextStyle(
-      color: Colors.white,
-    ),
+    style: const TextStyle(),
     autofocus: true,
     controller: controller,
     onChanged: onChanged,
     validator: validator,
     decoration: InputDecoration(
-      counterStyle: const TextStyle(color: Colors.white),
       errorText: validate ? 'Fields Can\'t Be Empty' : null,
       filled: true,
       fillColor: Colors.transparent,
@@ -35,14 +32,6 @@ TextFormField textFieldRequest(
           width: 2.0,
         ),
       ),
-      enabledBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blueGrey),
-      ),
-      focusedBorder: const OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0xffCFFFDC),
-        ),
-      ),
       errorBorder: const OutlineInputBorder(
         borderSide: BorderSide(color: Colors.redAccent),
       ),
@@ -50,8 +39,8 @@ TextFormField textFieldRequest(
         borderSide: BorderSide(color: Colors.orangeAccent),
       ),
       disabledBorder: const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white),
-      ),
+          // borderSide: BorderSide(color: mobileBackgroundColor),
+          ),
     ),
   );
 }

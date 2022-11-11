@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 //
-const Color kAppBackgroundColor = Color(0xFF1F1E2C);
+const Color kAppBackgroundColor = Color.fromARGB(255, 234, 230, 220);
 //
 const mobileBackgroundColor = Color(0xFF1F1E2C);
 const Color kCardColor = Color(0xff3A3A3A);

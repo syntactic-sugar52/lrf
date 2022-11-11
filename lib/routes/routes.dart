@@ -28,13 +28,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case '/contactUs':
       return MaterialPageRoute(builder: (context) => const ContactUsPage());
-    case '/post':
-      return PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const RequestPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return slideNavigation(child, animation, secondaryAnimation);
-        },
-      );
+    // case '/post':
+    //   return PageRouteBuilder(
+    //     pageBuilder: (context, animation, secondaryAnimation) => const RequestPage(),
+    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    //       return slideNavigation(child, animation, secondaryAnimation);
+    //     },
+    //   );
     //   case '/comment':
     // return PageRouteBuilder(
     //   pageBuilder: (context, animation, secondaryAnimation) => const Co(),

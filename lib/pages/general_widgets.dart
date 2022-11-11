@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:lrf/constants/widgets.dart';
 
 Widget customButton({required String text, required Function onPressed, required Color color}) {
   return ElevatedButton(
@@ -26,24 +24,5 @@ Widget customButton({required String text, required Function onPressed, required
         ],
       ),
     ),
-  );
-}
-
-void showLocationPermissionRequired(BuildContext context) {
-  return showAlert(
-    context: context,
-    title: 'Location access',
-    messageBody: const Text(
-      'You denied the permission to access your location. In order to use the app, please visit the permissions settings page and grant the location access for Last Resrt app.',
-    ),
-    textButton1: 'CLOSE',
-    onPressedButton1: () {
-      Navigator.of(context).pop();
-    },
-    textButton2: 'GO TO SETTINGS',
-    onPressedButton2: () async {
-      Geolocator.openLocationSettings();
-      Navigator.of(context).pop();
-    },
   );
 }

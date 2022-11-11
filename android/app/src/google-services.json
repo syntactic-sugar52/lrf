@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "859672609504",
+    "project_id": "bountybay-96d6e",
+    "storage_bucket": "bountybay-96d6e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859672609504:android:2cc866024592fe35fcc685",
+        "android_client_info": {
+          "package_name": "com.bountybay.bb"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "859672609504-fkejbivk3h4rddbsja6hku6lqc0g1t96.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_eoy0e7iy2ucEV__uj0TP2c5Qesri-V8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "859672609504-fkejbivk3h4rddbsja6hku6lqc0g1t96.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
