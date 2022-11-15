@@ -30,10 +30,9 @@ class _RequestPageState extends State<RequestPage> {
   final ImagePicker picker = ImagePicker();
   File? selectedPhoto;
   Map<String, dynamic>? user;
-
+  String? token;
 // text controllers for textfield
   final TextEditingController _contactEmailController = TextEditingController();
-
   final TextEditingController _contactNumberController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _dropDownValue;
@@ -55,6 +54,8 @@ class _RequestPageState extends State<RequestPage> {
   void initState() {
     db = Database();
     currentUserId = sharedPreferences.getString('currentUserUid');
+    token = sharedPreferences.getString('token');
+
     user = widget.user;
 
     super.initState();
@@ -83,7 +84,7 @@ class _RequestPageState extends State<RequestPage> {
           username: user?['username'],
           photoURL: user?['photoUrl'],
           postId: postId,
-          token: user?['token'],
+          token: user?['token'] ?? token,
           imagePath: mediaUrl);
 
       if (res == "success") {
@@ -122,13 +123,13 @@ class _RequestPageState extends State<RequestPage> {
   Future<String> uploadimageToStorage(
     String postId,
   ) async {
-    await compressImage(postId);
+    await compressImage(postId, user?['id']);
     final metadata = SettableMetadata(
       contentType: 'image/jpeg',
       customMetadata: {'picked-file-path': selectedPhoto!.path},
     );
     UploadTask uploadTask;
-    Reference ref = FirebaseStorage.instance.ref().child('post').child('post_$postId.jpg');
+    Reference ref = FirebaseStorage.instance.ref().child('post').child('post_$postId$currentUserId.jpg');
     uploadTask = ref.putData(await selectedPhoto!.readAsBytes(), metadata);
     String imgUrl = await (await uploadTask).ref.getDownloadURL();
 
@@ -173,11 +174,11 @@ class _RequestPageState extends State<RequestPage> {
     });
   }
 
-  Future<void> compressImage(String postId) async {
+  Future<void> compressImage(String postId, String userId) async {
     final tempDir = await getTemporaryDirectory();
     final path = tempDir.path;
     Im.Image? imageFile = Im.decodeImage(await selectedPhoto!.readAsBytes());
-    final compressedImage = File('$path/img_$postId.jpg')..writeAsBytesSync(Im.encodeJpg(imageFile!, quality: 85));
+    final compressedImage = File('$path/img_$postId$userId.jpg')..writeAsBytesSync(Im.encodeJpg(imageFile!, quality: 85));
     setState(() {
       selectedPhoto = compressedImage;
     });
@@ -315,7 +316,7 @@ class _RequestPageState extends State<RequestPage> {
                                         side: BorderSide(color: Colors.blue.shade800),
                                       ),
                                     ),
-                                    backgroundColor: MaterialStateProperty.all(Colors.blue.shade900)),
+                                    backgroundColor: MaterialStateProperty.all(selectedPhoto == null ? Colors.blue.shade900 : Colors.blue)),
                                 onPressed: selectImage,
                                 child: selectedPhoto == null ? const Text('Upload Image') : const Text('Image Saved'))),
                         const SizedBox(

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +26,7 @@ import 'package:provider/provider.dart';
 
 import 'package:random_avatar/random_avatar.dart';
 
-Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // print('handling background message: ${message.messageId}');
-}
+Future _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 
 class FeedPage extends StatefulWidget {
   const FeedPage({
@@ -45,7 +42,6 @@ class _FeedPageState extends State<FeedPage> {
   String? currentUserId;
 
   late Database db;
-  //shared prference
 
   String? mtoken = '';
   String? username;
@@ -96,6 +92,7 @@ class _FeedPageState extends State<FeedPage> {
   Future<void> saveToken(String token) async {
     try {
       await db.usersRef.doc(_firebaseAuth.currentUser!.uid).update({'token': token});
+      sharedPreferences.setString('token', token);
     } catch (e) {
       Future.error(e);
     }
@@ -109,7 +106,7 @@ class _FeedPageState extends State<FeedPage> {
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
-      provisional: true,
+      provisional: false,
       sound: true,
     );
 
@@ -156,7 +153,7 @@ class _FeedPageState extends State<FeedPage> {
       currentUser = details;
     });
 
-    return currentUser!;
+    return currentUser ?? {};
   }
 
   @override
@@ -201,7 +198,7 @@ class _FeedPageState extends State<FeedPage> {
                     size: 18,
                   ),
                   title: const Text(
-                    'Contact BountyBay',
+                    'Settings',
                     style: TextStyle(
                       fontSize: 14.0,
                     ),
@@ -220,7 +217,7 @@ class _FeedPageState extends State<FeedPage> {
                   onTap: () async {
                     try {
                       Provider.of<Authentication>(context, listen: false).signOut(context: context);
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RootPage()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const RootPage()));
                     } catch (e) {
                       if (mounted) {
                         showSnackBar(context, 'Something went wrong.');

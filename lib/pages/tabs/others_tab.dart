@@ -25,7 +25,7 @@ class OthersTab extends StatelessWidget {
                   child: Center(
                     child: ExpandableTheme(
                         data: const ExpandableThemeData(
-                          iconColor: Colors.lightGreenAccent,
+                          iconColor: Colors.blue,
                           useInkWell: true,
                         ),
                         child: Card2(

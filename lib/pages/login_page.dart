@@ -19,10 +19,16 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String intlPhoneNumber = '';
-  bool isLoading = false;
+  ButtonState? buttonState;
   final TextEditingController phoneController = TextEditingController();
 
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
+  @override
+  void initState() {
+    // TODO: implement initState
+    _btnController.reset();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -118,19 +124,17 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         final formValid = formKey.currentState!.validate();
                         // if valid
                         if (formValid) {
-                          await context
-                              .read<Authentication>()
-                              .phoneSignIn(
+                          String res = await context.read<Authentication>().phoneSignIn(
                                 context,
                                 intlPhoneNumber,
                                 mounted,
-                              )
-                              .whenComplete(() {
+                              );
+
+                          if (res == 'success') {
                             _btnController.success();
-                          }).then((value) {
-                            // reset button animation
+                          } else {
                             _btnController.reset();
-                          });
+                          }
                         } else {
                           _btnController.reset();
                         }

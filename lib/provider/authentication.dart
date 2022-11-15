@@ -14,21 +14,22 @@ import 'package:lrf/utils/utils.dart';
 import 'package:username_gen/username_gen.dart';
 
 class Authentication with ChangeNotifier {
-  final FirebaseAuth _auth;
   Authentication(this._auth);
 
   Map<String, dynamic>? currentUser;
-
   String? udid;
+
+  final FirebaseAuth _auth;
+
   // GET USER DATA
   // using null check operator since this method should be called only
   // when the user is logged in
   User get user => _auth.currentUser!;
-  // GoogleSignInAccount get user => _user!;
+
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // PHONE SIGN IN
-  Future<void> phoneSignIn(
+  Future<String> phoneSignIn(
     BuildContext context,
     String phoneNumber,
     var mounted,
@@ -37,79 +38,91 @@ class Authentication with ChangeNotifier {
     String udid = await FlutterUdid.consistentUdid;
     String svg = DateTime.now().toIso8601String();
     final usernameGen = UsernameGen().generate();
+    String res = "Some error occurred";
+    try {
+      // FOR ANDROID, IOS
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        //  Automatic handling of the SMS code
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // !!! works only on android !!!
+          await _auth.signInWithCredential(credential);
+        },
+        // Displays a message when verification fails
+        verificationFailed: (e) {
+          if (mounted) {
+            showSnackBar(context, e.message!);
+          }
+        },
 
-    // FOR ANDROID, IOS
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      //  Automatic handling of the SMS code
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // !!! works only on android !!!
-        await _auth.signInWithCredential(credential);
-      },
-      // Displays a message when verification fails
-      verificationFailed: (e) {
-        showSnackBar(context, e.message!);
-      },
-      // Displays a dialog box when OTP is sent
-      codeSent: ((String verificationId, int? resendToken) async {
-        showOTPDialog(
-          codeController: codeController,
-          context: context,
-          onPressed: () async {
-            try {
-              PhoneAuthCredential credential = PhoneAuthProvider.credential(
-                verificationId: verificationId,
-                smsCode: codeController.text.trim(),
-              );
-
-              // !!! Works only on Android, iOS !!!
-              UserCredential userCredential = await _auth.signInWithCredential(credential);
-              if (mounted) {
-                Navigator.of(context).pop();
-              }
-
-              if (userCredential.additionalUserInfo!.isNewUser) {
-                final res = await Database().createUser(
-                  phoneNumber,
-                  userCredential.user!.uid,
-                  svg,
-                  usernameGen,
-                  udid.toString(),
+        // Displays a dialog box when OTP is sent
+        codeSent: ((String verificationId, int? resendToken) async {
+          showOTPDialog(
+            codeController: codeController,
+            context: context,
+            onPressed: () async {
+              try {
+                PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                  verificationId: verificationId,
+                  smsCode: codeController.text.trim(),
                 );
-                if (res == "success") {
+
+                // !!! Works only on Android, iOS !!!
+                UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+
+                if (userCredential.additionalUserInfo!.isNewUser) {
+                  final res = await Database().createUser(
+                    phoneNumber,
+                    userCredential.user!.uid,
+                    svg,
+                    usernameGen,
+                    udid.toString(),
+                  );
+                  if (res == "success") {
+                    sharedPreferences.setString(
+                      'currentUserUid',
+                      userCredential.user!.uid,
+                    );
+                    sharedPreferences.setString('udid', udid.toString());
+                  } else {
+                    if (mounted) {
+                      showSnackBar(context, 'Something went wrong. Please Try Again.');
+                    }
+                  }
+                } else if (sharedPreferences.getString('udid') == udid) {
                   sharedPreferences.setString(
                     'currentUserUid',
                     userCredential.user!.uid,
                   );
-                  sharedPreferences.setString('udid', udid.toString());
                 } else {
                   if (mounted) {
                     showSnackBar(context, 'Something went wrong. Please Try Again.');
                   }
                 }
-              } else if (sharedPreferences.getString('udid') == udid) {
-                sharedPreferences.setString(
-                  'currentUserUid',
-                  userCredential.user!.uid,
-                );
-              } else {
+              } on FirebaseAuthException catch (e) {
                 if (mounted) {
                   showSnackBar(context, 'Something went wrong. Please Try Again.');
                 }
+                Future.error(e);
               }
-            } on FirebaseAuthException catch (e) {
-              if (mounted) {
-                showSnackBar(context, 'Something went wrong. Please Try Again.');
-              }
-              Future.error(e);
-            }
-          },
-        );
-      }),
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Auto-resolution timed out...
-      },
-    );
+            },
+          );
+        }),
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-resolution timed out...
+        },
+      );
+      res = 'success';
+    } catch (e) {
+      res = e.toString();
+      Future.error(e);
+    }
+
+    return res;
   }
 
   Future<void> signOut({required BuildContext context}) async {

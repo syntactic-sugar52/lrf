@@ -27,7 +27,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   // depending on the route value - redirect to the proper page
   switch (settings.name) {
     case '/contactUs':
-      return MaterialPageRoute(builder: (context) => const ContactUsPage());
+      return MaterialPageRoute(builder: (context) => ContactUsPage());
     // case '/post':
     //   return PageRouteBuilder(
     //     pageBuilder: (context, animation, secondaryAnimation) => const RequestPage(),

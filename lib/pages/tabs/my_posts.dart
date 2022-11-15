@@ -12,7 +12,7 @@ class MyPostsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return user.isNotEmpty
         ? StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('posts').where('userId', isEqualTo: user?['id']).snapshots(),
+            stream: FirebaseFirestore.instance.collection('posts').where('userId', isEqualTo: user['id']).snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const FadeShimmerLoading();
@@ -26,7 +26,7 @@ class MyPostsTab extends StatelessWidget {
                   child: Center(
                     child: ExpandableTheme(
                         data: const ExpandableThemeData(
-                          iconColor: Colors.lightGreenAccent,
+                          iconColor: Colors.blue,
                           useInkWell: true,
                         ),
                         child: Card2(

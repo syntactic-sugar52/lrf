@@ -248,10 +248,11 @@ class _Card2State extends State<Card2> {
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 12,
+                  child: Container(
+                    height: 280,
                     child: Image.network(
                       widget.snap['imagePath'].toString(),
+                      fit: BoxFit.cover,
                       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                         if (loadingProgress == null) {
                           return child;
@@ -604,9 +605,8 @@ class _Card2State extends State<Card2> {
                             ],
                           ),
                         ),
-                        onPressed: () {
-                          controller.toggle();
-                        },
+                        onPressed: () => controller.toggle(),
+                        // },
                       );
                     },
                   ),

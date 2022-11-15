@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:lrf/utils/utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 class Database {
   final usersRef = FirebaseFirestore.instance.collection('users');
+  final postsRef = FirebaseFirestore.instance.collection('posts');
   final firebase_storage.FirebaseStorage storageRef = firebase_storage.FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -250,7 +251,6 @@ class Database {
           },
         ),
       );
-      print('sent');
     } catch (e) {
       Future.error(e);
     }
@@ -290,7 +290,7 @@ class Database {
     String res = "Some error occurred";
     try {
       if (text.isNotEmpty) {
-        String commentId = const Uuid().v1();
+        String commentId = const Uuid().v4();
         _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
           'profilePic': profilePic,
           'name': name,
@@ -351,7 +351,7 @@ class Database {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: email,
-      queryParameters: {'subject': 'LastResrt', 'body': ''},
+      queryParameters: {'subject': 'BountyBay', 'body': ''},
     );
     launchUrl(emailLaunchUri);
   }
