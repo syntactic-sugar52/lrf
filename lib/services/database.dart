@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 class Database {
   final usersRef = FirebaseFirestore.instance.collection('users');
   final postsRef = FirebaseFirestore.instance.collection('posts');
+  final blockRef = FirebaseFirestore.instance.collection('blockedUsers');
   final firebase_storage.FirebaseStorage storageRef = firebase_storage.FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,6 +24,20 @@ class Database {
   // get user details
   Future getUserDetails({required String uid}) async {
     DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(uid).get();
+    // returns map string dynamic
+    return documentSnapshot.data();
+  }
+
+  Future blockUsers({required String uid, required String userBlockedid}) async {
+    final docRequest = blockRef.doc(uid);
+
+    await docRequest.set({
+      'userBlockedId': FieldValue.arrayUnion([userBlockedid])
+    }, SetOptions(merge: true));
+  }
+
+  Future getBlockedCollection({required String uid}) async {
+    DocumentSnapshot documentSnapshot = await blockRef.doc(uid).get();
     // returns map string dynamic
     return documentSnapshot.data();
   }
@@ -51,7 +66,7 @@ class Database {
         'createdAt': DateTime.now(),
         'username': username,
         'udid': udid,
-        'token': ''
+        'token': '',
       };
 
       await docUser.set(user, SetOptions(merge: true));
@@ -62,38 +77,14 @@ class Database {
     return res;
   }
 
-  Future<String> updateUserCollection({required String address, required String lat, required String lng, required String uid}) async {
-    final docRequest = FirebaseFirestore.instance.collection('users').doc(uid);
-    String res = "Some error occurred";
-    try {
-      final user = {
-        'address': address,
-        'lat': lat,
-        'lng': lng,
-      };
-// create document and write data to firebase
-      await docRequest.update(
-        user,
-      );
-      res = "success";
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
-  String getConversationID(String userID, String peerID) {
-    return userID.hashCode <= peerID.hashCode ? '${userID}_$peerID' : '${peerID}_$userID';
-  }
-
   Future<String> createPostRequest(
       {required String title,
       required String description,
       required String userId,
-      required String contactNumber,
+      String? contactNumber,
       required String contactEmail,
       required String username,
-      required String imagePath,
+      String? imagePath,
       required String postId,
       required String token,
       required String category,
@@ -113,6 +104,9 @@ class Database {
         'category': category,
         'upVote': [],
         'downVote': [],
+        'flagReason': [],
+        'hiddenFrom': [],
+        'flag': [],
         'description': description,
         'datePublished': DateTime.now(),
         'profImage': photoURL,
@@ -187,22 +181,6 @@ class Database {
     return res;
   }
 
-  Future<String> updateInquiryRequest({required bool isAccepted, required String postOwnerId, required String docId}) async {
-    final docRequest = FirebaseFirestore.instance.collection('inquiry').doc(postOwnerId).collection('inquiryItems').doc(docId);
-    String res = "Some error occurred";
-    try {
-      final posts = {
-        'isAccepted': isAccepted,
-      };
-// create document and write data to firebase
-      await docRequest.update(posts);
-      res = "success";
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
   Future<String> upvotePost(String postId, String uid, List upvote, String token, String title, String username) async {
     String res = "Some error occurred";
     try {
@@ -219,6 +197,109 @@ class Database {
 
         await sendPushNotification(token, 'You got an upvote on $title', 'Hey, $username');
       }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> flagUser(
+    String postId,
+    String uid,
+    List flag,
+  ) async {
+    String res = "Some error occurred";
+    try {
+      if (flag.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        _firestore.collection('posts').doc(postId).update({
+          'flag': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        _firestore.collection('posts').doc(postId).update({
+          'flag': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> hidePost(String postId, String uid, List hiddenFrom) async {
+    String res = "Some error occurred";
+    try {
+      if (hiddenFrom.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        _firestore.collection('posts').doc(postId).update({
+          'hiddenFrom': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        _firestore.collection('posts').doc(postId).update({
+          'hiddenFrom': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> blockUserCollection(String postOwnerId, String uid, List blockedBy) async {
+    String res = "Some error occurred";
+    try {
+      if (blockedBy.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        _firestore.collection('posts').doc(uid).update({
+          'blockUser': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        _firestore.collection('users').doc(uid).update({
+          'blockUser': FieldValue.arrayUnion([postOwnerId])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> blockUserPostCollection(String uid, List blockedBy) async {
+    String res = "Some error occurred";
+
+    try {
+      if (blockedBy.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        _firestore.collection('posts').doc(FieldPath.documentId.toString()).update({
+          'blockedBy': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+
+        _firestore.collection('posts').doc(FieldPath.documentId.toString()).update({
+          'blockedBy': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> reportPost({required String postId, required String reportReason}) async {
+    String res = "Some error occurred";
+    try {
+      _firestore.collection('posts').doc(postId).update({
+        'flagReason': FieldValue.arrayUnion([reportReason])
+      });
       res = 'success';
     } catch (err) {
       res = err.toString();

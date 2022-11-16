@@ -87,6 +87,7 @@ class Authentication with ChangeNotifier {
                       'currentUserUid',
                       userCredential.user!.uid,
                     );
+                    sharedPreferences.setBool('isChecked', true);
                     sharedPreferences.setString('udid', udid.toString());
                   } else {
                     if (mounted) {

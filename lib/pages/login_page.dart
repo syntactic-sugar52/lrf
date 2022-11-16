@@ -1,13 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
 import 'package:glass/glass.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/provider/authentication.dart';
-
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -36,12 +35,13 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     phoneController.dispose();
   }
 
+  bool isChecked = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: kAppBackgroundColor,
         body: Padding(
-          padding: const EdgeInsets.all(60.0),
+          padding: const EdgeInsets.all(50.0),
           child: Form(
             key: formKey,
             child: Column(
@@ -61,6 +61,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Text(
                         'Enter Phone Number to Continue',
@@ -140,7 +141,46 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         }
                       },
                       child: const Text('Sign in', style: TextStyle(color: Colors.white)),
-                    )
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RichText(
+                        // Controls visual overflow
+                        overflow: TextOverflow.clip,
+
+                        // Controls how the text should be aligned horizontally
+                        textAlign: TextAlign.end,
+
+                        // Control the text direction
+                        textDirection: TextDirection.rtl,
+
+                        // Whether the text should break at soft line breaks
+                        softWrap: true,
+
+                        // Maximum number of lines for the text to span
+                        maxLines: 1,
+
+                        // The number of font pixels for each logical pixel
+                        textScaleFactor: 1,
+                        text: TextSpan(
+                          text: 'By continuing, you agree to our ',
+                          style: const TextStyle(fontSize: 12, color: Colors.black),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: 'End User Agreement',
+                                recognizer: TapGestureRecognizer()..onTap = () => _launchURLBrowser(),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, decoration: TextDecoration.underline, fontSize: 12, color: Colors.black)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const Spacer(),
@@ -148,5 +188,21 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
             ),
           ),
         ));
+  }
+
+  _launchURLBrowser() async {
+    const String url = "https://portal.termshub.io/cbdt5d3m5s/mobile_eula/";
+    // ignore: deprecated_member_use
+    if (!await canLaunch(url)) {
+      // ignore: deprecated_member_use
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
+        // headers: <String, String>{'my_header_key': 'my_header_value'},
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

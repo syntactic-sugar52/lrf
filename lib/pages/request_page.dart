@@ -69,9 +69,12 @@ class _RequestPageState extends State<RequestPage> {
     // start the loading
     try {
       final postId = const Uuid().v4();
-      String mediaUrl = await uploadimageToStorage(
-        postId,
-      );
+      String mediaUrl = '';
+      selectedPhoto != null
+          ? mediaUrl = await uploadimageToStorage(
+              postId,
+            )
+          : mediaUrl = '';
 
       // upload to  db
       String res = await db.createPostRequest(
@@ -79,7 +82,7 @@ class _RequestPageState extends State<RequestPage> {
           description: _descriptionController.text.trim(),
           userId: user?['id'] ?? currentUserId,
           category: catgeory,
-          contactNumber: _contactNumberController.text.trim(),
+          contactNumber: _contactNumberController.text.isNotEmpty ? _contactNumberController.text.trim() : '',
           contactEmail: _contactEmailController.text.trim(),
           username: user?['username'],
           photoURL: user?['photoUrl'],
@@ -200,7 +203,7 @@ class _RequestPageState extends State<RequestPage> {
                   onPressed: () async {
                     final formState = _formKey.currentState;
                     //if form is not empty
-                    if (formState!.validate() && _dropDownValue != null && selectedPhoto != null) {
+                    if (formState!.validate() && _dropDownValue != null) {
                       // add to post collection in db
                       await postRequest(_dropDownValue.toString());
                     } else {
@@ -236,7 +239,7 @@ class _RequestPageState extends State<RequestPage> {
                           height: 10,
                         ),
                         ListTile(
-                          title: const Text('Select Category: '),
+                          title: const Text('(Required) Select Category: '),
                           dense: true,
                           subtitle: DropdownButtonFormField(
                             decoration: const InputDecoration(
@@ -284,7 +287,7 @@ class _RequestPageState extends State<RequestPage> {
                         ),
                         ListTile(
                           dense: true,
-                          title: const Text('Title : ',
+                          title: const Text('(Required) Interesting title : ',
                               style: TextStyle(
                                 fontSize: 16,
                               )),
@@ -307,7 +310,7 @@ class _RequestPageState extends State<RequestPage> {
                                   textInputType: TextInputType.text)),
                         ),
                         ListTile(
-                            title: const Text('Image: '),
+                            title: const Text('(Optional) Image: '),
                             subtitle: ElevatedButton(
                                 style: ButtonStyle(
                                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -324,7 +327,7 @@ class _RequestPageState extends State<RequestPage> {
                         ),
                         ListTile(
                           dense: true,
-                          title: const Text('Contact Number : ', style: TextStyle(fontSize: 16, color: mobileBackgroundColor)),
+                          title: const Text('(Optional)  Contact Number : ', style: TextStyle(fontSize: 16, color: mobileBackgroundColor)),
                           subtitle: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: textFieldRequest(
@@ -332,16 +335,16 @@ class _RequestPageState extends State<RequestPage> {
                                   maxLines: null,
                                   maxLength: null,
                                   validate: _validate,
-                                  validator: (value) {
-                                    String patttern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
-                                    RegExp regExp = RegExp(patttern);
-                                    if (value!.isEmpty) {
-                                      return 'Mobile Number is Required';
-                                    } else if (!regExp.hasMatch(value)) {
-                                      return 'Please enter a valid mobile number';
-                                    }
-                                    return null;
-                                  },
+                                  // validator: (value) {
+                                  //   String patttern = r'(^(?:[+0]9)?[0-9]{10,12}$)';
+                                  //   RegExp regExp = RegExp(patttern);
+                                  //   if (value!.isEmpty) {
+                                  //     return 'Mobile Number is Required';
+                                  //   } else if (!regExp.hasMatch(value)) {
+                                  //     return 'Please enter a valid mobile number';
+                                  //   }
+                                  //   return null;
+                                  // },
                                   onChanged: (value) {},
                                   hintText: '+1234567',
                                   textCapitalization: TextCapitalization.none,
@@ -349,7 +352,7 @@ class _RequestPageState extends State<RequestPage> {
                         ),
                         ListTile(
                           dense: true,
-                          title: const Text('Contact Email : ', style: TextStyle(fontSize: 16, color: mobileBackgroundColor)),
+                          title: const Text('(Required) Contact Email : ', style: TextStyle(fontSize: 16, color: mobileBackgroundColor)),
                           subtitle: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: textFieldRequest(
@@ -373,7 +376,7 @@ class _RequestPageState extends State<RequestPage> {
                         ),
                         ListTile(
                           dense: true,
-                          title: const Text('Description : ',
+                          title: const Text('(Required) Body : ',
                               style: TextStyle(
                                 fontSize: 16,
                               )),
@@ -387,7 +390,7 @@ class _RequestPageState extends State<RequestPage> {
                                   onChanged: (value) {},
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return 'Description is Required';
+                                      return 'Body is Required';
                                     }
                                     return null;
                                   },
