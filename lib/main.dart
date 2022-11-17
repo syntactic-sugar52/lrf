@@ -7,6 +7,7 @@ import 'package:lrf/pages/feed_page.dart';
 import 'package:lrf/pages/login_page.dart';
 import 'package:lrf/provider/authentication.dart';
 import 'package:lrf/root.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,22 +28,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => Authentication(FirebaseAuth.instance),
-        ),
-        StreamProvider(
-          create: (context) => context.read<Authentication>().authStateChanges,
-          initialData: null,
-        ),
-      ],
-      child: MaterialApp(
-          navigatorKey: navigatorKey,
-          debugShowCheckedModeBanner: false,
-          title: 'Bounty Bay App',
-          onGenerateRoute: router.generateRoute,
-          home: const RootPage()),
+    return OverlaySupport.global(
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => Authentication(FirebaseAuth.instance),
+          ),
+          StreamProvider(
+            create: (context) => context.read<Authentication>().authStateChanges,
+            initialData: null,
+          ),
+        ],
+        child: MaterialApp(
+            navigatorKey: navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: 'Bounty Bay App',
+            onGenerateRoute: router.generateRoute,
+            home: const RootPage()),
+      ),
     );
   }
 }

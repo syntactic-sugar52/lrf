@@ -132,6 +132,7 @@ class _RequestPageState extends State<RequestPage> {
       customMetadata: {'picked-file-path': selectedPhoto!.path},
     );
     UploadTask uploadTask;
+    //storage path
     Reference ref = FirebaseStorage.instance.ref().child('post').child('post_$postId$currentUserId.jpg');
     uploadTask = ref.putData(await selectedPhoto!.readAsBytes(), metadata);
     String imgUrl = await (await uploadTask).ref.getDownloadURL();
@@ -140,7 +141,9 @@ class _RequestPageState extends State<RequestPage> {
   }
 
   handleGallery() async {
+    // pop dialog
     Navigator.pop(context);
+    //upload to db
     XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery, maxHeight: 675, maxWidth: 960);
     setState(() {
       selectedPhoto = File(image!.path);

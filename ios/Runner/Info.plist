@@ -52,13 +52,15 @@
 		<string>sms</string>
 		<string>tel</string>
 		<string>mailto</string>
+	    <string>http</string>
+        <string>https</string>  	
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>BountyBay needs access to upload images from your camera </string>
+	<string>BountyBay needs access to upload images from your camera. By continuing, you agree to our EULA </string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>BountyBay needs access to upload images from your gallery </string>
+	<string>BountyBay needs access to upload images from your gallery. By continuing, you agree to our EULA </string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

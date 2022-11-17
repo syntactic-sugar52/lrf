@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     return Scaffold(
         backgroundColor: kAppBackgroundColor,
         body: Padding(
-          padding: const EdgeInsets.all(50.0),
+          padding: const EdgeInsets.all(40.0),
           child: Form(
             key: formKey,
             child: Column(
@@ -81,6 +81,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           height: 90,
                           child: IntlPhoneField(
                             controller: phoneController,
+                            showCountryFlag: true,
                             flagsButtonMargin: const EdgeInsets.all(5),
                             dropdownIconPosition: IconPosition.trailing,
                             dropdownIcon: const Icon(
@@ -155,7 +156,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         overflow: TextOverflow.clip,
 
                         // Controls how the text should be aligned horizontally
-                        textAlign: TextAlign.end,
+                        textAlign: TextAlign.center,
 
                         // Control the text direction
                         textDirection: TextDirection.rtl,
@@ -164,7 +165,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         softWrap: true,
 
                         // Maximum number of lines for the text to span
-                        maxLines: 1,
+                        maxLines: 2,
 
                         // The number of font pixels for each logical pixel
                         textScaleFactor: 1,
@@ -192,15 +193,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
 
   _launchURLBrowser() async {
     const String url = "https://portal.termshub.io/cbdt5d3m5s/mobile_eula/";
+
     // ignore: deprecated_member_use
-    if (!await canLaunch(url)) {
-      // ignore: deprecated_member_use
-      await launch(
-        url,
-        forceSafariVC: false,
-        forceWebView: false,
-        // headers: <String, String>{'my_header_key': 'my_header_value'},
-      );
+    if (await canLaunch(url)) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
       throw 'Could not launch $url';
     }
