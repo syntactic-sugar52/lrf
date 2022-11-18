@@ -1,12 +1,10 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glass/glass.dart';
 import 'package:lrf/constants/constants.dart';
+import 'package:lrf/constants/widgets.dart';
 import 'package:lrf/main.dart';
 import 'package:lrf/pages/comment_screen.dart';
 import 'package:lrf/pages/widgets/home/danger_animation.dart';
@@ -15,7 +13,6 @@ import 'package:lrf/utils/utils.dart';
 import 'package:random_avatar/random_avatar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 
 enum Options { flag, block, hide }
 
@@ -34,8 +31,8 @@ class Card2 extends StatefulWidget {
 }
 
 class _Card2State extends State<Card2> {
-  int commentLength = 0;
   dynamic blUsers;
+  int commentLength = 0;
   String? country;
   String? currentUserId;
   String? currentUserName;
@@ -68,26 +65,6 @@ class _Card2State extends State<Card2> {
         });
       }
     }
-  }
-
-  buildInnerCard(
-    Color color,
-    double height,
-    Widget child,
-  ) {
-    return Card(
-      child: SizedBox(
-          height: height,
-          width: double.infinity,
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.rectangle,
-            ),
-            child: child,
-          )).asGlass(),
-    );
   }
 
   buildCollapsedHeader() {
@@ -130,33 +107,6 @@ class _Card2State extends State<Card2> {
     ]);
   }
 
-  Widget buildCollapsedBody() {
-    return buildInnerCard(
-      kWhite,
-      MediaQuery.of(context).size.height / 6,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                widget.snap['title'].toString(),
-                style: const TextStyle(
-                  fontSize: 17,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildCollapsedImgDetails() {
-    return Container();
-  }
-
   Widget buildExpandedHeader() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Padding(
@@ -181,7 +131,7 @@ class _Card2State extends State<Card2> {
                     ))
               ],
             ),
-            // if user id is the same as user id in database
+            // if user id is the same as current user id collection in database
             widget.snap['userId'].toString() == widget.user?['id']
                 ? Padding(
                     padding: const EdgeInsets.only(left: 8),
@@ -220,9 +170,10 @@ class _Card2State extends State<Card2> {
                       ),
                     ),
                     itemBuilder: (ctx) => [
-                      _buildPopupMenuItem('Block User', Icons.block, Options.block.index),
-                      _buildPopupMenuItem('Report Post', Icons.flag, Options.flag.index),
-                      _buildPopupMenuItem('Hide Post', Icons.flag, Options.hide.index),
+                      //lib/ constants/widgets
+                      buildPopupMenuItem('Block User', Icons.block, Options.block.index),
+                      buildPopupMenuItem('Report Post', Icons.report, Options.flag.index),
+                      buildPopupMenuItem('Hide Post', Icons.hide_image, Options.hide.index),
                     ],
                     child: const Center(child: Icon(Icons.more_vert_outlined)),
                   )
@@ -230,26 +181,6 @@ class _Card2State extends State<Card2> {
         ),
       ),
     ]);
-  }
-
-  SimpleDialogOption buildSimpleDialogOption(Function() onPressed, String text) {
-    return SimpleDialogOption(
-      onPressed: onPressed,
-      child: Row(
-        children: [
-          const Icon(Icons.flag),
-          Expanded(
-              child: Text(
-            text,
-            style: const TextStyle(fontSize: 16),
-          )),
-        ],
-      ),
-    );
-  }
-
-  buildExpandedBody() {
-    return Container();
   }
 
   buildExpandedDetails() {
@@ -266,13 +197,14 @@ class _Card2State extends State<Card2> {
             widget.snap['imagePath'].toString().isNotEmpty
                 ? Row(
                     children: <Widget>[
+                      // todo: if flagged, add sensitive content
                       Expanded(
                           child: DecoratedBox(
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Container(
+                        child: SizedBox(
                           height: 280,
                           child: Image.network(
                             widget.snap['imagePath'] != ''
@@ -488,7 +420,7 @@ class _Card2State extends State<Card2> {
                 expanded: buildExpandedHeader(),
               ),
               Expandable(
-                collapsed: buildCollapsedBody(),
+                collapsed: buildCollapsedBody(widget.snap['title'].toString(), context),
                 expanded: buildExpandedBody(),
               ),
               Expandable(
@@ -657,16 +589,19 @@ class _Card2State extends State<Card2> {
     Map<String, dynamic> blockedUsers = {};
     try {
       var res = await db.getBlockedCollection(uid: widget.user?['id']);
-      setState(() {
-        blockedUsers = res;
-      });
-      for (var bu in blockedUsers.values) {
-        blUsers = bu;
+      if (res == 'success') {
+        setState(() {
+          blockedUsers = res;
+        });
+        for (var bu in blockedUsers.values) {
+          setState(() {
+            blUsers = bu;
+          });
+        }
       }
     } catch (e) {
       Future.error(e);
     }
-
     return blockedUsers;
   }
 
@@ -676,31 +611,35 @@ class _Card2State extends State<Card2> {
     });
 
     if (value == Options.block.index) {
-      await db.blockUsers(uid: widget.user?['id'], userBlockedid: widget.snap['userId']).whenComplete(() {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SimpleDialog(
-                titlePadding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 20,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                title: const Text('This user is blocked. Please refresh the page.'),
-                children: <Widget>[
-                  SimpleDialogOption(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Close'),
+      try {
+        await db.blockUsers(uid: widget.user?['id'], userBlockedid: widget.snap['userId']).whenComplete(() {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  titlePadding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 20,
                   ),
-                ],
-              );
-            });
-      });
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
+                  ),
+                  title: const Text('This user is blocked. Please refresh the page.'),
+                  children: <Widget>[
+                    SimpleDialogOption(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Close'),
+                    ),
+                  ],
+                );
+              });
+        });
+      } catch (e) {
+        Future.error(e);
+      }
     } else if (value == Options.flag.index) {
       await db
           .flagUser(
@@ -854,24 +793,12 @@ class _Card2State extends State<Card2> {
             });
       });
     } else {
-      await db.hidePost(widget.snap['postId'], widget.user?['id'], widget.snap['hiddenFrom']);
+      try {
+        await db.hidePost(widget.snap['postId'], widget.user?['id'], widget.snap['hiddenFrom']);
+      } catch (e) {
+        Future.error(e);
+      }
     }
-  }
-
-  PopupMenuItem _buildPopupMenuItem(String title, IconData iconData, int position) {
-    return PopupMenuItem(
-      value: position,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Icon(
-            iconData,
-            color: Colors.black,
-          ),
-          Text(title),
-        ],
-      ),
-    );
   }
 
   @override

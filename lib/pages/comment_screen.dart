@@ -1,7 +1,5 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fade_shimmer/fade_shimmer.dart';
+
 import 'package:flutter/material.dart';
 import 'package:lrf/main.dart';
 import 'package:lrf/pages/widgets/home/comment_card.dart';

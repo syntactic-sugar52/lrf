@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/provider/authentication.dart';
@@ -9,7 +8,7 @@ import 'package:lrf/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class ContactUsPage extends StatefulWidget {
-  ContactUsPage({
+  const ContactUsPage({
     Key? key,
   }) : super(key: key);
 
@@ -36,7 +35,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
             _firebaseAuth.currentUser?.delete();
             await Provider.of<Authentication>(context, listen: false).signOut(context: context);
             if (mounted) {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RootPage()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const RootPage()));
             }
           } else {
             showSnackBar(context, 'Something went wrong, Try again.');

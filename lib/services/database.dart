@@ -1,4 +1,7 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +14,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
-class Database {
+import '../main.dart';
+
+class Database extends ChangeNotifier {
   final usersRef = FirebaseFirestore.instance.collection('users');
   final postsRef = FirebaseFirestore.instance.collection('posts');
   final blockRef = FirebaseFirestore.instance.collection('blockedUsers');
@@ -204,6 +209,22 @@ class Database {
     return res;
   }
 
+  launchURLBrowser() async {
+    const String url = "https://portal.termshub.io/cbdt5d3m5s/mobile_eula/";
+
+    // ignore: deprecated_member_use
+    if (await canLaunch(url)) {
+      Platform.isIOS
+          ? await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)
+          : await launch(
+              url,
+              forceWebView: false,
+            );
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   Future<String> flagUser(
     String postId,
     String uid,
@@ -277,13 +298,13 @@ class Database {
     try {
       if (blockedBy.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(FieldPath.documentId.toString()).update({
+        postsRef.doc(FieldPath.documentId.toString()).update({
           'blockedBy': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
 
-        _firestore.collection('posts').doc(FieldPath.documentId.toString()).update({
+        postsRef.doc(FieldPath.documentId.toString()).update({
           'blockedBy': FieldValue.arrayUnion([uid])
         });
       }
@@ -297,7 +318,7 @@ class Database {
   Future<String> reportPost({required String postId, required String reportReason}) async {
     String res = "Some error occurred";
     try {
-      _firestore.collection('posts').doc(postId).update({
+      postsRef.doc(postId).update({
         'flagReason': FieldValue.arrayUnion([reportReason])
       });
       res = 'success';
@@ -435,5 +456,14 @@ class Database {
       queryParameters: {'subject': 'BountyBay', 'body': ''},
     );
     launchUrl(emailLaunchUri);
+  }
+
+  Future<void> saveToken(String token, String currentUserId) async {
+    try {
+      await usersRef.doc(currentUserId).update({'token': token});
+      sharedPreferences.setString('token', token);
+    } catch (e) {
+      Future.error(e);
+    }
   }
 }

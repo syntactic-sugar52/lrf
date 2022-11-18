@@ -14,7 +14,7 @@ class CommentCard extends StatefulWidget {
 
   final String dbUserUid;
   final String postId;
-  final snap;
+  final dynamic snap;
 
   @override
   State<CommentCard> createState() => _CommentCardState();
@@ -39,7 +39,6 @@ class _CommentCardState extends State<CommentCard> {
                     text: TextSpan(
                       children: [
                         TextSpan(text: widget.snap.data()['name'], style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.black)),
-                        // TextSpan(text: ' --- ${widget.snap.data()['text']}', style: const TextStyle(color: Colors.black)),
                       ],
                     ),
                   ),

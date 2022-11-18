@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:lrf/pages/widgets/fade_shimmer.dart';
 import 'package:lrf/pages/widgets/home/card_widget.dart';
+import 'package:lrf/services/database.dart';
+import 'package:provider/provider.dart';
 
 class MyPostsTab extends StatelessWidget {
   const MyPostsTab({super.key, required this.user});
@@ -12,7 +14,7 @@ class MyPostsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return user.isNotEmpty
         ? StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('posts').where('userId', isEqualTo: user['id']).snapshots(),
+            stream: Provider.of<Database>(context, listen: false).postsRef.where('userId', isEqualTo: user['id']).snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const FadeShimmerLoading();

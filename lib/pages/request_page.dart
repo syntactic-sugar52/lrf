@@ -29,15 +29,16 @@ class _RequestPageState extends State<RequestPage> {
   bool isLoading = false;
   final ImagePicker picker = ImagePicker();
   File? selectedPhoto;
-  Map<String, dynamic>? user;
   String? token;
+  Map<String, dynamic>? user;
 // text controllers for textfield
+  final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contactEmailController = TextEditingController();
   final TextEditingController _contactNumberController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   String? _dropDownValue;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
+
   final bool _validate = false;
 
   @override
@@ -116,6 +117,7 @@ class _RequestPageState extends State<RequestPage> {
   }
 
   handleCamera() async {
+    // pop dialog
     Navigator.pop(context);
     XFile? image = await ImagePicker().pickImage(source: ImageSource.camera, maxHeight: 675, maxWidth: 960);
     setState(() {
@@ -133,10 +135,9 @@ class _RequestPageState extends State<RequestPage> {
     );
     UploadTask uploadTask;
     //storage path
-    Reference ref = FirebaseStorage.instance.ref().child('post').child('post_$postId$currentUserId.jpg');
+    Reference ref = db.storageRef.ref().child('post').child('post_$postId$currentUserId.jpg');
     uploadTask = ref.putData(await selectedPhoto!.readAsBytes(), metadata);
     String imgUrl = await (await uploadTask).ref.getDownloadURL();
-
     return imgUrl;
   }
 
@@ -184,7 +185,7 @@ class _RequestPageState extends State<RequestPage> {
     final tempDir = await getTemporaryDirectory();
     final path = tempDir.path;
     Im.Image? imageFile = Im.decodeImage(await selectedPhoto!.readAsBytes());
-    final compressedImage = File('$path/img_$postId$userId.jpg')..writeAsBytesSync(Im.encodeJpg(imageFile!, quality: 85));
+    final compressedImage = File('$path/img_$postId$userId.jpg')..writeAsBytesSync(Im.encodeJpg(imageFile!, quality: 100));
     setState(() {
       selectedPhoto = compressedImage;
     });

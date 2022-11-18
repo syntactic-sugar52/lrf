@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:lrf/constants/widgets.dart';
 
 import 'package:lrf/main.dart';
 import 'package:lrf/models/push_notification_model.dart';
@@ -66,93 +67,101 @@ class _FeedPageState extends State<FeedPage> {
     super.initState();
   }
 
-  onMessageListen() {
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      PushNotificationModel notification = PushNotificationModel(
-        title: message.notification?.title,
-        body: message.notification?.body,
-      );
-      if (mounted) {
-        setState(() {
-          _notificationInfo = notification;
-          _totalNotifications++;
-        });
-      }
-    });
-  }
-
-  void getToken() async {
-    await FirebaseMessaging.instance.getToken().then((token) {
-      setState(() {
-        mtoken = token;
-      });
-    });
-  }
-
-  Future<void> saveToken(String token) async {
+  void onMessageListen() {
     try {
-      await db.usersRef.doc(_firebaseAuth.currentUser!.uid).update({'token': token});
-      sharedPreferences.setString('token', token);
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        PushNotificationModel notification = PushNotificationModel(
+          title: message.notification?.title,
+          body: message.notification?.body,
+        );
+        if (mounted) {
+          setState(() {
+            _notificationInfo = notification;
+            _totalNotifications++;
+          });
+        }
+      });
     } catch (e) {
       Future.error(e);
     }
   }
 
-  requestAndRegisterNotification() async {
-    // instatiate firebase messaging
-    _firebaseMessaging = FirebaseMessaging.instance;
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    //  On iOS, this helps to take the user permissions
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      badge: true,
-      provisional: false,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      String? token = await _firebaseMessaging.getToken();
-
-      await saveToken(token.toString());
-      sharedPreferences.setString('userToken', token.toString());
-      // For handling the received notifications
-
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        // Parse the message received
-        PushNotificationModel notification = PushNotificationModel(
-          title: message.notification?.title,
-          body: message.notification?.body,
-        );
-
-        _notificationInfo = notification;
-        _totalNotifications++;
-        if (_notificationInfo != null) {
-          // For displaying the notification as an overlay
-          if (mounted) {
-            showSimpleNotification(
-              Text(_notificationInfo!.title!),
-              leading: NotificationBadge(totalNotifications: _totalNotifications),
-              subtitle: Text(_notificationInfo!.body!),
-              background: Colors.blue,
-              duration: const Duration(seconds: 2),
-            );
-          }
-        }
+  void getToken() async {
+    try {
+      await FirebaseMessaging.instance.getToken().then((token) {
+        setState(() {
+          mtoken = token;
+        });
       });
-    } else {
-      String? token = await _firebaseMessaging.getToken();
-      await saveToken(token.toString());
+    } catch (e) {
+      Future.error(e);
+    }
+  }
+
+  void requestAndRegisterNotification() async {
+    try {
+      // instatiate firebase messaging
+      _firebaseMessaging = FirebaseMessaging.instance;
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      //  On iOS, this helps to take the user permissions
+      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        provisional: false,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        String? token = await _firebaseMessaging.getToken();
+
+        await db.saveToken(_firebaseAuth.currentUser!.uid, token.toString());
+        sharedPreferences.setString('userToken', token.toString());
+        // For handling the received notifications
+
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          // Parse the message received
+          PushNotificationModel notification = PushNotificationModel(
+            title: message.notification?.title,
+            body: message.notification?.body,
+          );
+
+          _notificationInfo = notification;
+          _totalNotifications++;
+          if (_notificationInfo != null) {
+            // For displaying the notification as an overlay
+            if (mounted) {
+              showSimpleNotification(
+                Text(_notificationInfo!.title!),
+                leading: NotificationBadge(totalNotifications: _totalNotifications),
+                subtitle: Text(_notificationInfo!.body!),
+                background: Colors.blue,
+                duration: const Duration(seconds: 2),
+              );
+            }
+          }
+        });
+      } else {
+        // dont display local notification
+        String? tokenElse = await _firebaseMessaging.getToken();
+        await db.saveToken(_firebaseAuth.currentUser!.uid, tokenElse.toString());
+        sharedPreferences.setString('userToken', tokenElse.toString());
+      }
+    } catch (e) {
+      Future.error(e);
     }
   }
 
   Future<Map<String, dynamic>> getUser(String currentUserId) async {
-    //get user details from database if userID is the same with locally saved user id
-    var details = await db.getUserDetails(uid: currentUserId);
-    // move details data to current user variable
-    setState(() {
-      currentUser = details;
-    });
-
+    try {
+      //get user details from database if userID is the same with locally saved user id
+      var details = await db.getUserDetails(uid: currentUserId);
+      // move details data to current user variable
+      setState(() {
+        currentUser = details;
+      });
+    } catch (e) {
+      Future.error(e);
+    }
     return currentUser ?? {};
   }
 
@@ -222,7 +231,6 @@ class _FeedPageState extends State<FeedPage> {
                       if (mounted) {
                         showSnackBar(context, 'Something went wrong.');
                       }
-
                       Future.error(e);
                     }
                   },
@@ -242,13 +250,13 @@ class _FeedPageState extends State<FeedPage> {
                             borderRadius: BorderRadius.circular(10), // Creates border
                             color: Colors.blue),
                         isScrollable: true,
-                        tabs: const [
-                          Tab(child: Text('All')),
-                          Tab(child: Text('Art')),
-                          Tab(child: Text('Antiques')),
-                          Tab(child: Text('Watches')),
-                          Tab(child: Text('Others')),
-                          Tab(child: Text('My Posts')),
+                        tabs: [
+                          buildTabs('All'),
+                          buildTabs('Art'),
+                          buildTabs('Antiques'),
+                          buildTabs('Watches'),
+                          buildTabs('Others'),
+                          buildTabs('My Posts'),
                         ],
                       ),
                     ),

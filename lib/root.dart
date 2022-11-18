@@ -6,8 +6,6 @@ import 'package:lrf/pages/login_page.dart';
 
 import 'package:provider/provider.dart';
 
-enum AuthStatus { notLoggedIn, loggedIn }
-
 class RootPage extends StatelessWidget {
   const RootPage({super.key});
 

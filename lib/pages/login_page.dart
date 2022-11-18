@@ -4,9 +4,9 @@ import 'package:glass/glass.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:lrf/constants/constants.dart';
 import 'package:lrf/provider/authentication.dart';
+import 'package:lrf/services/database.dart';
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -24,7 +24,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   @override
   void initState() {
-    // TODO: implement initState
     _btnController.reset();
     super.initState();
   }
@@ -35,7 +34,6 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
     phoneController.dispose();
   }
 
-  bool isChecked = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,19 +152,14 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                       child: RichText(
                         // Controls visual overflow
                         overflow: TextOverflow.clip,
-
                         // Controls how the text should be aligned horizontally
                         textAlign: TextAlign.center,
-
                         // Control the text direction
                         textDirection: TextDirection.rtl,
-
                         // Whether the text should break at soft line breaks
                         softWrap: true,
-
                         // Maximum number of lines for the text to span
                         maxLines: 2,
-
                         // The number of font pixels for each logical pixel
                         textScaleFactor: 1,
                         text: TextSpan(
@@ -175,7 +168,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                           children: <TextSpan>[
                             TextSpan(
                                 text: 'End User Agreement',
-                                recognizer: TapGestureRecognizer()..onTap = () => _launchURLBrowser(),
+                                recognizer: TapGestureRecognizer()..onTap = () => Provider.of<Database>(context, listen: false).launchURLBrowser(),
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, decoration: TextDecoration.underline, fontSize: 12, color: Colors.black)),
                           ],
@@ -189,16 +182,5 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
             ),
           ),
         ));
-  }
-
-  _launchURLBrowser() async {
-    const String url = "https://portal.termshub.io/cbdt5d3m5s/mobile_eula/";
-
-    // ignore: deprecated_member_use
-    if (await canLaunch(url)) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 }

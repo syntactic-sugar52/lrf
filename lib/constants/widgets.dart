@@ -1,5 +1,7 @@
 // type: 0 - default(alert) , 1 - change log
 import 'package:flutter/material.dart';
+import 'package:glass/glass.dart';
+import 'package:lrf/constants/constants.dart';
 
 void showAlert(
     {required context,
@@ -85,4 +87,91 @@ void showAlert(
       );
     },
   );
+}
+
+SimpleDialogOption buildSimpleDialogOption(Function() onPressed, String text) {
+  return SimpleDialogOption(
+    onPressed: onPressed,
+    child: Row(
+      children: [
+        const Icon(Icons.flag),
+        Expanded(
+            child: Text(
+          text,
+          style: const TextStyle(fontSize: 16),
+        )),
+      ],
+    ),
+  );
+}
+
+PopupMenuItem buildPopupMenuItem(String title, IconData iconData, int position) {
+  return PopupMenuItem(
+    value: position,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Icon(
+          iconData,
+          color: Colors.black,
+        ),
+        Text(title),
+      ],
+    ),
+  );
+}
+
+Widget buildCollapsedImgDetails() {
+  return Container();
+}
+
+buildInnerCard(
+  Color color,
+  double height,
+  Widget child,
+) {
+  return Card(
+    child: SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.rectangle,
+          ),
+          child: child,
+        )).asGlass(),
+  );
+}
+
+Widget buildCollapsedBody(String title, BuildContext context) {
+  return buildInnerCard(
+    kWhite,
+    MediaQuery.of(context).size.height / 6,
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 17,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+buildExpandedBody() {
+  return Container();
+}
+
+buildTabs(String tab) {
+  return Tab(child: Text(tab));
 }

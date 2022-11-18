@@ -87,13 +87,13 @@ class Authentication with ChangeNotifier {
                       'currentUserUid',
                       userCredential.user!.uid,
                     );
-                    sharedPreferences.setBool('isChecked', true);
                     sharedPreferences.setString('udid', udid.toString());
                   } else {
                     if (mounted) {
                       showSnackBar(context, 'Something went wrong. Please Try Again.');
                     }
                   }
+                  //check if user is using the same phone
                 } else if (sharedPreferences.getString('udid') == udid) {
                   sharedPreferences.setString(
                     'currentUserUid',
@@ -128,7 +128,9 @@ class Authentication with ChangeNotifier {
 
   Future<void> signOut({required BuildContext context}) async {
     try {
+      // logout of firebase auth
       await _auth.signOut();
+      // remove uid
       sharedPreferences.remove('currentUserUid');
     } catch (e) {
       showSnackBar(context, 'Error signing out. Try again.');
