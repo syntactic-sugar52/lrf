@@ -5,6 +5,7 @@ import 'package:lrf/main.dart';
 import 'package:lrf/pages/widgets/home/comment_card.dart';
 import 'package:lrf/services/database.dart';
 import 'package:lrf/utils/utils.dart';
+import 'package:provider/provider.dart';
 import 'package:random_avatar/random_avatar.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class CommentScreen extends StatefulWidget {
       required this.token,
       required this.postOwnerName,
       required this.postOwnerId,
+      required this.blUsers,
       required this.postTitle});
 
   final Map<String, dynamic>? currentUser;
@@ -25,6 +27,7 @@ class CommentScreen extends StatefulWidget {
   final String postOwnerId;
   final String postTitle;
   final String postOwnerName;
+  final dynamic blUsers;
   @override
   State<CommentScreen> createState() => _CommentScreenState();
 }
@@ -35,12 +38,14 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
   String? username;
   String? userId;
   String? currentUserPhotoUrl;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     db = Database();
     username = sharedPreferences.getString('currentUserName');
     userId = sharedPreferences.getString('currentUserUid');
     currentUserPhotoUrl = sharedPreferences.getString('currentUserPhotoUrl');
+
     super.initState();
   }
 
@@ -66,7 +71,7 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
       }
       if (res != 'success') {
         if (mounted) {
-          showSnackBar(context, res);
+          showSnackBar(_scaffoldKey.currentContext, res);
         }
       }
       // clear comment controller
@@ -75,7 +80,7 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
       });
     } catch (err) {
       showSnackBar(
-        context,
+        _scaffoldKey.currentContext,
         err.toString(),
       );
     }
@@ -84,7 +89,9 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
         title: const Text(
@@ -106,14 +113,16 @@ class _CommentScreenState extends State<CommentScreen> with AutomaticKeepAliveCl
           }
 
           return ListView.builder(
-            physics: const ClampingScrollPhysics(),
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (ctx, index) => CommentCard(
-              snap: snapshot.data!.docs[index],
-              dbUserUid: widget.currentUserUid.toString(),
-              postId: widget.postId,
-            ),
-          );
+              physics: const ClampingScrollPhysics(),
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (ctx, index) => CommentCard(
+                    snap: snapshot.data!.docs[index],
+                    dbUserUid: widget.currentUserUid.toString(),
+                    postId: widget.postId,
+                    currentUser: widget.currentUser,
+                    postOwnerId: widget.postOwnerId,
+                    blockedUsers: widget.blUsers,
+                  ));
         },
       ),
       // text input

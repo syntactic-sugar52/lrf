@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lrf/provider/authentication.dart';
@@ -18,7 +20,9 @@ class ContactUsPage extends StatefulWidget {
 
 class _ContactUsPageState extends State<ContactUsPage> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final String emailUs = 'We would love to hear from you! Send us an email about your experience.';
+  final String bbEmail = 'hello@bountybay.net';
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   showAlertDialog(BuildContext context) {
     // set up the buttons
     Widget cancelButton = TextButton(
@@ -38,7 +42,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const RootPage()));
             }
           } else {
-            showSnackBar(context, 'Something went wrong, Try again.');
+            showSnackBar(_scaffoldKey.currentContext, 'Something went wrong, Try again.');
           }
         } catch (e) {
           Future.error(e);
@@ -68,6 +72,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
         title: const Text('Settings'),
@@ -123,18 +128,18 @@ class _ContactUsPageState extends State<ContactUsPage> {
               const Divider(
                 color: Colors.grey,
               ),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text('We would love to hear from you! Send us an email about your experience.'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(emailUs),
               ),
               ListTile(
                 leading: const Icon(
                   Icons.mail,
                   size: 22,
                 ),
-                title: const Text(
-                  'hello@bountybay.net',
-                  style: TextStyle(
+                title: Text(
+                  bbEmail,
+                  style: const TextStyle(
                     fontSize: 16,
                   ),
                 ),

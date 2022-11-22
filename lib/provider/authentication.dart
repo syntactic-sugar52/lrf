@@ -30,7 +30,7 @@ class Authentication with ChangeNotifier {
 
   // PHONE SIGN IN
   Future<String> phoneSignIn(
-    BuildContext context,
+    context,
     String phoneNumber,
     var mounted,
   ) async {
@@ -73,8 +73,9 @@ class Authentication with ChangeNotifier {
                 if (mounted) {
                   Navigator.of(context).pop();
                 }
-
+                // check if user doesnt exit in firebase
                 if (userCredential.additionalUserInfo!.isNewUser) {
+                  // if doesnt exits, create new user
                   final res = await Database().createUser(
                     phoneNumber,
                     userCredential.user!.uid,
@@ -83,6 +84,7 @@ class Authentication with ChangeNotifier {
                     udid.toString(),
                   );
                   if (res == "success") {
+                    //if success, save local data
                     sharedPreferences.setString(
                       'currentUserUid',
                       userCredential.user!.uid,
@@ -95,6 +97,7 @@ class Authentication with ChangeNotifier {
                   }
                   //check if user is using the same phone
                 } else if (sharedPreferences.getString('udid') == udid) {
+                  // add uid to local storage
                   sharedPreferences.setString(
                     'currentUserUid',
                     userCredential.user!.uid,

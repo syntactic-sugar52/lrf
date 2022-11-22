@@ -109,11 +109,13 @@ PopupMenuItem buildPopupMenuItem(String title, IconData iconData, int position) 
   return PopupMenuItem(
     value: position,
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Icon(
           iconData,
           color: Colors.black,
+        ),
+        const SizedBox(
+          width: 4,
         ),
         Text(title),
       ],
@@ -174,4 +176,30 @@ buildExpandedBody() {
 
 buildTabs(String tab) {
   return Tab(child: Text(tab));
+}
+
+buildDialog(BuildContext context) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          titlePadding: const EdgeInsets.symmetric(
+            horizontal: 30,
+            vertical: 20,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 20,
+          ),
+          title: const Text('Thank you for keeping BountyBay safe.'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      });
 }

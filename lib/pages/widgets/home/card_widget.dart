@@ -22,8 +22,9 @@ class Card2 extends StatefulWidget {
     required this.snap,
     required this.user,
   }) : super(key: key);
-
+//post data from db
   final Map<String, dynamic> snap;
+  //current user from db
   final Map<String, dynamic>? user;
 
   @override
@@ -33,14 +34,10 @@ class Card2 extends StatefulWidget {
 class _Card2State extends State<Card2> {
   dynamic blUsers;
   int commentLength = 0;
-  String? country;
   String? currentUserId;
-  String? currentUserName;
-  String? currentUserPhotoUrl;
+
   bool dangerTapped = false;
   late Database db;
-  bool isHidden = false;
-  String? postalCode;
 
   var _popupMenuItemIndex = 0;
 
@@ -122,7 +119,6 @@ class _Card2State extends State<Card2> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: Colors.blue.shade900,
-
                       borderRadius: const BorderRadius.all(Radius.circular(10.0)), // Set rounded corner radius
                     ),
                     child: Text(
@@ -197,7 +193,6 @@ class _Card2State extends State<Card2> {
             widget.snap['imagePath'].toString().isNotEmpty
                 ? Row(
                     children: <Widget>[
-                      // todo: if flagged, add sensitive content
                       Expanded(
                           child: DecoratedBox(
                         decoration: BoxDecoration(
@@ -540,6 +535,7 @@ class _Card2State extends State<Card2> {
                                                 postOwnerId: widget.snap['userId'].toString(),
                                                 postTitle: widget.snap['title'].toString(),
                                                 postOwnerName: widget.snap['username'].toString(),
+                                                blUsers: blUsers,
                                               )));
                                 },
                                 icon: const FaIcon(
@@ -578,31 +574,33 @@ class _Card2State extends State<Card2> {
       ),
     ));
 
-    if (widget.snap['hiddenFrom'].toString().contains(widget.user?['id']) || blUsers.toString().contains(widget.snap['userId'])) {
+    if (widget.snap['hiddenFrom'].toString().contains(widget.user?['id'])) {
+      body = const SizedBox.shrink();
+    }
+    if (blUsers.toString().contains(widget.snap['userId'])) {
       body = const SizedBox.shrink();
     }
 
     return body;
   }
 
-  Future<Map<String, dynamic>> getBlockedCollection() async {
-    Map<String, dynamic> blockedUsers = {};
+  Future getBlockedCollection() async {
     try {
       var res = await db.getBlockedCollection(uid: widget.user?['id']);
-      if (res == 'success') {
-        setState(() {
-          blockedUsers = res;
-        });
-        for (var bu in blockedUsers.values) {
+      if (res != null) {
+        for (var bu in res.values) {
           setState(() {
             blUsers = bu;
           });
         }
+      } else {
+        setState(() {
+          blUsers = [];
+        });
       }
     } catch (e) {
       Future.error(e);
     }
-    return blockedUsers;
   }
 
   _onMenuItemSelected(int value) async {
@@ -641,157 +639,73 @@ class _Card2State extends State<Card2> {
         Future.error(e);
       }
     } else if (value == Options.flag.index) {
-      await db
-          .flagUser(
-        widget.snap['postId'],
-        widget.user?['id'],
-        widget.snap['flag'],
-      )
-          .whenComplete(() {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SimpleDialog(
-                titlePadding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 20,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                title: const Text('What\'s the problem?'),
-                children: <Widget>[
-                  buildSimpleDialogOption(
-                    () => db
-                        .reportPost(
-                          postId: widget.snap['postId'],
-                          reportReason: 'Hateful or abusive content',
-                        )
-                        .whenComplete(() => Navigator.pop(context))
-                        .whenComplete(() => showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return SimpleDialog(
-                                titlePadding: const EdgeInsets.symmetric(
-                                  horizontal: 30,
-                                  vertical: 20,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 40,
-                                  vertical: 20,
-                                ),
-                                title: const Text('Thank you for keeping BountyBay safe.'),
-                                children: [
-                                  SimpleDialogOption(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Close'),
-                                  ),
-                                ],
-                              );
-                            })),
-                    'Hateful or abusive content',
+      try {
+        await db
+            .flagUser(
+          widget.snap['postId'],
+          widget.user?['id'],
+          widget.snap['flag'],
+        )
+            .whenComplete(() {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  titlePadding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 20,
                   ),
-                  const Divider(
-                    color: Colors.grey,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
                   ),
-                  buildSimpleDialogOption(
+                  title: const Text('What\'s the problem?'),
+                  children: <Widget>[
+                    buildSimpleDialogOption(
                       () => db
-                          .reportPost(reportReason: 'Violent or repulsive content', postId: widget.snap['postId'])
+                          .reportPost(
+                            postId: widget.snap['postId'],
+                            reportReason: 'Hateful or abusive content',
+                          )
                           .whenComplete(() => Navigator.pop(context))
-                          .whenComplete(() => showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return SimpleDialog(
-                                  titlePadding: const EdgeInsets.symmetric(
-                                    horizontal: 30,
-                                    vertical: 20,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 40,
-                                    vertical: 20,
-                                  ),
-                                  title: const Text('Thank you for keeping BountyBay safe.'),
-                                  children: [
-                                    SimpleDialogOption(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                );
-                              })),
-                      'Violent or repulsive content'),
-                  const Divider(
-                    color: Colors.grey,
-                  ),
-                  buildSimpleDialogOption(
+                          .whenComplete(() => buildDialog(context)),
+                      'Hateful or abusive content',
+                    ),
+                    const Divider(
+                      color: Colors.grey,
+                    ),
+                    buildSimpleDialogOption(
+                        () => db
+                            .reportPost(reportReason: 'Violent or repulsive content', postId: widget.snap['postId'])
+                            .whenComplete(() => Navigator.pop(context))
+                            .whenComplete(() => buildDialog(context)),
+                        'Violent or repulsive content'),
+                    const Divider(
+                      color: Colors.grey,
+                    ),
+                    buildSimpleDialogOption(
+                        () => db
+                            .reportPost(reportReason: 'Sexual content', postId: widget.snap['postId'])
+                            .whenComplete(() => Navigator.pop(context))
+                            .whenComplete(() => buildDialog(context)),
+                        'Sexual content'),
+                    const Divider(
+                      color: Colors.grey,
+                    ),
+                    buildSimpleDialogOption(
                       () => db
-                          .reportPost(reportReason: 'Sexual content', postId: widget.snap['postId'])
+                          .reportPost(reportReason: 'Spam or misleading', postId: widget.snap['postId'])
                           .whenComplete(() => Navigator.pop(context))
-                          .whenComplete(() => showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return SimpleDialog(
-                                  titlePadding: const EdgeInsets.symmetric(
-                                    horizontal: 30,
-                                    vertical: 20,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 40,
-                                    vertical: 20,
-                                  ),
-                                  title: const Text('Thank you for keeping BountyBay safe.'),
-                                  children: [
-                                    SimpleDialogOption(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                );
-                              })),
-                      'Sexual content'),
-                  const Divider(
-                    color: Colors.grey,
-                  ),
-                  buildSimpleDialogOption(
-                    () => db
-                        .reportPost(reportReason: 'Spam or misleading', postId: widget.snap['postId'])
-                        .whenComplete(() => Navigator.pop(context))
-                        .whenComplete(() => showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return SimpleDialog(
-                                titlePadding: const EdgeInsets.symmetric(
-                                  horizontal: 30,
-                                  vertical: 20,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 40,
-                                  vertical: 20,
-                                ),
-                                title: const Text('Thank you for keeping BountyBay safe.'),
-                                children: [
-                                  SimpleDialogOption(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text('Close'),
-                                  ),
-                                ],
-                              );
-                            })),
-                    'Spam or misleading',
-                  ),
-                ],
-              );
-            });
-      });
+                          .whenComplete(() => buildDialog(context)),
+                      'Spam or misleading',
+                    ),
+                  ],
+                );
+              });
+        });
+      } catch (e) {
+        Future.error(e);
+      }
     } else {
       try {
         await db.hidePost(widget.snap['postId'], widget.user?['id'], widget.snap['hiddenFrom']);

@@ -53,10 +53,12 @@ class _RequestPageState extends State<RequestPage> {
 
   @override
   void initState() {
+    //initialize database
     db = Database();
+    // get data from local storage
     currentUserId = sharedPreferences.getString('currentUserUid');
     token = sharedPreferences.getString('token');
-
+    //initialize user variable with passed user data from feed page
     user = widget.user;
 
     super.initState();
@@ -71,6 +73,7 @@ class _RequestPageState extends State<RequestPage> {
     try {
       final postId = const Uuid().v4();
       String mediaUrl = '';
+      // if no image uploaded, add empty string otherwise add image path
       selectedPhoto != null
           ? mediaUrl = await uploadimageToStorage(
               postId,
@@ -90,17 +93,20 @@ class _RequestPageState extends State<RequestPage> {
           postId: postId,
           token: user?['token'] ?? token,
           imagePath: mediaUrl);
-
+      // if successful
       if (res == "success") {
+        //remove circular progress indicator
         setState(() {
           isLoading = false;
         });
+        //set image to null
         clearImage();
         if (mounted) {
           showSnackBar(
             context,
             'Posted!',
           );
+          // navigate back to feed page
           Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedPage()));
         }
       } else {
@@ -119,7 +125,7 @@ class _RequestPageState extends State<RequestPage> {
   handleCamera() async {
     // pop dialog
     Navigator.pop(context);
-    XFile? image = await ImagePicker().pickImage(source: ImageSource.camera, maxHeight: 675, maxWidth: 960);
+    XFile? image = await picker.pickImage(source: ImageSource.camera, maxHeight: 675, maxWidth: 960);
     setState(() {
       selectedPhoto = File(image!.path.toString());
     });
@@ -145,7 +151,7 @@ class _RequestPageState extends State<RequestPage> {
     // pop dialog
     Navigator.pop(context);
     //upload to db
-    XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery, maxHeight: 675, maxWidth: 960);
+    XFile? image = await picker.pickImage(source: ImageSource.gallery, maxHeight: 675, maxWidth: 960);
     setState(() {
       selectedPhoto = File(image!.path);
     });

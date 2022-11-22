@@ -17,13 +17,17 @@ import 'package:uuid/uuid.dart';
 import '../main.dart';
 
 class Database extends ChangeNotifier {
-  final usersRef = FirebaseFirestore.instance.collection('users');
-  final postsRef = FirebaseFirestore.instance.collection('posts');
   final blockRef = FirebaseFirestore.instance.collection('blockedUsers');
+
+  final postsRef = FirebaseFirestore.instance.collection('posts');
   final firebase_storage.FirebaseStorage storageRef = firebase_storage.FirebaseStorage.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final usersRef = FirebaseFirestore.instance.collection('users');
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Stream<User?> get authChanges => _auth.authStateChanges();
+
   User get user => _auth.currentUser!;
 
   // get user details
@@ -35,9 +39,10 @@ class Database extends ChangeNotifier {
 
   Future blockUsers({required String uid, required String userBlockedid}) async {
     final docRequest = blockRef.doc(uid);
-
     await docRequest.set({
+      //add user blocked id to list in blocked collection
       'userBlockedId': FieldValue.arrayUnion([userBlockedid])
+      //add new user blocked id if doesnt exits. dont add if already exits
     }, SetOptions(merge: true));
   }
 
@@ -94,7 +99,7 @@ class Database extends ChangeNotifier {
       required String token,
       required String category,
       required String photoURL}) async {
-    final docRequest = FirebaseFirestore.instance.collection('posts').doc(postId);
+    final docRequest = postsRef.doc(postId);
     String res = "Some error occurred";
     try {
       final posts = {
@@ -128,7 +133,7 @@ class Database extends ChangeNotifier {
   }
 
   Future<String> deletePostRequest({required String postId}) async {
-    // when a post is deleted, delete entire subcollection too
+    // when a post is deleted, delete entire comments subcollection too
     final docRequest = FirebaseFirestore.instance.collection('posts').doc(postId);
     var collection = FirebaseFirestore.instance.collection('posts').doc(postId).collection('comments');
     var snapshots = await collection.get();
@@ -146,7 +151,7 @@ class Database extends ChangeNotifier {
   }
 
   Future<String> deleteComment({required String postId, required String commentId}) async {
-    final docRequest = FirebaseFirestore.instance.collection('posts').doc(postId).collection('comments').doc(commentId);
+    final docRequest = postsRef.doc(postId).collection('comments').doc(commentId);
     String res = "Some error occurred";
     try {
       await docRequest.delete();
@@ -191,12 +196,35 @@ class Database extends ChangeNotifier {
     try {
       if (upvote.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'upVote': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
+          'upVote': FieldValue.arrayUnion([uid])
+        });
+
+        await sendPushNotification(token, 'You got an upvote on $title', 'Hey, $username');
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> upvoteComment(String postId, String uid, List upvote, String token, String title, String username, String commentId) async {
+    String res = "Some error occurred";
+    try {
+      if (upvote.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'upVote': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
           'upVote': FieldValue.arrayUnion([uid])
         });
 
@@ -210,7 +238,7 @@ class Database extends ChangeNotifier {
   }
 
   launchURLBrowser() async {
-    const String url = "https://portal.termshub.io/cbdt5d3m5s/mobile_eula/";
+    const String url = "https://bountybayeula.carrd.co/";
 
     // ignore: deprecated_member_use
     if (await canLaunch(url)) {
@@ -234,12 +262,12 @@ class Database extends ChangeNotifier {
     try {
       if (flag.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'flag': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'flag': FieldValue.arrayUnion([uid])
         });
       }
@@ -250,17 +278,42 @@ class Database extends ChangeNotifier {
     return res;
   }
 
-  Future<String> hidePost(String postId, String uid, List hiddenFrom) async {
+  Future<String> flagComment(String postId, String uid, List flag, String commentId) async {
+    String res = "Some error occurred";
+    try {
+      if (flag.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'flag': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'flag': FieldValue.arrayUnion([uid])
+        });
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> hidePost(
+    String postId,
+    String uid,
+    List hiddenFrom,
+  ) async {
     String res = "Some error occurred";
     try {
       if (hiddenFrom.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'hiddenFrom': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'hiddenFrom': FieldValue.arrayUnion([uid])
         });
       }
@@ -271,41 +324,18 @@ class Database extends ChangeNotifier {
     return res;
   }
 
-  Future<String> blockUserCollection(String postOwnerId, String uid, List blockedBy) async {
+  Future<String> hideComment(String postId, String uid, List hiddenFrom, String commentId) async {
     String res = "Some error occurred";
     try {
-      if (blockedBy.contains(uid)) {
+      if (hiddenFrom.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(uid).update({
-          'blockUser': FieldValue.arrayRemove([uid])
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'hiddenFrom': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
-        _firestore.collection('users').doc(uid).update({
-          'blockUser': FieldValue.arrayUnion([postOwnerId])
-        });
-      }
-      res = 'success';
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
-  Future<String> blockUserPostCollection(String uid, List blockedBy) async {
-    String res = "Some error occurred";
-
-    try {
-      if (blockedBy.contains(uid)) {
-        // if the  list contains the user uid, we need to remove it
-        postsRef.doc(FieldPath.documentId.toString()).update({
-          'blockedBy': FieldValue.arrayRemove([uid])
-        });
-      } else {
-        // else we need to add uid to the likes array
-
-        postsRef.doc(FieldPath.documentId.toString()).update({
-          'blockedBy': FieldValue.arrayUnion([uid])
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'hiddenFrom': FieldValue.arrayUnion([uid])
         });
       }
       res = 'success';
@@ -319,6 +349,19 @@ class Database extends ChangeNotifier {
     String res = "Some error occurred";
     try {
       postsRef.doc(postId).update({
+        'flagReason': FieldValue.arrayUnion([reportReason])
+      });
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> reportComment({required String postId, required String reportReason, required String commentId}) async {
+    String res = "Some error occurred";
+    try {
+      postsRef.doc(postId).collection('comments').doc(commentId).update({
         'flagReason': FieldValue.arrayUnion([reportReason])
       });
       res = 'success';
@@ -363,12 +406,35 @@ class Database extends ChangeNotifier {
     try {
       if (downvote.contains(uid)) {
         // if the  list contains the user uid, we need to remove it
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
           'downVote': FieldValue.arrayRemove([uid])
         });
       } else {
         // else we need to add uid to the likes array
-        _firestore.collection('posts').doc(postId).update({
+        postsRef.doc(postId).update({
+          'downVote': FieldValue.arrayUnion([uid])
+        });
+
+        await sendPushNotification(token, 'You got a downvote on $title', 'Hey, $username');
+      }
+      res = 'success';
+    } catch (err) {
+      res = err.toString();
+    }
+    return res;
+  }
+
+  Future<String> downVoteComment(String postId, String uid, List downvote, String token, String title, String username, String commentId) async {
+    String res = "Some error occurred";
+    try {
+      if (downvote.contains(uid)) {
+        // if the  list contains the user uid, we need to remove it
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
+          'downVote': FieldValue.arrayRemove([uid])
+        });
+      } else {
+        // else we need to add uid to the likes array
+        postsRef.doc(postId).collection('comments').doc(commentId).update({
           'downVote': FieldValue.arrayUnion([uid])
         });
 
@@ -393,40 +459,20 @@ class Database extends ChangeNotifier {
     try {
       if (text.isNotEmpty) {
         String commentId = const Uuid().v4();
-        _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
+        postsRef.doc(postId).collection('comments').doc(commentId).set({
           'profilePic': profilePic,
           'name': name,
           'uid': uid,
           'text': text,
           'commentId': commentId,
           'datePublished': DateTime.now(),
+          'flagReason': [],
+          'hiddenFrom': [],
+          'flag': [],
+          'upVote': [],
+          'downVote': [],
         });
 
-        res = 'success';
-      } else {
-        res = "Please enter text";
-      }
-    } catch (err) {
-      res = err.toString();
-    }
-    return res;
-  }
-
-  // Post comment
-  Future<String> postMessage(String postId, String text, String idFrom, String idTo, String content, String token) async {
-    String res = "Some error occurred";
-    try {
-      if (text.isNotEmpty) {
-        // if the likes list contains the user uid, we need to remove it
-
-        _firestore.collection('posts').doc(postId).collection('message').doc(DateTime.now().millisecondsSinceEpoch.toString()).set({
-          'content': content,
-          'idFrom': idFrom,
-          'idTo': idTo,
-          'id': DateTime.now().millisecondsSinceEpoch.toString(),
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'token': token
-        });
         res = 'success';
       } else {
         res = "Please enter text";

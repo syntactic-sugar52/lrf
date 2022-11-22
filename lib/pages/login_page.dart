@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glass/glass.dart';
@@ -20,7 +21,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   String intlPhoneNumber = '';
   ButtonState? buttonState;
   final TextEditingController phoneController = TextEditingController();
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   @override
   void initState() {
@@ -37,9 +38,10 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey,
         backgroundColor: kAppBackgroundColor,
         body: Padding(
-          padding: const EdgeInsets.all(40.0),
+          padding: kIsWeb ? const EdgeInsets.all(220.0) : const EdgeInsets.all(40.0),
           child: Form(
             key: formKey,
             child: Column(
@@ -125,7 +127,7 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                         // if valid
                         if (formValid) {
                           String res = await context.read<Authentication>().phoneSignIn(
-                                context,
+                                _scaffoldKey.currentContext,
                                 intlPhoneNumber,
                                 mounted,
                               );
@@ -183,4 +185,12 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
           ),
         ));
   }
+
+  // _onBasicAlertPressed(context) {
+  //   Alert(
+  //     context: context,
+  //     title: "End User Agreement",
+  //     desc: '',
+  //   ).show();
+  // }
 }

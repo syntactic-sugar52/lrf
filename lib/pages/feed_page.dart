@@ -38,7 +38,7 @@ class FeedPage extends StatefulWidget {
   State<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage> {
+class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin {
   Map<String, dynamic>? currentUser;
   String? currentUserId;
 
@@ -69,6 +69,7 @@ class _FeedPageState extends State<FeedPage> {
 
   void onMessageListen() {
     try {
+      //background notifications when app is in closed
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         PushNotificationModel notification = PushNotificationModel(
           title: message.notification?.title,
@@ -110,7 +111,7 @@ class _FeedPageState extends State<FeedPage> {
         provisional: false,
         sound: true,
       );
-
+      // check user status
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         String? token = await _firebaseMessaging.getToken();
 
@@ -141,7 +142,7 @@ class _FeedPageState extends State<FeedPage> {
           }
         });
       } else {
-        // dont display local notification
+        // dont display local notification overlay but get token and save to db
         String? tokenElse = await _firebaseMessaging.getToken();
         await db.saveToken(_firebaseAuth.currentUser!.uid, tokenElse.toString());
         sharedPreferences.setString('userToken', tokenElse.toString());
@@ -165,8 +166,13 @@ class _FeedPageState extends State<FeedPage> {
     return currentUser ?? {};
   }
 
+  //save state
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return currentUser != null
         ? DefaultTabController(
             length: 6,
